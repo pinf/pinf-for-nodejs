@@ -1,6 +1,6 @@
 {
-	"name": "pinf-for-nodejs",
-	"version": "0.1.0",
-	"pm": "npm",
-	"publish": true
+    "name": "pinf-for-nodejs",
+    "version": "0.1.1",
+    "pm": "npm",
+    "publish": true
 }
