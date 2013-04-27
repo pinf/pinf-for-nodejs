@@ -2,5 +2,16 @@
     "name": "pinf-for-nodejs",
     "version": "0.1.1",
     "pm": "npm",
-    "publish": true
+    "publish": true,
+    "main": "lib/pinf-loader.js",
+    "dependencies": {
+    	"pinf-loader-js": "~0.4.4"
+	},
+    "devDependencies": {
+        "fs-extra": "~0.6.0",
+        "mocha": "~1.9.0",
+        "grunt": "~0.4.1",
+        "grunt-mocha": "~0.3.1",
+        "q": "~0.9.3"
+    }
 }

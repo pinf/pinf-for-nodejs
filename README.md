@@ -19,7 +19,11 @@ Install
 Usage
 -----
 
-*TODO*
+	const PINF = require("pinf-for-nodejs");
+	
+	PINF.sandbox("<bundle path>", function(sandbox) {
+		sandbox.main();
+    });
 
 
 Development
