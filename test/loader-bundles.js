@@ -3,7 +3,7 @@ const ASSERT = require("assert");
 const PATH = require("path");
 const FS = require("fs");
 const Q = require("q");
-const PINF_LOADER = require("../lib/pinf-loader");
+const LOADER = require("../lib/loader");
 
 
 describe("loader-bundles", function() {
@@ -25,9 +25,9 @@ describe("loader-bundles", function() {
             moduleObj.require.API = {
                 Q: Q,
                 FETCH: function(uri, callback) {
-                    return PINF_LOADER.resolveURI(uri, function(err, uri) {
+                    return LOADER.resolveURI(uri, function(err, uri) {
                         if (err) callback(err);
-                        return PINF_LOADER.loadCode(uri, function(err, code) {
+                        return LOADER.loadCode(uri, function(err, code) {
                             if (err) callback(err);
                             return callback(null, code);
                         });
@@ -49,7 +49,7 @@ describe("loader-bundles", function() {
 
         it(filename.replace(/\.js$/,""), function(done) {
 
-            return PINF_LOADER.sandbox(PATH.join(featuresPath, filename), sandboxOptions, function(sandbox) {
+            return LOADER.sandbox(PATH.join(featuresPath, filename), sandboxOptions, function(sandbox) {
                 return Q.when(sandbox.main({
                     debug: true
                 }), function() {

@@ -3,7 +3,7 @@
     "version": "0.1.2",
     "pm": "npm",
     "publish": true,
-    "main": "lib/pinf-loader.js",
+    "main": "lib/pinf.js",
     "dependencies": {
         "pinf-loader-js": "~0.4.4"
     },
