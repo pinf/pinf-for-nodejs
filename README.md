@@ -19,10 +19,23 @@ Install
 Usage
 -----
 
+`app.js`
+
+    const PATH = require("path");
 	const PINF = require("pinf-for-nodejs");
-	
-	PINF.sandbox("<bundle path>", function(sandbox) {
+    
+	PINF.sandbox(PATH.resolve("bundle.js"), function(sandbox) {
 		sandbox.main();
+    });
+
+`bundle.js`
+
+    PINF.bundle("", function(require) {
+        require.memoize("/main.js", function(require, exports, module) {
+            exports.main = function(options) {
+                console.log("HelloWorld!");
+            }
+        });
     });
 
 
