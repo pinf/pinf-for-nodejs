@@ -5,7 +5,8 @@
     "publish": true,
     "main": "lib/pinf.js",
     "dependencies": {
-        "pinf-loader-js": "~0.4.5"
+        "pinf-loader-js": "~0.4.5",
+        "request": "~2.21.0"
     },
     "devDependencies": {
         "fs-extra": "~0.6.0",

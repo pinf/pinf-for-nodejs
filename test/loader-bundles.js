@@ -3,6 +3,7 @@ const ASSERT = require("assert");
 const PATH = require("path");
 const FS = require("fs");
 const Q = require("q");
+const REQUEST = require("request");
 const LOADER = require("../lib/loader");
 
 
@@ -25,13 +26,14 @@ describe("loader-bundles", function() {
             moduleObj.require.API = {
                 Q: Q,
                 FETCH: function(uri, callback) {
-                    return LOADER.resolveURI(uri, function(err, uri) {
-                        if (err) callback(err);
-                        return LOADER.loadCode(uri, function(err, code) {
-                            if (err) callback(err);
-                            return callback(null, code);
+                    if (/^\//.test(uri)) {
+                        return FS.readFile(uri, "utf8", callback);
+                    } else {
+                        return REQUEST(uri, function(err, result) {
+                            if (err) return callback(err);
+                            return callback(null, result.body);
                         });
-                    });
+                    }
                 }
             };
             moduleInterface.log = function() {
