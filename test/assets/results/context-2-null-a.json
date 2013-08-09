@@ -1,7 +1,5 @@
 {
     "env": {
-        "CWD": "programs/program-a",
-        "FOO": "BAR",
         "PINF_PACKAGE": "packages/package-a/package.json",
         "PINF_PACKAGES": "",
         "PINF_PROGRAM_PARENT": "",

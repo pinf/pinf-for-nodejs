@@ -1,6 +1,5 @@
 {
     "env": {
-        "FOO": "BAR",
         "PINF_PACKAGES": "programs:packages",
         "PINF_PROGRAM": "programs/program-c/program.json",
         "PINF_PACKAGE": "packages/package-c/package.json",
