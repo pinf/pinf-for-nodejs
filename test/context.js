@@ -30,6 +30,14 @@ describe("context", function() {
                 "PINF_PROGRAM": PATH.join(options.rootPath, "programs/program-a/program.json"),
                 "FOO": "BAR"
             }
+        },
+        {
+            program: null,
+            package: "a",
+            env: {
+                "CWD": PATH.join(options.rootPath, "programs/program-a"),
+                "FOO": "BAR"
+            }
         }
     ].forEach(function(info, index) {
 
