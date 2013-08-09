@@ -31,9 +31,9 @@ describe("context", function() {
                 "FOO": "BAR"
             }
         }
-    ].forEach(function(info) {
+    ].forEach(function(info, index) {
 
-        it("verify output for program '" + info.program + "' and package '" + info.package + "' given ENV '" + JSON.stringify(info.env) + "'", function(done) {
+        it("(" + index + ") verify output for program '" + info.program + "' and package '" + info.package + "' given ENV '" + JSON.stringify(info.env) + "'", function(done) {
 
             var programDescriptorPath = (info.program) ? PATH.join(options.rootPath, "programs/program-" + info.program + "/program.json") : info.program;
             var packageDescriptorPath = (info.package) ? PATH.join(options.rootPath, "packages/package-" + info.package + "/package.json") : info.package;
@@ -46,11 +46,11 @@ describe("context", function() {
                 if (MODE === "test") {
                     ASSERT.deepEqual(
                         context,
-                        JSON.parse(FS.readFileSync(PATH.join(options.rootPath, "results", "context-" + info.program + "-" + info.package + ".json")))
+                        JSON.parse(FS.readFileSync(PATH.join(options.rootPath, "results", "context-" + index + "-" + info.program + "-" + info.package + ".json")))
                     );
                 } else
                 if (MODE === "write") {
-                    FS.writeFileSync(PATH.join(options.rootPath, "results", "context-" + info.program + "-" + info.package + ".json"), JSON.stringify(context, null, 4));
+                    FS.writeFileSync(PATH.join(options.rootPath, "results", "context-" + index + "-" + info.program + "-" + info.package + ".json"), JSON.stringify(context, null, 4));
                 } else {
                     throw new Error("Unknown `MODE`");
                 }
