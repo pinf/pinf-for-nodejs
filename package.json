@@ -1,21 +1,23 @@
 {
-    "name": "pinf-for-nodejs",
-    "version": "0.1.3",
-    "pm": "npm",
-    "publish": true,
-    "main": "lib/pinf.js",
-    "dependencies": {
-        "pinf-loader-js": "~0.4.5",
-        "request": "~2.21.0"
-    },
-    "devDependencies": {
-        "fs-extra": "~0.6.0",
-        "mocha": "~1.9.0",
-        "grunt": "~0.4.1",
-        "grunt-mocha": "~0.3.1",
-        "q": "~0.9.3"
-    },
-    "devMappings": {
-        "pinf-loader-js": "github.com/pinf/pinf-loader-js/~0.4.5"
-    }
+  "name": "pinf-for-nodejs",
+  "version": "0.1.3",
+  "pm": "npm",
+  "publish": true,
+  "main": "lib/pinf.js",
+  "dependencies": {
+    "pinf-loader-js": "~0.4.5",
+    "request": "~2.21.0",
+    "waitfor": "~0.1.3",
+    "deepmerge": "~0.2.7"
+  },
+  "devDependencies": {
+    "fs-extra": "~0.6.0",
+    "mocha": "~1.9.0",
+    "grunt": "~0.4.1",
+    "grunt-mocha": "~0.3.1",
+    "q": "~0.9.3"
+  },
+  "devMappings": {
+    "pinf-loader-js": "github.com/pinf/pinf-loader-js/~0.4.5"
+  }
 }
