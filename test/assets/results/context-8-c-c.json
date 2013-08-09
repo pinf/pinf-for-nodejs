@@ -1,9 +1,9 @@
 {
     "env": {
         "FOO": "BAR",
+        "PINF_PACKAGES": "programs:packages",
         "PINF_PROGRAM": "programs/program-c/program.json",
-        "PINF_PACKAGE": "packages/package-b/package.json",
-        "PINF_PACKAGES": "",
+        "PINF_PACKAGE": "packages/package-c/package.json",
         "PINF_PROGRAM_PARENT": "",
         "PINF_RUNTIME": "programs/program-c/.rt/program.rt.json",
         "PINF_MODE": "production"
@@ -12,23 +12,24 @@
         "programs/program-c/program.production.json",
         "programs/program-c/.rt/program.rt.json",
         "programs/program-c/.program.json",
-        "packages/package-b/.package.json",
+        "packages/package-c/.package.json",
         "programs/program-c/program.json",
-        "packages/package-b/package.json",
+        "packages/package-c/package.json",
         ""
     ],
     "descriptorFoundPaths": [
         "programs/program-c/program.json",
         "programs/program-b/program.prototype.json",
         "programs/program-b/program.json",
-        "packages/package-b/package.json"
+        "packages/package-c/package.json",
+        "packages/package-b/package.prototype.json"
     ],
     "binPaths": [],
     "descriptor": {
-        "packageB": "from package-b dir",
-        "path1": "packages/package-b/path1",
-        "path2": "programs/program-b/path2",
+        "packageBprototype": "from package-b dir",
+        "packageC": "from package-c dir",
         "programB": "from program-b dir",
+        "path2": "programs/program-b/path2",
         "programBprototype": "from program-b dir",
         "programC": "from program-c dir"
     }

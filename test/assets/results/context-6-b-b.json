@@ -3,6 +3,7 @@
         "FOO": "BAR",
         "PINF_PROGRAM": "programs/program-b/program.json",
         "PINF_PACKAGE": "packages/package-b/package.json",
+        "PINF_PACKAGES": "",
         "PINF_PROGRAM_PARENT": "",
         "PINF_RUNTIME": "programs/program-b/.rt/program.rt.json",
         "PINF_MODE": "production"

@@ -1,0 +1,6 @@
+{
+	"@extends": [
+		"package-b"
+	],
+	"packageC": "from package-c dir"
+}

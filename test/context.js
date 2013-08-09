@@ -69,6 +69,21 @@ describe("context", function() {
             env: {
                 "FOO": "BAR"
             }
+        },
+        {
+            program: "c",
+            package: "b",
+            env: {
+                "FOO": "BAR"
+            }
+        },
+        {
+            program: "c",
+            package: "c",
+            env: {
+                "FOO": "BAR",
+                "PINF_PACKAGES": PATH.join(options.rootPath, "programs") + ":" + PATH.join(options.rootPath, "packages")
+            }
         }
     ].forEach(function(info, index) {
 
