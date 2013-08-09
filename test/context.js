@@ -55,6 +55,14 @@ describe("context", function() {
                 "FOO": "BAR"
             }
         },
+        {
+            program: null,
+            package: null,
+            env: {
+                "CWD": PATH.join(options.rootPath, "programs/program-a"),
+                "FOO": "BAR"
+            }
+        }
     ].forEach(function(info, index) {
 
         it("(" + index + ") verify output for program '" + info.program + "' and package '" + info.package + "' given ENV '" + JSON.stringify(info.env) + "'", function(done) {

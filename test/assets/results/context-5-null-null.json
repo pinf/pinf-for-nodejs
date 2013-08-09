@@ -1,0 +1,25 @@
+{
+    "env": {
+        "CWD": "programs/program-a",
+        "FOO": "BAR",
+        "PINF_PROGRAM_PARENT": "",
+        "PINF_PROGRAM": "programs/program-a/program.json",
+        "PINF_PACKAGE": "programs/program-a/package.json",
+        "PINF_RUNTIME": "programs/program-a/.rt/program.rt.json",
+        "PINF_MODE": "production"
+    },
+    "configPaths": [
+        "programs/program-a/program.production.json",
+        "programs/program-a/.rt/program.rt.json",
+        "programs/program-a/.program.json",
+        "programs/program-a/.package.json",
+        "programs/program-a/program.json",
+        "programs/program-a/package.json",
+        ""
+    ],
+    "binPaths": [],
+    "descriptor": {
+        "programA": true,
+        "packageA": "from program-a dir"
+    }
+}
