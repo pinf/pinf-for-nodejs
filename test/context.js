@@ -62,6 +62,13 @@ describe("context", function() {
                 "CWD": PATH.join(options.rootPath, "programs/program-a"),
                 "FOO": "BAR"
             }
+        },
+        {
+            program: "b",
+            package: "b",
+            env: {
+                "FOO": "BAR"
+            }
         }
     ].forEach(function(info, index) {
 

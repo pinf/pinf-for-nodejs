@@ -1,0 +1,4 @@
+{
+	"programB": "from program-b dir",
+	"path2": "$__DIRNAME/path2"
+}

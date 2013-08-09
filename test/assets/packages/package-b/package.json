@@ -1,0 +1,5 @@
+{
+	"packageB": "from package-b dir",
+	"path1": "$__DIRNAME/path1",
+	"path2": "$__DIRNAME/path2"
+}

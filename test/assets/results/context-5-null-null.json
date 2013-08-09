@@ -23,7 +23,7 @@
     ],
     "binPaths": [],
     "descriptor": {
-        "programA": "from program-a dir",
-        "packageA": "from program-a dir"
+        "packageA": "from program-a dir",
+        "programA": "from program-a dir"
     }
 }

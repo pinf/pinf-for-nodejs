@@ -1,0 +1,30 @@
+{
+    "env": {
+        "FOO": "BAR",
+        "PINF_PROGRAM": "programs/program-b/program.json",
+        "PINF_PACKAGE": "packages/package-b/package.json",
+        "PINF_PROGRAM_PARENT": "",
+        "PINF_RUNTIME": "programs/program-b/.rt/program.rt.json",
+        "PINF_MODE": "production"
+    },
+    "descriptorLookupPaths": [
+        "programs/program-b/program.production.json",
+        "programs/program-b/.rt/program.rt.json",
+        "programs/program-b/.program.json",
+        "packages/package-b/.package.json",
+        "programs/program-b/program.json",
+        "packages/package-b/package.json",
+        ""
+    ],
+    "descriptorFoundPaths": [
+        "programs/program-b/program.json",
+        "packages/package-b/package.json"
+    ],
+    "binPaths": [],
+    "descriptor": {
+        "packageB": "from package-b dir",
+        "path1": "packages/package-b/path1",
+        "path2": "programs/program-b/path2",
+        "programB": "from program-b dir"
+    }
+}
