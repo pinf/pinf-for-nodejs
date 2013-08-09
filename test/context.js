@@ -27,6 +27,7 @@ describe("context", function() {
             program: null,
             package: "a",
             env: {
+                "PINF_PROGRAM": PATH.join(options.rootPath, "programs/program-a/program.json"),
                 "FOO": "BAR"
             }
         }
