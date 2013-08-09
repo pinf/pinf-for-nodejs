@@ -1,0 +1,6 @@
+{
+	"@extends": [
+		"../program-b"
+	],
+	"programC": "from program-c dir"
+}

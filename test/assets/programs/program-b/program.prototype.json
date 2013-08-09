@@ -1,0 +1,6 @@
+{
+	"@extends": [
+		"./program.json"
+	],
+    "programBprototype": "from program-b dir"
+}
