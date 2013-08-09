@@ -8,7 +8,7 @@
         "PINF_RUNTIME": "programs/program-a/.rt/program.rt.json",
         "PINF_MODE": "production"
     },
-    "configPaths": [
+    "descriptorLookupPaths": [
         "programs/program-a/program.production.json",
         "programs/program-a/.rt/program.rt.json",
         "programs/program-a/.program.json",
@@ -16,6 +16,10 @@
         "programs/program-a/program.json",
         "programs/program-a/package.json",
         ""
+    ],
+    "descriptorFoundPaths": [
+        "programs/program-a/program.json",
+        "programs/program-a/package.json"
     ],
     "binPaths": [],
     "descriptor": {
