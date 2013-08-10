@@ -12,6 +12,8 @@
         "programs/program-c/.rt/program.rt.json",
         "programs/program-c/.program.json",
         "packages/package-b/.package.json",
+        "programs/program-b/program.json",
+        "programs/program-b/program.prototype.json",
         "programs/program-c/program.json",
         "packages/package-b/package.json",
         ""
