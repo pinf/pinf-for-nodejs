@@ -1,0 +1,7 @@
+{
+	"packageE": "from package-e dir",
+	"config": {
+		"configE1": "from package-e dir",
+		"configE2": "from package-e dir"
+	}	
+}

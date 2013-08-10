@@ -1,4 +1,5 @@
 {
+    "uid": null,
     "env": {
         "FOO": "BAR",
         "FOO_INHERITED": "BAR",
@@ -30,7 +31,8 @@
     "binPaths": [
         "programs/program-d/bin"
     ],
-    "descriptor": {
+    "config": {},
+    "_descriptor": {
         "packageD": "from package-d dir",
         "programB": "from program-b dir",
         "path2": "programs/program-b/path2",

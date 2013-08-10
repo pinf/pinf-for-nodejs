@@ -1,0 +1,35 @@
+{
+    "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/package-e",
+    "env": {
+        "PINF_PROGRAM": "programs/program-e/program.json",
+        "PINF_PACKAGE": "packages/package-e/package.json",
+        "PINF_PACKAGES": "",
+        "PINF_PROGRAM_PARENT": "",
+        "PINF_RUNTIME": "programs/program-e/.rt/program.rt.json",
+        "PINF_MODE": "production"
+    },
+    "lookupPaths": [
+        "programs/program-e/program.production.json",
+        "programs/program-e/.rt/program.rt.json",
+        "programs/program-e/.program.json",
+        "packages/package-e/.package.json",
+        "programs/program-e/program.json",
+        "packages/package-e/package.json",
+        ""
+    ],
+    "descriptorPaths": [
+        "packages/package-e/.package.json",
+        "programs/program-e/program.json",
+        "packages/package-e/package.json"
+    ],
+    "binPaths": [],
+    "config": {
+        "configE1": "from package-e dir",
+        "configE2": "from program-e dir"
+    },
+    "_descriptor": {
+        "packageE": "from package-e dir",
+        "programE": "from program-e dir",
+        "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/package-e"
+    }
+}

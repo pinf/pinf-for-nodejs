@@ -1,4 +1,5 @@
 {
+    "uid": null,
     "env": {
         "FOO": "BAR",
         "FOO_INHERITED": "BAR",
@@ -24,7 +25,8 @@
         "packages/package-d/package.json"
     ],
     "binPaths": [],
-    "descriptor": {
+    "config": {},
+    "_descriptor": {
         "packageD": "from package-d dir",
         "programA": "from program-a dir"
     }

@@ -1,0 +1,8 @@
+{
+	"programE": "from program-e dir",
+	"config": {
+		"github.com/pinf/pinf-for-nodejs/test/assets/packages/package-e": {
+			"configE2": "from program-e dir"
+		}
+	}
+}

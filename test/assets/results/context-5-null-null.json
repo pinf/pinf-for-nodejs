@@ -1,4 +1,5 @@
 {
+    "uid": null,
     "env": {
         "PINF_PACKAGES": "",
         "PINF_PROGRAM_PARENT": "",
@@ -21,7 +22,8 @@
         "programs/program-a/package.json"
     ],
     "binPaths": [],
-    "descriptor": {
+    "config": {},
+    "_descriptor": {
         "packageA": "from program-a dir",
         "programA": "from program-a dir"
     }
