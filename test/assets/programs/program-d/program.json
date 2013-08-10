@@ -1,0 +1,4 @@
+{
+	"@extends": ["<-", "./extends.json"],
+	"programD": "from program-d dir"
+}

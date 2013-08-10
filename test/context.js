@@ -91,6 +91,13 @@ describe("context", function() {
             env: {
                 "FOO": "BAR"
             }
+        },
+        {
+            program: "d",
+            package: "d",
+            env: {
+                "FOO": "BAR"
+            }
         }
     ].forEach(function(info, index) {
 

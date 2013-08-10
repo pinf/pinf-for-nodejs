@@ -1,0 +1,36 @@
+{
+    "env": {
+        "FOO": "BAR",
+        "FOO_INHERITED": "BAR",
+        "FOO_OWN": "own-bar",
+        "PINF_PROGRAM": "programs/program-d/program.json",
+        "PINF_PACKAGE": "packages/package-d/package.json",
+        "PINF_PACKAGES": "",
+        "PINF_PROGRAM_PARENT": "",
+        "PINF_RUNTIME": "programs/program-d/.rt/program.rt.json",
+        "PINF_MODE": "production"
+    },
+    "descriptorLookupPaths": [
+        "programs/program-d/program.production.json",
+        "programs/program-d/.rt/program.rt.json",
+        "programs/program-d/.program.json",
+        "packages/package-d/.package.json",
+        "programs/program-d/program.json",
+        "packages/package-d/package.json",
+        ""
+    ],
+    "descriptorFoundPaths": [
+        "programs/program-d/program.json",
+        "programs/program-b/program.prototype.json",
+        "programs/program-b/program.json",
+        "packages/package-d/package.json"
+    ],
+    "binPaths": [],
+    "descriptor": {
+        "packageD": "from package-d dir",
+        "programB": "from program-b dir",
+        "path2": "programs/program-b/path2",
+        "programBprototype": "from program-b dir",
+        "programD": "from program-d dir"
+    }
+}
