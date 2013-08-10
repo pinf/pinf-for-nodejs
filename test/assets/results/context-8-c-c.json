@@ -26,7 +26,10 @@
         "packages/package-c/package.json",
         "packages/package-b/package.prototype.json"
     ],
-    "binPaths": [],
+    "binPaths": [
+        "packages/package-c/bin",
+        "packages/package-c/.bin"
+    ],
     "descriptor": {
         "packageBprototype": "from package-b dir",
         "packageC": "from package-c dir",

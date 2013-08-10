@@ -27,7 +27,9 @@
         "programs/program-b/program.json",
         "packages/package-d/package.json"
     ],
-    "binPaths": [],
+    "binPaths": [
+        "programs/program-d/bin"
+    ],
     "descriptor": {
         "packageD": "from package-d dir",
         "programB": "from program-b dir",
