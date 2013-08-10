@@ -1,0 +1,8 @@
+{
+	"packageD": "from package-d dir",
+	"env": {
+		"FOO": "$FOO",
+		"FOO_INHERITED": "$FOO",
+		"FOO_OWN": "own-bar"		
+	}
+}
