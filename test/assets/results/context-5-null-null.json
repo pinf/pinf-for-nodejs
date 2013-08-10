@@ -1,5 +1,6 @@
 {
     "uid": null,
+    "ns": "program-a",
     "env": {
         "PINF_PACKAGES": "",
         "PINF_PROGRAM_PARENT": "",
@@ -8,6 +9,22 @@
         "PINF_RUNTIME": "programs/program-a/.rt/program.rt.json",
         "PINF_MODE": "production"
     },
+    "paths": {
+        "program": "programs/program-a",
+        "package": "programs/program-a",
+        "run": "programs/program-a/.rt/run/program-a",
+        "data": "programs/program-a/.rt/data/program-a",
+        "conf": "programs/program-a/.rt/conf/program-a",
+        "log": "programs/program-a/.rt/log/program-a",
+        "cache": "programs/program-a/.rt/cache/program-a",
+        "tmp": "programs/program-a/.rt/tmp/program-a"
+    },
+    "binPaths": [],
+    "config": {},
+    "descriptorPaths": [
+        "programs/program-a/program.json",
+        "programs/program-a/package.json"
+    ],
     "lookupPaths": [
         "programs/program-a/program.production.json",
         "programs/program-a/.rt/program.rt.json",
@@ -17,12 +34,6 @@
         "programs/program-a/package.json",
         ""
     ],
-    "descriptorPaths": [
-        "programs/program-a/program.json",
-        "programs/program-a/package.json"
-    ],
-    "binPaths": [],
-    "config": {},
     "_descriptor": {
         "packageA": "from program-a dir",
         "programA": "from program-a dir"

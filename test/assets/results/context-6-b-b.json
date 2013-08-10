@@ -1,5 +1,6 @@
 {
     "uid": null,
+    "ns": "package-b",
     "env": {
         "PINF_PROGRAM": "programs/program-b/program.json",
         "PINF_PACKAGE": "packages/package-b/package.json",
@@ -8,6 +9,22 @@
         "PINF_RUNTIME": "programs/program-b/.rt/program.rt.json",
         "PINF_MODE": "production"
     },
+    "paths": {
+        "program": "programs/program-b",
+        "package": "packages/package-b",
+        "run": "programs/program-b/.rt/run/package-b",
+        "data": "programs/program-b/.rt/data/package-b",
+        "conf": "programs/program-b/.rt/conf/package-b",
+        "log": "programs/program-b/.rt/log/package-b",
+        "cache": "programs/program-b/.rt/cache/package-b",
+        "tmp": "programs/program-b/.rt/tmp/package-b"
+    },
+    "binPaths": [],
+    "config": {},
+    "descriptorPaths": [
+        "programs/program-b/program.json",
+        "packages/package-b/package.json"
+    ],
     "lookupPaths": [
         "programs/program-b/program.production.json",
         "programs/program-b/.rt/program.rt.json",
@@ -17,12 +34,6 @@
         "packages/package-b/package.json",
         ""
     ],
-    "descriptorPaths": [
-        "programs/program-b/program.json",
-        "packages/package-b/package.json"
-    ],
-    "binPaths": [],
-    "config": {},
     "_descriptor": {
         "packageB": "from package-b dir",
         "path1": "packages/package-b/path1",

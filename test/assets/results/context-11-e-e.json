@@ -1,5 +1,6 @@
 {
     "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/package-e",
+    "ns": "github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
     "env": {
         "PINF_PROGRAM": "programs/program-e/program.json",
         "PINF_PACKAGE": "packages/package-e/package.json",
@@ -8,6 +9,26 @@
         "PINF_RUNTIME": "programs/program-e/.rt/program.rt.json",
         "PINF_MODE": "production"
     },
+    "paths": {
+        "program": "programs/program-e",
+        "package": "packages/package-e",
+        "run": "programs/program-e/.rt/run/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
+        "data": "programs/program-e/.rt/data/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
+        "conf": "programs/program-e/.rt/conf/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
+        "log": "programs/program-e/.rt/log/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
+        "cache": "programs/program-e/.rt/cache/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
+        "tmp": "programs/program-e/.rt/tmp/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e"
+    },
+    "binPaths": [],
+    "config": {
+        "configE1": "from package-e dir",
+        "configE2": "from program-e dir"
+    },
+    "descriptorPaths": [
+        "packages/package-e/.package.json",
+        "programs/program-e/program.json",
+        "packages/package-e/package.json"
+    ],
     "lookupPaths": [
         "programs/program-e/program.production.json",
         "programs/program-e/.rt/program.rt.json",
@@ -17,16 +38,6 @@
         "packages/package-e/package.json",
         ""
     ],
-    "descriptorPaths": [
-        "packages/package-e/.package.json",
-        "programs/program-e/program.json",
-        "packages/package-e/package.json"
-    ],
-    "binPaths": [],
-    "config": {
-        "configE1": "from package-e dir",
-        "configE2": "from program-e dir"
-    },
     "_descriptor": {
         "packageE": "from package-e dir",
         "programE": "from program-e dir",

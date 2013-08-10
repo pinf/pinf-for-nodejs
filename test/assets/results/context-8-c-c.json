@@ -1,5 +1,6 @@
 {
     "uid": null,
+    "ns": "package-c",
     "env": {
         "PINF_PACKAGES": "programs:packages",
         "PINF_PROGRAM": "programs/program-c/program.json",
@@ -8,6 +9,28 @@
         "PINF_RUNTIME": "programs/program-c/.rt/program.rt.json",
         "PINF_MODE": "production"
     },
+    "paths": {
+        "program": "programs/program-c",
+        "package": "packages/package-c",
+        "run": "programs/program-c/.rt/run/package-c",
+        "data": "programs/program-c/.rt/data/package-c",
+        "conf": "programs/program-c/.rt/conf/package-c",
+        "log": "programs/program-c/.rt/log/package-c",
+        "cache": "programs/program-c/.rt/cache/package-c",
+        "tmp": "programs/program-c/.rt/tmp/package-c"
+    },
+    "binPaths": [
+        "packages/package-c/bin",
+        "packages/package-c/.bin"
+    ],
+    "config": {},
+    "descriptorPaths": [
+        "programs/program-c/program.json",
+        "programs/program-b/program.prototype.json",
+        "programs/program-b/program.json",
+        "packages/package-c/package.json",
+        "packages/package-b/package.prototype.json"
+    ],
     "lookupPaths": [
         "programs/program-c/program.production.json",
         "programs/program-c/.rt/program.rt.json",
@@ -20,18 +43,6 @@
         "packages/package-c/package.json",
         ""
     ],
-    "descriptorPaths": [
-        "programs/program-c/program.json",
-        "programs/program-b/program.prototype.json",
-        "programs/program-b/program.json",
-        "packages/package-c/package.json",
-        "packages/package-b/package.prototype.json"
-    ],
-    "binPaths": [
-        "packages/package-c/bin",
-        "packages/package-c/.bin"
-    ],
-    "config": {},
     "_descriptor": {
         "packageBprototype": "from package-b dir",
         "packageC": "from package-c dir",

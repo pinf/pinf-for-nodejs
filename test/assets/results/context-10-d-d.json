@@ -1,5 +1,6 @@
 {
     "uid": null,
+    "ns": "package-d",
     "env": {
         "FOO": "BAR",
         "FOO_INHERITED": "BAR",
@@ -11,6 +12,26 @@
         "PINF_RUNTIME": "programs/program-d/.rt/program.rt.json",
         "PINF_MODE": "production"
     },
+    "paths": {
+        "program": "programs/program-d",
+        "package": "packages/package-d",
+        "run": "programs/program-d/.rt/run/package-d",
+        "data": "programs/program-d/.rt/data/package-d",
+        "conf": "programs/program-d/.rt/conf/package-d",
+        "log": "programs/program-d/.rt/log/package-d",
+        "cache": "programs/program-d/.rt/cache/package-d",
+        "tmp": "programs/program-d/.rt/tmp/package-d"
+    },
+    "binPaths": [
+        "programs/program-d/bin"
+    ],
+    "config": {},
+    "descriptorPaths": [
+        "programs/program-d/program.json",
+        "programs/program-b/program.prototype.json",
+        "programs/program-b/program.json",
+        "packages/package-d/package.json"
+    ],
     "lookupPaths": [
         "programs/program-d/program.production.json",
         "programs/program-d/.rt/program.rt.json",
@@ -22,16 +43,6 @@
         "packages/package-d/package.json",
         ""
     ],
-    "descriptorPaths": [
-        "programs/program-d/program.json",
-        "programs/program-b/program.prototype.json",
-        "programs/program-b/program.json",
-        "packages/package-d/package.json"
-    ],
-    "binPaths": [
-        "programs/program-d/bin"
-    ],
-    "config": {},
     "_descriptor": {
         "packageD": "from package-d dir",
         "programB": "from program-b dir",
