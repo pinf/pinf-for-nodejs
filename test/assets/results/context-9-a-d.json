@@ -1,0 +1,31 @@
+{
+    "env": {
+        "FOO": "$FOO",
+        "FOO_INHERITED": "$FOO",
+        "FOO_OWN": "own-bar",
+        "PINF_PROGRAM": "programs/program-a/program.json",
+        "PINF_PACKAGE": "packages/package-d/package.json",
+        "PINF_PACKAGES": "",
+        "PINF_PROGRAM_PARENT": "",
+        "PINF_RUNTIME": "programs/program-a/.rt/program.rt.json",
+        "PINF_MODE": "production"
+    },
+    "descriptorLookupPaths": [
+        "programs/program-a/program.production.json",
+        "programs/program-a/.rt/program.rt.json",
+        "programs/program-a/.program.json",
+        "packages/package-d/.package.json",
+        "programs/program-a/program.json",
+        "packages/package-d/package.json",
+        ""
+    ],
+    "descriptorFoundPaths": [
+        "programs/program-a/program.json",
+        "packages/package-d/package.json"
+    ],
+    "binPaths": [],
+    "descriptor": {
+        "packageD": "from package-d dir",
+        "programA": "from program-a dir"
+    }
+}
