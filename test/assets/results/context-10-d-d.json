@@ -10,7 +10,7 @@
         "PINF_RUNTIME": "programs/program-d/.rt/program.rt.json",
         "PINF_MODE": "production"
     },
-    "descriptorLookupPaths": [
+    "lookupPaths": [
         "programs/program-d/program.production.json",
         "programs/program-d/.rt/program.rt.json",
         "programs/program-d/.program.json",
@@ -19,7 +19,7 @@
         "packages/package-d/package.json",
         ""
     ],
-    "descriptorFoundPaths": [
+    "descriptorPaths": [
         "programs/program-d/program.json",
         "programs/program-b/program.prototype.json",
         "programs/program-b/program.json",
