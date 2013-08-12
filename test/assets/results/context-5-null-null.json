@@ -14,7 +14,7 @@
         "package": "programs/program-a",
         "run": "programs/program-a/.rt/run/program-a",
         "data": "programs/program-a/.rt/data/program-a",
-        "conf": "programs/program-a/.rt/conf/program-a",
+        "etc": "programs/program-a/.rt/etc/program-a",
         "log": "programs/program-a/.rt/log/program-a",
         "cache": "programs/program-a/.rt/cache/program-a",
         "tmp": "programs/program-a/.rt/tmp/program-a"

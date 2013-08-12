@@ -14,7 +14,7 @@
         "package": "packages/package-b",
         "run": "programs/program-b/.rt/run/package-b",
         "data": "programs/program-b/.rt/data/package-b",
-        "conf": "programs/program-b/.rt/conf/package-b",
+        "etc": "programs/program-b/.rt/etc/package-b",
         "log": "programs/program-b/.rt/log/package-b",
         "cache": "programs/program-b/.rt/cache/package-b",
         "tmp": "programs/program-b/.rt/tmp/package-b"

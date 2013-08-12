@@ -14,7 +14,7 @@
         "package": "packages/package-e",
         "run": "programs/program-e/.rt/run/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
         "data": "programs/program-e/.rt/data/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
-        "conf": "programs/program-e/.rt/conf/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
+        "etc": "programs/program-e/.rt/etc/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
         "log": "programs/program-e/.rt/log/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
         "cache": "programs/program-e/.rt/cache/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
         "tmp": "programs/program-e/.rt/tmp/github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e"

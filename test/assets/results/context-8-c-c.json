@@ -14,7 +14,7 @@
         "package": "packages/package-c",
         "run": "programs/program-c/.rt/run/package-c",
         "data": "programs/program-c/.rt/data/package-c",
-        "conf": "programs/program-c/.rt/conf/package-c",
+        "etc": "programs/program-c/.rt/etc/package-c",
         "log": "programs/program-c/.rt/log/package-c",
         "cache": "programs/program-c/.rt/cache/package-c",
         "tmp": "programs/program-c/.rt/tmp/package-c"

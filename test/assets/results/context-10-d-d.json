@@ -17,7 +17,7 @@
         "package": "packages/package-d",
         "run": "programs/program-d/.rt/run/package-d",
         "data": "programs/program-d/.rt/data/package-d",
-        "conf": "programs/program-d/.rt/conf/package-d",
+        "etc": "programs/program-d/.rt/etc/package-d",
         "log": "programs/program-d/.rt/log/package-d",
         "cache": "programs/program-d/.rt/cache/package-d",
         "tmp": "programs/program-d/.rt/tmp/package-d"
