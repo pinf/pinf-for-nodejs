@@ -19,5 +19,8 @@
   },
   "devMappings": {
     "pinf-loader-js": "github.com/pinf/pinf-loader-js/~0.4.5"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/mocha --reporter list test/*.js"
   }
 }
