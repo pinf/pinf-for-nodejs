@@ -1,0 +1,11 @@
+{
+	"dependencies": {
+		"required": {
+			"sub": "0.x"
+		}
+	},
+	"scripts": {
+		"pinf-start": "",
+		"pinf-stop": ""
+	}
+}
