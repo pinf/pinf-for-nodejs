@@ -42,13 +42,5 @@
         "packages/package-b/package.prototype.json",
         "packages/package-c/package.json",
         ""
-    ],
-    "_descriptor": {
-        "packageBprototype": "from package-b dir",
-        "packageC": "from package-c dir",
-        "programB": "from program-b dir",
-        "path2": "programs/program-b/path2",
-        "programBprototype": "from program-b dir",
-        "programC": "from program-c dir"
-    }
+    ]
 }

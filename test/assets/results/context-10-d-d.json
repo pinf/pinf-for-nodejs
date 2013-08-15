@@ -42,12 +42,5 @@
         "programs/program-d/program.json",
         "packages/package-d/package.json",
         ""
-    ],
-    "_descriptor": {
-        "packageD": "from package-d dir",
-        "programB": "from program-b dir",
-        "path2": "programs/program-b/path2",
-        "programBprototype": "from program-b dir",
-        "programD": "from program-d dir"
-    }
+    ]
 }

@@ -33,11 +33,5 @@
         "programs/program-b/program.json",
         "packages/package-b/package.json",
         ""
-    ],
-    "_descriptor": {
-        "packageB": "from package-b dir",
-        "path1": "packages/package-b/path1",
-        "path2": "programs/program-b/path2",
-        "programB": "from program-b dir"
-    }
+    ]
 }

@@ -33,9 +33,5 @@
         "programs/program-a/program.json",
         "packages/package-a/package.json",
         ""
-    ],
-    "_descriptor": {
-        "packageA": "from package-a dir",
-        "programA": "from program-a dir"
-    }
+    ]
 }

@@ -37,10 +37,5 @@
         "programs/program-e/program.json",
         "packages/package-e/package.json",
         ""
-    ],
-    "_descriptor": {
-        "packageE": "from package-e dir",
-        "programE": "from program-e dir",
-        "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/package-e"
-    }
+    ]
 }
