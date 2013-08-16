@@ -141,13 +141,10 @@ PINF.main(function(context, callback) {
                     return context.getProgramInfo(function(err, info) {
                         if (err) return callback(err);
                         var config = {};
-                        if (
-                            info.program.descriptor &&
-                            info.program.descriptor.packages
-                        ) {
-                            for (var id in info.program.descriptor.packages) {
+                        if (info.packages) {
+                            for (var id in info.packages) {
                                 config[id] = DEEPMERGE(
-                                    (info.program.descriptor.packages[id].descriptor && info.program.descriptor.packages[id].descriptor.config) || {},
+                                    (info.packages[id].descriptor && info.packages[id].descriptor.config) || {},
                                     (info.program.descriptor.config && info.program.descriptor.config[id]) || {}
                                 );
                             }
