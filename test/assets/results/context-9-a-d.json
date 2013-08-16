@@ -32,9 +32,8 @@
         "programs/program-a/program.production.json",
         "programs/program-a/.rt/program.rt.json",
         "programs/program-a/.program.json",
-        "packages/package-d/.package.json",
         "programs/program-a/program.json",
-        "packages/package-d/package.json",
-        ""
+        "packages/package-d/.package.json",
+        "packages/package-d/package.json"
     ]
 }

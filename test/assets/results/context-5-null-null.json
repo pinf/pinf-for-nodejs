@@ -29,9 +29,8 @@
         "programs/program-a/program.production.json",
         "programs/program-a/.rt/program.rt.json",
         "programs/program-a/.program.json",
-        "programs/program-a/.package.json",
         "programs/program-a/program.json",
-        "programs/program-a/package.json",
-        ""
+        "programs/program-a/.package.json",
+        "programs/program-a/package.json"
     ]
 }

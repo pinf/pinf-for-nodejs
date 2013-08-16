@@ -36,11 +36,10 @@
         "programs/program-d/program.production.json",
         "programs/program-d/.rt/program.rt.json",
         "programs/program-d/.program.json",
-        "packages/package-d/.package.json",
-        "programs/program-b/program.json",
-        "programs/program-b/program.prototype.json",
         "programs/program-d/program.json",
-        "packages/package-d/package.json",
-        ""
+        "programs/program-b/program.prototype.json",
+        "programs/program-b/program.json",
+        "packages/package-d/.package.json",
+        "packages/package-d/package.json"
     ]
 }

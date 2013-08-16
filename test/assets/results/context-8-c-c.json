@@ -35,12 +35,11 @@
         "programs/program-c/program.production.json",
         "programs/program-c/.rt/program.rt.json",
         "programs/program-c/.program.json",
-        "packages/package-c/.package.json",
-        "programs/program-b/program.json",
-        "programs/program-b/program.prototype.json",
         "programs/program-c/program.json",
-        "packages/package-b/package.prototype.json",
+        "programs/program-b/program.prototype.json",
+        "programs/program-b/program.json",
+        "packages/package-c/.package.json",
         "packages/package-c/package.json",
-        ""
+        "packages/package-b/package.prototype.json"
     ]
 }

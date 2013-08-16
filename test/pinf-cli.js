@@ -22,10 +22,15 @@ describe("pinf-cli", function() {
             "info"
         ], function(err, stdout) {
             if (err) return done(err);
-            var output = JSON.parse(stdout);
-
+            try {
+                var output = JSON.parse(stdout);
+            } catch(err) {
+                console.error("stdout", stdout);
+                return done(new Error("Error '" + err.message + "' parsing output."));
+            }
             ASSERT.equal(typeof output, "object");
             ASSERT.equal(typeof output.context, "object");
+
 console.log("output", output);
 
             return done();
@@ -37,9 +42,14 @@ console.log("output", output);
             "config"
         ], function(err, stdout) {
             if (err) return done(err);
-            var output = JSON.parse(stdout);
-
+            try {
+                var output = JSON.parse(stdout);
+            } catch(err) {
+                console.error("stdout", stdout);
+                return done(new Error("Error '" + err.message + "' parsing output."));
+            }
             ASSERT.equal(typeof output, "object");
+
 console.log("output", output);
 
             return done();
@@ -65,6 +75,9 @@ console.log("output", output);
                 console.error(stdout);
                 console.error(stderr);
                 return callback(new Error("Got error '" + error + "' while trying to call `pinf`"));
+            }
+            if (stderr) {
+                console.error(stderr);
             }
             return callback(null, stdout);
         });

@@ -51,7 +51,7 @@ console.log("STOP");
                 if (err) return callback(err);
                 if (typeof program.format === "string" && program.format.toUpperCase() === "JSON") {
                 	process.stdout.write(JSON.stringify(info, null, 4) + "\n");
-                	return;
+                	return callback(null);
                 }
                 console.log("ENV:".bold);
                 console.log("  CWD:", ("" + info.env.CWD).yellow);

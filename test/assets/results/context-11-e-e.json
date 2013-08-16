@@ -25,17 +25,16 @@
         "configE2": "from program-e dir"
     },
     "descriptorPaths": [
-        "packages/package-e/.package.json",
         "programs/program-e/program.json",
+        "packages/package-e/.package.json",
         "packages/package-e/package.json"
     ],
     "lookupPaths": [
         "programs/program-e/program.production.json",
         "programs/program-e/.rt/program.rt.json",
         "programs/program-e/.program.json",
-        "packages/package-e/.package.json",
         "programs/program-e/program.json",
-        "packages/package-e/package.json",
-        ""
+        "packages/package-e/.package.json",
+        "packages/package-e/package.json"
     ]
 }
