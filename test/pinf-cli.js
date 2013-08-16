@@ -5,8 +5,8 @@ const FS = require("fs-extra");
 const EXEC = require("child_process").exec;
 
 
-//const MODE = "test";
-const MODE = "write";
+const MODE = "test";
+//const MODE = "write";
 
 describe("pinf-cli", function() {
 
@@ -27,16 +27,15 @@ describe("pinf-cli", function() {
         return done();
     });
 
+
     it("info - program", function(done) {
         return runTest("info-program", [
-            "--format", "JSON",
             "info"
         ], done);
     });
 
     it("info - program package", function(done) {
         return runTest("info-program-package", [
-            "--format", "JSON",
             "info",
             "assets/packages/pinf-cli"
         ], done);
@@ -44,7 +43,6 @@ describe("pinf-cli", function() {
 
     it("info - sub package", function(done) {
         return runTest("info-sub-package", [
-            "--format", "JSON",
             "info",
             "assets/packages/pinf-cli/node_modules/sub"
         ], done);
@@ -70,6 +68,38 @@ describe("pinf-cli", function() {
         ], done);
     });
 
+
+    it("status - before start", function(done) {
+        return runTest("status-before-start", [
+            "status"
+        ], done);
+    });
+
+    it("start", function(done) {
+        return runTest("start", [
+            "start"
+        ], done);
+    });
+
+    it("status - after start", function(done) {
+        return runTest("status-after-start", [
+            "status"
+        ], done);
+    });
+
+    it("stop", function(done) {
+        return runTest("stop", [
+            "stop"
+        ], done);
+    });
+
+    it("status - after stop", function(done) {
+        return runTest("status-after-stop", [
+            "status"
+        ], done);
+    });
+
+
     it("cleanup", function() {
         FS.unlinkSync(PATH.join(__dirname, "program.json"));
         try { FS.unlinkSync(PATH.join(__dirname, ".program.json")); } catch(err) {}
@@ -87,6 +117,7 @@ describe("pinf-cli", function() {
                 return done(new Error("Error '" + err.message + "' parsing output."));
             }
             ASSERT.equal(typeof output, "object");
+//console.log(JSON.stringify(output, null, 4));
             var json = JSON.stringify(output);
             json = json.replace(new RegExp((process.cwd()+"/").replace(/([\/\+])/g, "\\$1"), "g"), "");
             output = JSON.parse(json);
@@ -105,9 +136,8 @@ describe("pinf-cli", function() {
         });
     }
 
-
     function call(args, callback) {
-        return EXEC(PATH.join(__dirname, "../bin/pinf") + " " + args.join(" "), {
+        return EXEC(PATH.join(__dirname, "../bin/pinf") + " --output JSON " + args.join(" "), {
             cwd: __dirname,
             env: {
                 PATH: process.env.PATH,
