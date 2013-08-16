@@ -1,0 +1,8 @@
+{
+    "package": {
+        "config": {
+            "key1": "value1: test/assets/packages/pinf-cli",
+            "key2": "value2: test"
+        }
+    }
+}

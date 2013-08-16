@@ -1,0 +1,43 @@
+{
+    "env": {
+        "CWD": "test",
+        "PINF_PACKAGE": "test/assets/packages/pinf-cli/node_modules/sub/package.json"
+    },
+    "package": {
+        "path": "test/assets/packages/pinf-cli/node_modules/sub",
+        "id": "5a91745a5a03c12907968a6d793836754bf076ce-sub",
+        "descriptor": {
+            "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub",
+            "events": {
+                "listen": {
+                    "pinf-start": "on pinf-start: test/assets/packages/pinf-cli/node_modules/sub",
+                    "pinf-stop": "on pinf-start: test/assets/packages/pinf-cli/node_modules/sub"
+                }
+            },
+            "config": {
+                "key1": "value1: test/assets/packages/pinf-cli/node_modules/sub",
+                "key2": "value2: test/assets/packages/pinf-cli/node_modules/sub"
+            },
+            "pm": {
+                "install": "npm"
+            },
+            "layout": {
+                "directories": {
+                    "dependency": "./node_modules"
+                }
+            },
+            "dependencies": {
+                "bundled": {
+                    "sub": "."
+                }
+            },
+            "mappings": {
+                "sub": "5a91745a5a03c12907968a6d793836754bf076ce-sub"
+            }
+        },
+        "config": {
+            "key1": "value1: test/assets/packages/pinf-cli/node_modules/sub",
+            "key2": "value2: test"
+        }
+    }
+}

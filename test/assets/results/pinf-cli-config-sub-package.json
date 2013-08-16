@@ -1,0 +1,8 @@
+{
+    "package": {
+        "config": {
+            "key1": "value1: test/assets/packages/pinf-cli/node_modules/sub",
+            "key2": "value2: test"
+        }
+    }
+}

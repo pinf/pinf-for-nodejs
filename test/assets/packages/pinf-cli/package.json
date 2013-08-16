@@ -1,11 +1,16 @@
 {
+	"uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli",
 	"dependencies": {
 		"required": {
 			"sub": "0.x"
 		}
 	},
-	"scripts": {
-		"pinf-start": "",
-		"pinf-stop": ""
+	"on": {
+		"pinf-start": "on pinf-start: $__DIRNAME",
+		"pinf-stop": "on pinf-start: $__DIRNAME"
+	},
+	"config": {
+		"key1": "value1: $__DIRNAME",
+		"key2": "value2: $__DIRNAME"
 	}
 }
