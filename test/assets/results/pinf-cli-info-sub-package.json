@@ -11,7 +11,9 @@
             "events": {
                 "listen": {
                     "pinf-start": "on pinf-start: test/assets/packages/pinf-cli/node_modules/sub",
-                    "pinf-stop": "on pinf-start: test/assets/packages/pinf-cli/node_modules/sub"
+                    "pinf-stop": "on pinf-start: test/assets/packages/pinf-cli/node_modules/sub",
+                    "pinf/0/runtime/control/0#events/start": "test/assets/packages/pinf-cli/node_modules/sub/on.js",
+                    "pinf/0/runtime/control/0#events/stop": "test/assets/packages/pinf-cli/node_modules/sub/on.js"
                 }
             },
             "config": {

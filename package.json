@@ -23,6 +23,9 @@
     "grunt-mocha": "~0.3.1",
     "q": "~0.9.3"
   },
+  "mappings": {
+    "pinf-it-bundler": "github.com/pinf-it/pinf-it-bundler/~0.1.1"
+  },
   "devMappings": {
     "pinf-loader-js": "github.com/pinf/pinf-loader-js/~0.4.5"
   },

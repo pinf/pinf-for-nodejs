@@ -5,7 +5,7 @@
             "daemons": {
                 "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub": {
                     "running": true,
-                    "startCount": 0
+                    "startCount": 1
                 }
             }
         }

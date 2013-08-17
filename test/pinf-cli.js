@@ -11,6 +11,9 @@ const MODE = "test";
 describe("pinf-cli", function() {
 
     it("init context", function(done) {
+        FS.writeFileSync(PATH.join(__dirname, "package.json"), JSON.stringify({
+            "uid": "github.com/pinf/pinf-for-nodejs/test"
+        }, null, 4));
         FS.writeFileSync(PATH.join(__dirname, "program.json"), JSON.stringify({
             "boot": {
                 "package": PATH.join(__dirname, "assets/packages/pinf-cli")
@@ -81,6 +84,12 @@ describe("pinf-cli", function() {
         ], done);
     });
 
+    it("start - again", function(done) {
+        return runTest("start-again", [
+            "start"
+        ], done);
+    });
+
     it("status - after start", function(done) {
         return runTest("status-after-start", [
             "status"
@@ -101,6 +110,7 @@ describe("pinf-cli", function() {
 
 
     it("cleanup", function() {
+        FS.unlinkSync(PATH.join(__dirname, "package.json"));
         FS.unlinkSync(PATH.join(__dirname, "program.json"));
         try { FS.unlinkSync(PATH.join(__dirname, ".program.json")); } catch(err) {}
         try { FS.removeSync(PATH.join(__dirname, ".rt")); } catch(err) {}

@@ -1,7 +1,25 @@
 {
     "program": {
         "status": {
-            "started": true
+            "github.com/pinf/pinf-for-nodejs/test": {
+                "pinf/0/runtime/control/0": {
+                    "program": {
+                        "status": "started",
+                        "daemons": {
+                            "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub": {
+                                "running": true,
+                                "startCount": 1
+                            }
+                        }
+                    }
+                }
+            },
+            "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub": {
+                "daemon": {
+                    "running": true,
+                    "startCount": 1
+                }
+            }
         }
     }
 }
