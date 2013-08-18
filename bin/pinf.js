@@ -14,28 +14,55 @@ COLORS.setTheme({
 
 PINF.main(function(context, callback) {
 
-    function getProgramContext(callback) {
+    var program = new COMMANDER.Command();
+
+
+    function getProgramContext(options, callback) {
+        if (typeof options === "function" && typeof callback === "undefined") {
+            callback = options;
+            options = null;
+        }
+        options = options || {};
         // TODO: If program.json not wound in CWD, go up the tree until found.
         var programPath = PATH.join(process.cwd(), "program.json");
+
         return FS.exists(programPath, function(exists) {
             if (!exists) return callback(new Error("No program descriptor at '" + programPath + "'"));
             return PINF.context(programPath, "", {
                 env: {
                     CWD: process.cwd()
-                }
+                },
+                debug: options.debug || program.debug || false,
+                verbose: options.verbose || options.verbose || program.verbose || program.debug || false,
+                forceIndexPackages: options.forceIndexPackages || false
             }, callback);
         });
     }
 
 
-    var program = new COMMANDER.Command();
-
     program
         .version(JSON.parse(FS.readFileSync(PATH.join(__dirname, "../package.json"))).version)
         .option("-v, --verbose", "Show verbose progress.")
+        .option("--debug", "Show debug output.")
         .option("--output <TYPE>", "Output format.");
 
     var acted = false;
+
+    program
+        .command("index")
+        .description("Index all packages in the program")
+        .action(function() {
+            acted = true;
+            return getProgramContext({
+                forceIndexPackages: true
+            }, function(err, context) {
+                if (err) return callback(err);
+                process.stdout.write(JSON.stringify({
+                    success: true
+                }, null, 4) + "\n");
+                return callback(null);
+            });
+        });
 
     program
         .command("info [path]")
@@ -132,7 +159,7 @@ PINF.main(function(context, callback) {
                         if (err) return callback(err);
                         process.stdout.write(JSON.stringify({
                             package: {
-                                config: info.package.config
+                                config: info.package && info.package.config
                             }
                         }, null, 4) + "\n");
                         return callback(null);

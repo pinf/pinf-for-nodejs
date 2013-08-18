@@ -4,6 +4,9 @@
   "pm": "npm",
   "publish": true,
   "main": "lib/pinf.js",
+  "bin": {
+    "pinf": "./bin/pinf"
+  },
   "dependencies": {
     "pinf-loader-js": "~0.4.5",
     "request": "~2.21.0",
