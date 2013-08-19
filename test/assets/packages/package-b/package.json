@@ -1,5 +1,9 @@
 {
 	"packageB": "from package-b dir",
+	"main": "./app.js",
 	"path1": "$__DIRNAME/path1",
-	"path2": "$__DIRNAME/path2"
+	"path2": "$__DIRNAME/path2",
+	"dependencies": {
+		"require.async": "~0.1.1"
+	}
 }
