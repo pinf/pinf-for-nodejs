@@ -1,0 +1,10 @@
+{
+	"boot": {
+		"package": "./package.json"
+	},
+	"config": {
+		"pinf/0/project/control/0": {
+			"open": "ginseng open"
+		}
+	}
+}

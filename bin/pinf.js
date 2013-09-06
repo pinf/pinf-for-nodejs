@@ -5,6 +5,7 @@ const Q = require("q");
 const COMMANDER = require("commander");
 const PINF = require("..");
 const DEEPMERGE = require("deepmerge");
+const DEEPCOPY = require("deepcopy");
 const COLORS = require("colors");
 
 COLORS.setTheme({
@@ -27,7 +28,10 @@ PINF.main(function(context, callback) {
         var programPath = PATH.join(process.cwd(), "program.json");
 
         return FS.exists(programPath, function(exists) {
-            if (!exists) return callback(new Error("No program descriptor at '" + programPath + "'"));
+            if (!exists) {
+// TODO: Mock program.json in overlay FS with context from `./program.prototype.json`.
+                return callback(new Error("No program descriptor at '" + programPath + "'"));
+            }
             return PINF.context(programPath, "", {
                 env: {
                     CWD: process.cwd()
@@ -65,7 +69,7 @@ PINF.main(function(context, callback) {
         });
 
     program
-        .command("info [path]")
+        .command("info [relpath]")
         .description("Show information about program")
         .action(function(path) {
             acted = true;
@@ -109,8 +113,27 @@ PINF.main(function(context, callback) {
         });
 
     program
+        .command("run")
+        .description("Run program (don't detach on daemonize)")
+        .action(function() {
+            acted = true;
+            return getProgramContext(function(err, context) {
+                if (err) return callback(err);
+                return context.runProgram(function(err, info) {
+                    if (err) return callback(err);
+                    process.stdout.write(JSON.stringify({
+                        program: {
+                            status: info
+                        }
+                    }, null, 4) + "\n");
+                    return callback(null);
+                });
+            });
+        });
+
+    program
         .command("start")
-        .description("Start program")
+        .description("Start program (detach on daemonize)")
         .action(function() {
             acted = true;
             return getProgramContext(function(err, context) {
@@ -129,7 +152,7 @@ PINF.main(function(context, callback) {
 
     program
         .command("stop")
-        .description("Stop program")
+        .description("Stop program (stops daemonized processes)")
         .action(function() {
             acted = true;
             return getProgramContext(function(err, context) {
@@ -147,7 +170,28 @@ PINF.main(function(context, callback) {
         });
 
     program
-        .command("config [path]")
+        .command("test")
+        .description("Test program")
+        .action(function() {
+            acted = true;
+            return getProgramContext(function(err, context) {
+                if (err) return callback(err);
+                return context.testProgram(function(err, summary) {
+                    if (err) return callback(err);
+                    process.stdout.write(JSON.stringify({
+                        program: {
+                            test: {
+                                summary: summary
+                            }
+                        }
+                    }, null, 4) + "\n");
+                    return callback(null);
+                });
+            });
+        });
+
+    program
+        .command("config [relpath]")
         .description("Show currently active program configuration")
         .action(function(path) {
             acted = true;
@@ -167,13 +211,12 @@ PINF.main(function(context, callback) {
                 } else {
                     return context.getProgramInfo(function(err, info) {
                         if (err) return callback(err);
-                        var config = {};
+                        var config = DEEPCOPY(info.program.descriptor.config);
                         if (info.packages) {
                             for (var id in info.packages) {
-                                config[id] = DEEPMERGE(
-                                    (info.packages[id].descriptor && info.packages[id].descriptor.config) || {},
-                                    (info.program.descriptor.config && info.program.descriptor.config[id]) || {}
-                                );
+                                if (info.packages[id].descriptor && info.packages[id].descriptor.config) {
+                                    config[id] = DEEPMERGE(info.packages[id].descriptor.config, config[id] || {});
+                                }
                             }
                         }
                         process.stdout.write(JSON.stringify({
@@ -199,6 +242,25 @@ PINF.main(function(context, callback) {
                     process.stdout.write(JSON.stringify({
                         program: {
                             status: status
+                        }
+                    }, null, 4) + "\n");
+                    return callback(null);
+                });
+            });
+        });
+
+    program
+        .command("open")
+        .description("Open program in tool")
+        .action(function() {
+            acted = true;
+            return getProgramContext(function(err, context) {
+                if (err) return callback(err);
+                return context.openProgram(function(err, info) {
+                    if (err) return callback(err);
+                    process.stdout.write(JSON.stringify({
+                        program: {
+                            open: info
                         }
                     }, null, 4) + "\n");
                     return callback(null);

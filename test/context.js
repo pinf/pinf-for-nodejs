@@ -4,7 +4,7 @@ const PATH = require("path");
 const FS = require("fs-extra");
 const Q = require("q");
 const CONTEXT = require("../lib/context");
-const PINF = require("../lib/pinf");
+const PINF = require("..");
 
 //const MODE = "test";
 const MODE = "write";
@@ -30,7 +30,7 @@ describe("context", function() {
                 program: null,
                 package: "a",
                 env: {
-                    "PINF_PROGRAM": PATH.join(options.rootPath, "programs/program-a/program.json"),
+                    "PINF_PROGRAM": PATH.join("programs/program-a/program.json"),
                     "FOO": "BAR"
                 }
             },
@@ -38,7 +38,7 @@ describe("context", function() {
                 program: null,
                 package: "a",
                 env: {
-                    "CWD": PATH.join(options.rootPath, "programs/program-a"),
+                    "CWD": PATH.join("programs/program-a"),
                     "FOO": "BAR"
                 }
             },
@@ -46,7 +46,7 @@ describe("context", function() {
                 program: "a",
                 package: null,
                 env: {
-                    "PINF_PACKAGE": PATH.join(options.rootPath, "packages/package-a/package.json"),
+                    "PINF_PACKAGE": PATH.join("packages/package-a/package.json"),
                     "FOO": "BAR"
                 }
             },
@@ -54,7 +54,7 @@ describe("context", function() {
                 program: "a",
                 package: null,
                 env: {
-                    "CWD": PATH.join(options.rootPath, "packages/package-a"),
+                    "CWD": PATH.join("packages/package-a"),
                     "FOO": "BAR"
                 }
             },
@@ -62,7 +62,7 @@ describe("context", function() {
                 program: null,
                 package: null,
                 env: {
-                    "CWD": PATH.join(options.rootPath, "programs/program-a"),
+                    "CWD": PATH.join("programs/program-a"),
                     "FOO": "BAR"
                 }
             },
@@ -85,7 +85,7 @@ describe("context", function() {
                 package: "c",
                 env: {
                     "FOO": "BAR",
-                    "PINF_PACKAGES": PATH.join(options.rootPath, "programs") + ":" + PATH.join(options.rootPath, "packages")
+                    "PINF_PACKAGES": PATH.join("programs") + ":" + PATH.join("packages")
                 }
             },
             {
@@ -123,12 +123,12 @@ describe("context", function() {
 
                     if (MODE === "test") {
                         ASSERT.deepEqual(
-                            context,
+                            JSON.parse(context.stringify()),
                             JSON.parse(FS.readFileSync(PATH.join(options.rootPath, "results", "context-" + index + "-" + info.program + "-" + info.package + ".json")))
                         );
                     } else
                     if (MODE === "write") {
-                        FS.writeFileSync(PATH.join(options.rootPath, "results", "context-" + index + "-" + info.program + "-" + info.package + ".json"), JSON.stringify(context, null, 4));
+                        FS.writeFileSync(PATH.join(options.rootPath, "results", "context-" + index + "-" + info.program + "-" + info.package + ".json"), context.stringify(null, 4));
                     } else {
                         throw new Error("Unknown `MODE`");
                     }
@@ -236,6 +236,89 @@ describe("context", function() {
             FS.removeSync(PATH.join(__dirname, ".rt"));
         });
 
+    });
+
+    describe("api", function() {
+
+        it("has `console` by default", function(done) {
+            return PINF.main(function main(options, callback) {
+                ASSERT.equal(options.$pinf.getAPI("console") === console, true);
+                return done(null);
+            }, module, done);
+        });
+
+    });
+
+    describe("passing and narrowing", function() {
+
+        var context = null;
+
+        it("init", function(done) {
+            return PINF.main(function main(options, callback) {
+                ASSERT.equal(typeof options, "object");
+                ASSERT.equal(typeof options.$pinf, "object");
+                ASSERT.equal(options.$pinf.test, false);
+                context = options.$pinf;
+                delete options.$pinf;
+                ASSERT.deepEqual(options, {
+                    foo: "bar",
+                    test: true
+                });
+                return callback(null);
+            }, module, {
+                foo: "bar",
+                test: true
+            }, done);
+        });
+
+        it("pass through sandbox", function() {
+            // TODO
+        });
+
+        it("setup", function() {
+            FS.writeFileSync(PATH.join(__dirname, "package.json"), JSON.stringify({
+                uid: "github.com/pinf/pinf-for-nodejs/test"
+            }, null, 4));
+        });
+
+        it("narrow", function(done) {
+          context._api.FS = FS;
+          context.test = true;
+          ASSERT.equal(context.getAPI("FS"), FS);
+          return PINF.main(function main(options, callback) {
+            ASSERT.equal(options.$pinf.paths.package, __dirname);
+            ASSERT.equal(options.$pinf.getAPI("FS"), null);
+            ASSERT.equal(options.$pinf.getAPI("Q"), null);
+            options.$pinf._api.Q = Q;
+            ASSERT.equal(options.$pinf.getAPI("Q"), Q);
+            ASSERT.equal(options.$pinf.getAPI("Q") === Q, true);
+            var opts = options.$pinf.makeOptions({
+                foo: "bar",
+                test: true,
+                $pinf: context
+            });
+            ASSERT.notEqual(opts.$pinf, options.$pinf);
+            ASSERT.equal(opts.$pinf.parentContext, opts.$pinf.__proto__);
+            ASSERT.equal(opts.$pinf.parentContext, context);
+            ASSERT.equal(opts.$pinf.getAPI("FS"), FS);
+            ASSERT.equal(opts.$pinf.parentContext === opts.$pinf.__proto__, true);
+            ASSERT.equal(opts.$pinf.parentContext === context, true);
+            ASSERT.equal(opts.$pinf.getAPI("FS") === FS, true);
+            ASSERT.equal(options.$pinf.getAPI("Q"), Q);
+            ASSERT.equal(options.$pinf.getAPI("Q") === Q, true);
+            ASSERT.equal(opts.$pinf.test, true);
+            delete opts.$pinf;
+            ASSERT.deepEqual(opts, {
+                foo: "bar",
+                test: true
+            });
+            return callback(null);
+          }, module, done);
+        });
+
+        it("cleanup", function() {
+            FS.unlinkSync(PATH.join(__dirname, "package.json"));
+        });
     });
 
 });

@@ -1,6 +1,9 @@
 {
     "uid": null,
     "ns": "package-b",
+    "debug": false,
+    "verbose": false,
+    "test": false,
     "env": {
         "PINF_PROGRAM": "programs/program-c/program.json",
         "PINF_PACKAGE": "packages/package-b/package.json",
@@ -17,7 +20,8 @@
         "etc": "programs/program-c/.rt/etc/package-b",
         "log": "programs/program-c/.rt/log/package-b",
         "cache": "programs/program-c/.rt/cache/package-b",
-        "tmp": "programs/program-c/.rt/tmp/package-b"
+        "tmp": "programs/program-c/.rt/tmp/package-b",
+        "dependency": "packages/package-b/node_modules"
     },
     "binPaths": [],
     "config": {},

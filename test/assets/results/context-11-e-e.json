@@ -1,6 +1,9 @@
 {
     "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/package-e",
     "ns": "github.com+pinf+pinf-for-nodejs+test+assets+packages+package-e",
+    "debug": false,
+    "verbose": false,
+    "test": false,
     "env": {
         "PINF_PROGRAM": "programs/program-e/program.json",
         "PINF_PACKAGE": "packages/package-e/package.json",

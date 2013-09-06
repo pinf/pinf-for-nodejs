@@ -1,6 +1,9 @@
 {
     "uid": null,
     "ns": "package-d",
+    "debug": false,
+    "verbose": false,
+    "test": false,
     "env": {
         "FOO": "BAR",
         "FOO_INHERITED": "BAR",

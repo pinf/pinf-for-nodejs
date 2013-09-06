@@ -1,6 +1,9 @@
 {
     "uid": null,
     "ns": "package-c",
+    "debug": false,
+    "verbose": false,
+    "test": false,
     "env": {
         "PINF_PACKAGES": "programs:packages",
         "PINF_PROGRAM": "programs/program-c/program.json",

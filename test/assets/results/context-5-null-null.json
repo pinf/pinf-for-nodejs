@@ -1,6 +1,9 @@
 {
     "uid": null,
     "ns": "program-a",
+    "debug": false,
+    "verbose": false,
+    "test": false,
     "env": {
         "PINF_PACKAGES": "",
         "PINF_PROGRAM_PARENT": "",

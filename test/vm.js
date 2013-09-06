@@ -3,7 +3,7 @@ const ASSERT = require("assert");
 const PATH = require("path");
 const FS = require("fs-extra");
 const VM = require("../lib/vm").VM;
-const PINF_FOR_NODEJS = require("..");
+const MAIN = require("../lib/main");
 
 
 const DEBUG = false;
@@ -12,18 +12,18 @@ const DEBUG = false;
 describe("vm", function() {
 
     it("load package-a", function(done) {
-        return PINF_FOR_NODEJS.main(function(context, callback) {
-            var vm = new VM(context);
+        return MAIN.main(function(options, callback) {
+            var vm = new VM(options.$pinf);
             return vm.loadPackage(PATH.join(__dirname, "assets/packages/package-a"), {
                 debug: DEBUG
             }, function(err, sandbox) {
                 if (err) return callback(err);
-                var context = {
+                var opts = {
                     key1: "value1"
                 };
-                return sandbox.main(context, function(err, ctx) {
+                return sandbox.main(opts, function(err, options) {
                     if (err) return callback(err);
-                    ASSERT.deepEqual(ctx, context);
+                    ASSERT.deepEqual(opts, options);
                     return callback();
                 });
             });
@@ -31,18 +31,18 @@ describe("vm", function() {
     });
 
     it("load package-b", function(done) {
-        return PINF_FOR_NODEJS.main(function(context, callback) {
-            var vm = new VM(context);
+        return MAIN.main(function(options, callback) {
+            var vm = new VM(options.$pinf);
             return vm.loadPackage(PATH.join(__dirname, "assets/packages/package-b"), {
                 debug: DEBUG
             }, function(err, sandbox) {
                 if (err) return callback(err);
-                var context = {
+                var opts = {
                     key1: "value1"
                 };
-                return sandbox.main(context, function(err, ctx) {
+                return sandbox.main(opts, function(err, options) {
                     if (err) return callback(err);
-                    ASSERT.deepEqual(ctx, context);
+                    ASSERT.deepEqual(opts, options);
                     return callback();
                 });
             });
