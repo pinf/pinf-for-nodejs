@@ -321,4 +321,20 @@ describe("context", function() {
         });
     });
 
+    describe("sandbox", function() {
+
+        it("init and run", function(done) {
+            return PINF.main(function main(options, callback) {
+                return options.$pinf.sandbox(PATH.join(__dirname, "assets", "packages", "package-a"), function(sandbox) {
+                    return sandbox.main(options, function(err, opts) {
+                        if (err) return callback(err);
+                        ASSERT.equal(opts === options, true);
+                        return callback();
+                    });
+                }, callback);
+
+            }, module, done);
+        });
+    });
+
 });

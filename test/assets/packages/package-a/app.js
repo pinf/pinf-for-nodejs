@@ -1,4 +1,4 @@
 
-exports.main = function(context, callback) {
-	return callback(null, context);
+exports.main = function(options, callback) {
+	return callback(null, options);
 }

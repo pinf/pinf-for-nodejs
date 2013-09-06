@@ -2,8 +2,8 @@
 require("require.async")(require);
 
 
-exports.main = function(context, callback) {
+exports.main = function(options, callback) {
 	return require.async("./extra", function(EXTRA) {
-		return EXTRA.main(context, callback);
+		return EXTRA.main(options, callback);
 	}, callback);
 }
