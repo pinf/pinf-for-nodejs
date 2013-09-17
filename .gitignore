@@ -1,3 +1,4 @@
-/.rt/
+.rt/
 /.sm/
 /node_modules/
+/test/.program.json

@@ -4,11 +4,13 @@
     "debug": false,
     "verbose": false,
     "test": false,
+    "now": 0,
+    "ttl": 0,
     "env": {
+        "PINF_PROGRAM": "programs/program-a/program.json",
         "PINF_PACKAGE": "packages/package-a/package.json",
         "PINF_PACKAGES": "",
         "PINF_PROGRAM_PARENT": "",
-        "PINF_PROGRAM": "programs/program-a/program.json",
         "PINF_RUNTIME": "programs/program-a/.rt/program.rt.json",
         "PINF_MODE": "production"
     },

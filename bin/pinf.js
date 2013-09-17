@@ -134,12 +134,25 @@ PINF.main(function(context, callback) {
     program
         .command("start")
         .description("Start program (detach on daemonize)")
-        .action(function() {
+        .option("--restart", "Stop before starting if already started.")
+        .action(function(options) {
             acted = true;
             return getProgramContext(function(err, context) {
                 if (err) return callback(err);
-                return context.startProgram(function(err, info) {
-                    if (err) return callback(err);
+                return context.startProgram({
+                    restart: options.restart || false
+                }, function(err, info) {
+                    if (err) {
+                        if (err.code === "ALREADY_STARTED") {
+                            process.stdout.write(JSON.stringify({
+                                error: {
+                                    code: err.code
+                                }
+                            }, null, 4) + "\n");
+                            return callback(null);
+                        }
+                        return callback(err);
+                    }
                     process.stdout.write(JSON.stringify({
                         program: {
                             status: info
@@ -158,7 +171,17 @@ PINF.main(function(context, callback) {
             return getProgramContext(function(err, context) {
                 if (err) return callback(err);
                 return context.stopProgram(function(err, info) {
-                    if (err) return callback(err);
+                    if (err) {
+                        if (err.code === "NOT_STARTED") {
+                            process.stdout.write(JSON.stringify({
+                                error: {
+                                    code: err.code
+                                }
+                            }, null, 4) + "\n");
+                            return callback(null);
+                        }
+                        return callback(err);
+                    }
                     process.stdout.write(JSON.stringify({
                         program: {
                             status: info

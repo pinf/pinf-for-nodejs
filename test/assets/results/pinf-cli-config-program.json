@@ -1,6 +1,13 @@
 {
     "program": {
         "config": {
+            "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli": {
+                "key2": "value2: test"
+            },
+            "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub": {
+                "key2": "value2: test"
+            },
+            "github.com/pinf/pinf-for-nodejs/test": {},
             "eadd4d3567d17d49826b5ff9b47f0c3add1379b3-pinf-cli": {
                 "key1": "value1: test/assets/packages/pinf-cli",
                 "key2": "value2: test/assets/packages/pinf-cli"

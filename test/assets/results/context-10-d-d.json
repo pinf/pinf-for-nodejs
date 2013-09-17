@@ -4,6 +4,8 @@
     "debug": false,
     "verbose": false,
     "test": false,
+    "now": 0,
+    "ttl": 0,
     "env": {
         "FOO": "BAR",
         "FOO_INHERITED": "BAR",

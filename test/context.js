@@ -121,6 +121,8 @@ describe("context", function() {
                 CONTEXT.context(programDescriptorPath, packageDescriptorPath, options, function(err, context) {
                     if (err) return done(err);
 
+                    context.now = 0;
+
                     if (MODE === "test") {
                         ASSERT.deepEqual(
                             JSON.parse(context.stringify()),
@@ -147,6 +149,8 @@ describe("context", function() {
         var context = null;
 
         it("load context", function(done) {
+            try { FS.removeSync(PATH.join(__dirname, ".rt")); } catch(err) {}
+            try { FS.unlinkSync(PATH.join(__dirname, ".program.json")); } catch(err) {}
             FS.writeFileSync(PATH.join(__dirname, "package.json"), JSON.stringify({
                 uid: "github.com/pinf/pinf-for-nodejs/test"
             }, null, 4));
@@ -174,7 +178,10 @@ describe("context", function() {
                     "key": "defaultValue"
                 }
             }, function(err, config) {
-                if (err) return done(err);
+                if (err) {
+                    console.error(err.stack);
+                    return done(err);
+                }
                 // `config.changed` event should have already fired above.
             });
         });
@@ -232,8 +239,6 @@ describe("context", function() {
         it("cleanup", function() {
             FS.unlinkSync(PATH.join(__dirname, "package.json"));
             FS.unlinkSync(PATH.join(__dirname, "program.json"));
-            FS.unlinkSync(PATH.join(__dirname, ".program.json"));
-            FS.removeSync(PATH.join(__dirname, ".rt"));
         });
 
     });
@@ -287,10 +292,9 @@ describe("context", function() {
           ASSERT.equal(context.getAPI("FS"), FS);
           return PINF.main(function main(options, callback) {
             ASSERT.equal(options.$pinf.paths.package, __dirname);
-            ASSERT.equal(options.$pinf.getAPI("FS"), null);
-            ASSERT.equal(options.$pinf.getAPI("Q"), null);
+            ASSERT.equal(options.$pinf.getAPI("FS") === null, true);
+            ASSERT.equal(options.$pinf.getAPI("Q") === null, true);
             options.$pinf._api.Q = Q;
-            ASSERT.equal(options.$pinf.getAPI("Q"), Q);
             ASSERT.equal(options.$pinf.getAPI("Q") === Q, true);
             var opts = options.$pinf.makeOptions({
                 foo: "bar",
@@ -298,13 +302,9 @@ describe("context", function() {
                 $pinf: context
             });
             ASSERT.notEqual(opts.$pinf, options.$pinf);
-            ASSERT.equal(opts.$pinf.parentContext, opts.$pinf.__proto__);
-            ASSERT.equal(opts.$pinf.parentContext, context);
-            ASSERT.equal(opts.$pinf.getAPI("FS"), FS);
-            ASSERT.equal(opts.$pinf.parentContext === opts.$pinf.__proto__, true);
-            ASSERT.equal(opts.$pinf.parentContext === context, true);
+            ASSERT.equal(opts.$pinf._parentContext === opts.$pinf.__proto__, true);
+            ASSERT.equal(opts.$pinf._parentContext === context, true);
             ASSERT.equal(opts.$pinf.getAPI("FS") === FS, true);
-            ASSERT.equal(options.$pinf.getAPI("Q"), Q);
             ASSERT.equal(options.$pinf.getAPI("Q") === Q, true);
             ASSERT.equal(opts.$pinf.test, true);
             delete opts.$pinf;

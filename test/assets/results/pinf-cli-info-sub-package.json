@@ -30,11 +30,47 @@
             },
             "dependencies": {
                 "bundled": {
-                    "sub": "."
+                    "sub": ".",
+                    "colors": "../../../../../../node_modules/colors",
+                    "commander": "../../../../../../node_modules/commander",
+                    "deepcopy": "../../../../../../node_modules/deepcopy",
+                    "deepmerge": "../../../../../../node_modules/deepmerge",
+                    "fs-extra": "../../../../../../node_modules/fs-extra",
+                    "grunt": "../../../../../../node_modules/grunt",
+                    "grunt-mocha": "../../../../../../node_modules/grunt-mocha",
+                    "mocha": "../../../../../../node_modules/mocha",
+                    "pinf-it-bundler": "../../../../../../node_modules/pinf-it-bundler",
+                    "pinf-it-package-insight": "../../../../../../node_modules/pinf-it-package-insight",
+                    "pinf-it-program-insight": "../../../../../../node_modules/pinf-it-program-insight",
+                    "pinf-loader-js": "../../../../../../node_modules/pinf-loader-js",
+                    "pinf-primitives-js": "../../../../../../node_modules/pinf-primitives-js",
+                    "q": "../../../../../../node_modules/q",
+                    "request": "../../../../../../node_modules/request",
+                    "require.async": "../../../../../../node_modules/require.async",
+                    "snapshot": "../../../../../../node_modules/snapshot",
+                    "waitfor": "../../../../../../node_modules/waitfor"
                 }
             },
             "mappings": {
-                "sub": "5a91745a5a03c12907968a6d793836754bf076ce-sub"
+                "sub": "5a91745a5a03c12907968a6d793836754bf076ce-sub",
+                "colors": "e759257e0a473321b006bc97e9807b6d48adec42-colors",
+                "commander": "4073cb62ee758495a015501e9a544ec9a0fabee6-commander",
+                "deepcopy": "117b95ef847343a0a6b7462ff5e45bf34ac8e2ad-deepcopy",
+                "deepmerge": "9250b23953017fc52066f40b74d4a7fac71f9de8-deepmerge",
+                "fs-extra": "b48782ec61e6220a3d055f232c3d98741b25adcb-fs-extra",
+                "grunt": "3043937f7caab42a56d618471c9ff70928549eb7-grunt",
+                "grunt-mocha": "67b005bf348ac4011ff7891839fcd098f27d1521-grunt-mocha",
+                "mocha": "831a5d7e316fead1635e84f6a69369d9608deb57-mocha",
+                "pinf-it-bundler": "1362506ac347f9da9a10f0d7d4bb2ad8e7b80f9a-pinf-it-bundler",
+                "pinf-it-package-insight": "c95597ab02a40c3a9403a7a14920f87ff6d5dc6e-pinf-it-package-insight",
+                "pinf-it-program-insight": "1935938a7d39378bba54dffb42e322a26eefd422-pinf-it-program-insight",
+                "pinf-loader-js": "0afce0a421b0cfaa7fb429999b9c90b6c35e8546-pinf-loader-js",
+                "pinf-primitives-js": "13a8d03291af1105919f67d8b89b34d86768d85e-pinf-primitives-js",
+                "q": "6edc75aa4b947b6efe8dc488b83c12cae8fcc154-q",
+                "request": "1c796d0d18f254ba52c6360f749f5190a01096de-request",
+                "require.async": "2b2511ee8ee2ee0c1152d67fed4b9293f1c15df0-require.async",
+                "snapshot": "5a7aa114d01a81e221b5248fc4db52327677cd4b-snapshot",
+                "waitfor": "0a24e386c16b4753772d033219ec01bba7da9ad8-waitfor"
             }
         },
         "config": {

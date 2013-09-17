@@ -11,7 +11,29 @@ const DEBUG = false;
 
 describe("vm", function() {
 
-    it("load package-a", function(done) {
+    it("load package-a (force re-generate)", function(done) {
+        return MAIN.main(function(options, callback) {
+            var vm = new VM(options.$pinf);
+            return vm.loadPackage(PATH.join(__dirname, "assets/packages/package-a"), {
+                debug: DEBUG,
+                $pinf: {
+                    ttl: -1
+                }
+            }, function(err, sandbox) {
+                if (err) return callback(err);
+                var opts = {
+                    key1: "value1"
+                };
+                return sandbox.main(opts, function(err, options) {
+                    if (err) return callback(err);
+                    ASSERT.deepEqual(opts, options);
+                    return callback();
+                });
+            });
+        }, module, done);
+    });
+
+    it("load package-a (from cache)", function(done) {
         return MAIN.main(function(options, callback) {
             var vm = new VM(options.$pinf);
             return vm.loadPackage(PATH.join(__dirname, "assets/packages/package-a"), {
@@ -34,7 +56,10 @@ describe("vm", function() {
         return MAIN.main(function(options, callback) {
             var vm = new VM(options.$pinf);
             return vm.loadPackage(PATH.join(__dirname, "assets/packages/package-b"), {
-                debug: DEBUG
+                debug: DEBUG,
+                $pinf: {
+                    ttl: -1
+                }
             }, function(err, sandbox) {
                 if (err) return callback(err);
                 var opts = {

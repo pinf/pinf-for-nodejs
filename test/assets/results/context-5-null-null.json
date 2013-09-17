@@ -4,6 +4,8 @@
     "debug": false,
     "verbose": false,
     "test": false,
+    "now": 0,
+    "ttl": 0,
     "env": {
         "PINF_PACKAGES": "",
         "PINF_PROGRAM_PARENT": "",

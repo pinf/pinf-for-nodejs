@@ -2,13 +2,16 @@
 const ASSERT = require("assert");
 const PATH = require("path");
 const FS = require("fs-extra");
-const EXEC = require("child_process").exec;
+const SPAWN = require("child_process").spawn;
 
 
-const MODE = "test";
-//const MODE = "write";
+//const MODE = "test";
+const MODE = "write";
+
 
 describe("pinf-cli", function() {
+
+    this.timeout(30 * 1000);
 
     it("init context", function(done) {
         FS.writeFileSync(PATH.join(__dirname, "package.json"), JSON.stringify({
@@ -27,6 +30,7 @@ describe("pinf-cli", function() {
                 }
             }
         }, null, 4));
+        try { FS.removeSync(PATH.join(__dirname, ".rt")); } catch(err) {}
         return done();
     });
 
@@ -102,18 +106,34 @@ describe("pinf-cli", function() {
         ], done);
     });
 
+    it("stop - again", function(done) {
+        return runTest("stop-again", [
+            "stop"
+        ], done);
+    });
+
     it("status - after stop", function(done) {
         return runTest("status-after-stop", [
             "status"
         ], done);
     });
 
+    it("run", function(done) {
+        return runTest("run", [
+            "run"
+        ], done);
+    });
+
+    it("status - after run", function(done) {
+        return runTest("status-after-run", [
+            "status"
+        ], done);
+    });
 
     it("cleanup", function() {
         FS.unlinkSync(PATH.join(__dirname, "package.json"));
         FS.unlinkSync(PATH.join(__dirname, "program.json"));
         try { FS.unlinkSync(PATH.join(__dirname, ".program.json")); } catch(err) {}
-        try { FS.removeSync(PATH.join(__dirname, ".rt")); } catch(err) {}
     });
 
 
@@ -124,6 +144,7 @@ describe("pinf-cli", function() {
                 var output = JSON.parse(stdout);
             } catch(err) {
                 console.error("stdout", stdout);
+                console.error("err", err.stack);
                 return done(new Error("Error '" + err.message + "' parsing output."));
             }
             ASSERT.equal(typeof output, "object");
@@ -147,22 +168,28 @@ describe("pinf-cli", function() {
     }
 
     function call(args, callback) {
-        return EXEC(PATH.join(__dirname, "../bin/pinf") + " --output JSON " + args.join(" "), {
+        var proc = SPAWN(PATH.join(__dirname, "../bin/pinf"), [
+            "--output", "JSON"
+        ].concat(args), {
             cwd: __dirname,
             env: {
                 PATH: process.env.PATH,
                 PINF_PROGRAM: PATH.join(__dirname, "program.json")
             }
-        }, function (error, stdout, stderr) {
-            if (error) {
-                console.error(stdout);
-                console.error(stderr);
-                return callback(new Error("Got error '" + error + "' while trying to call `pinf`"));
+        });
+        var buffer = [];
+        proc.stdout.on("data", function (data) {
+            buffer.push(data.toString());
+        });
+        proc.stderr.on("data", function (data) {
+            console.error(data.toString());
+        });
+        proc.on("close", function (code) {
+            if (code != 0) {
+                console.error(buffer.join(""));
+                return callback(new Error("Got status code '" + code + "' while trying to call `pinf`"));
             }
-            if (stderr) {
-                console.error(stderr);
-            }
-            return callback(null, stdout);
+            return callback(null, buffer.join(""));
         });
     }
 
