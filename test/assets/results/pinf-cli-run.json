@@ -1,5 +1,14 @@
 {
     "program": {
-        "status": {}
+        "status": {
+            "status": "stopped",
+            "daemonize": false,
+            "daemons": {
+                "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub": {
+                    "running": false,
+                    "startCount": 1
+                }
+            }
+        }
     }
 }

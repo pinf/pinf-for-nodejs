@@ -1,8 +1,17 @@
 {
     "program": {
         "status": {
-            "github.com/pinf/pinf-for-nodejs/test": {
-                "pinf/0/runtime/control/0": {}
+            "pinf/0/runtime/control/0": {
+                "program": {
+                    "status": "stopped",
+                    "daemonize": false,
+                    "daemons": {
+                        "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub": {
+                            "running": false,
+                            "startCount": 1
+                        }
+                    }
+                }
             },
             "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub": {}
         }
