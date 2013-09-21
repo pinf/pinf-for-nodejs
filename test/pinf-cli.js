@@ -3,6 +3,7 @@ const ASSERT = require("assert");
 const PATH = require("path");
 const FS = require("fs-extra");
 const SPAWN = require("child_process").spawn;
+const PINF = require("..");
 
 
 //const MODE = "test";
@@ -12,6 +13,8 @@ const MODE = "write";
 describe("pinf-cli", function() {
 
     this.timeout(30 * 1000);
+
+    var context = null;
 
     it("init context", function(done) {
         FS.writeFileSync(PATH.join(__dirname, "package.json"), JSON.stringify({
@@ -31,7 +34,14 @@ describe("pinf-cli", function() {
             }
         }, null, 4));
         try { FS.removeSync(PATH.join(__dirname, ".rt")); } catch(err) {}
-        return done();
+        return PINF.contextForModule(module, {
+            "PINF_PROGRAM": PATH.join(__dirname, "program.json"),
+            "PINF_RUNTIME": ""
+        }, function(err, _context) {
+            if (err) return done(err);
+            context = _context;
+            return done();
+        });
     });
 
 
@@ -80,6 +90,48 @@ describe("pinf-cli", function() {
         return runTest("status-before-start", [
             "status"
         ], done);
+    });
+
+    it("get program info", function(done) {
+        return context.getProgramInfo(function(err, output) {
+            if (err) return done(err);
+            var json = JSON.stringify(output);
+            json = json.replace(new RegExp((process.cwd()).replace(/([\/\+])/g, "\\$1"), "g"), "");
+            output = JSON.parse(json);
+            if (MODE === "test") {
+                ASSERT.deepEqual(
+                    output,
+                    JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/results", "pinf-cli-" + "get-program-info" + ".json")))
+                );
+            } else
+            if (MODE === "write") {
+                FS.outputFileSync(PATH.join(__dirname, "assets/results", "pinf-cli-" + "get-program-info" + ".json"), JSON.stringify(output, null, 4));
+            } else {
+                throw new Error("Unknown `MODE`");
+            }
+            return done();
+        });
+    });
+
+    it("get package info", function(done) {
+        return context.getPackageInfo(PATH.join(__dirname, "assets/packages/pinf-cli"), function(err, output) {
+            if (err) return done(err);
+            var json = JSON.stringify(output);
+            json = json.replace(new RegExp((process.cwd()).replace(/([\/\+])/g, "\\$1"), "g"), "");
+            output = JSON.parse(json);
+            if (MODE === "test") {
+                ASSERT.deepEqual(
+                    output,
+                    JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/results", "pinf-cli-" + "get-package-info" + ".json")))
+                );
+            } else
+            if (MODE === "write") {
+                FS.outputFileSync(PATH.join(__dirname, "assets/results", "pinf-cli-" + "get-package-info" + ".json"), JSON.stringify(output, null, 4));
+            } else {
+                throw new Error("Unknown `MODE`");
+            }
+            return done();
+        });
     });
 
     it("start", function(done) {

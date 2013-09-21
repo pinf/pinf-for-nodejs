@@ -1,10 +1,10 @@
 {
     "env": {
-        "CWD": "test",
-        "PINF_PACKAGE": "test/assets/packages/pinf-cli/package.json"
+        "CWD": "",
+        "PINF_PACKAGE": "/test/assets/packages/pinf-cli/package.json"
     },
     "package": {
-        "path": "test/assets/packages/pinf-cli",
+        "path": "/test/assets/packages/pinf-cli",
         "id": "eadd4d3567d17d49826b5ff9b47f0c3add1379b3-pinf-cli",
         "descriptor": {
             "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli",
@@ -20,13 +20,13 @@
             },
             "events": {
                 "listen": {
-                    "pinf-start": "on pinf-start: test/assets/packages/pinf-cli",
-                    "pinf-stop": "on pinf-start: test/assets/packages/pinf-cli"
+                    "pinf-start": "on pinf-start: /test/assets/packages/pinf-cli",
+                    "pinf-stop": "on pinf-start: /test/assets/packages/pinf-cli"
                 }
             },
             "config": {
-                "key1": "value1: test/assets/packages/pinf-cli",
-                "key2": "value2: test/assets/packages/pinf-cli"
+                "key1": "value1: /test/assets/packages/pinf-cli",
+                "key2": "value2: /test/assets/packages/pinf-cli"
             },
             "pm": {
                 "install": "npm"
@@ -41,8 +41,8 @@
             }
         },
         "config": {
-            "key1": "value1: test/assets/packages/pinf-cli",
-            "key2": "value2: test"
+            "key1": "value1: /test/assets/packages/pinf-cli",
+            "key2": "value2: /test"
         }
     }
 }

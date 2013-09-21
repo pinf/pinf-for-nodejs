@@ -37,8 +37,8 @@ PINF.main(function(context, callback) {
                     CWD: process.cwd()
                 },
                 debug: options.debug || program.debug || false,
-                verbose: options.verbose || options.verbose || program.verbose || program.debug || false,
-                forceIndexPackages: options.forceIndexPackages || false
+                verbose: options.verbose || options.verbose || program.verbose || program.debug || false
+//                forceIndexPackages: options.forceIndexPackages || false
             }, callback);
         });
     }
@@ -51,7 +51,7 @@ PINF.main(function(context, callback) {
         .option("--output <TYPE>", "Output format.");
 
     var acted = false;
-
+/*
     program
         .command("index")
         .description("Index all packages in the program")
@@ -67,7 +67,7 @@ PINF.main(function(context, callback) {
                 return callback(null);
             });
         });
-
+*/
     program
         .command("info [relpath]")
         .description("Show information about program")

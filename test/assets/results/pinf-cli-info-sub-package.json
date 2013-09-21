@@ -27,14 +27,6 @@
                 "directories": {
                     "dependency": "./node_modules"
                 }
-            },
-            "dependencies": {
-                "bundled": {
-                    "sub": "."
-                }
-            },
-            "mappings": {
-                "sub": "5a91745a5a03c12907968a6d793836754bf076ce-sub"
             }
         },
         "config": {
