@@ -12,8 +12,7 @@
         "PINF_PROGRAM": "programs/program-a/program.json",
         "PINF_PACKAGE": "programs/program-a/package.json",
         "PINF_RUNTIME": "programs/program-a/.rt/program.rt.json",
-        "PINF_MODE": "production",
-        "PINF_CACHE_CONTROL": ""
+        "PINF_MODE": "production"
     },
     "paths": {
         "program": "programs/program-a",

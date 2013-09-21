@@ -15,8 +15,7 @@
         "PINF_PACKAGES": "",
         "PINF_PROGRAM_PARENT": "",
         "PINF_RUNTIME": "programs/program-d/.rt/program.rt.json",
-        "PINF_MODE": "production",
-        "PINF_CACHE_CONTROL": ""
+        "PINF_MODE": "production"
     },
     "paths": {
         "program": "programs/program-d",

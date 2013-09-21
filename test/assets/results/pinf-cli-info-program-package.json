@@ -32,7 +32,6 @@
                     "q": "../../../../node_modules/q",
                     "request": "../../../../node_modules/request",
                     "require.async": "../../../../node_modules/require.async",
-                    "snapshot": "../../../../node_modules/snapshot",
                     "waitfor": "../../../../node_modules/waitfor"
                 }
             },
@@ -72,7 +71,6 @@
                 "q": "6edc75aa4b947b6efe8dc488b83c12cae8fcc154-q",
                 "request": "1c796d0d18f254ba52c6360f749f5190a01096de-request",
                 "require.async": "2b2511ee8ee2ee0c1152d67fed4b9293f1c15df0-require.async",
-                "snapshot": "5a7aa114d01a81e221b5248fc4db52327677cd4b-snapshot",
                 "waitfor": "0a24e386c16b4753772d033219ec01bba7da9ad8-waitfor"
             }
         },
