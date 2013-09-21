@@ -1,6 +1,7 @@
 
-const PATH = require("path");
 const ASSERT = require("assert");
+const PATH = require("path");
+const FS = require("fs-extra");
 const PACKAGE_INSIGHT = require("pinf-it-package-insight");
 const VFS = require("../lib/vfs");
 const PINF = require("..");
@@ -60,15 +61,19 @@ describe('vfs', function() {
 					ASSERT.equal(descriptor.dirpath, path);
 					ASSERT.equal(typeof descriptor.combined, "object");
 
-					ASSERT.deepEqual(Object.keys(usedPaths), [
-						"packages/package-b",
-						"packages/package-b/.package.json",
-						"packages/package-b/node_modules",
-						"packages/package-b/index.js",
-						"packages/node_modules",
-						"packages/package-b/package.json",
-						"node_modules"
-					]);
+		            var json = JSON.stringify(Object.keys(usedPaths));
+		            var output = JSON.parse(json);
+		            if (MODE === "test") {
+		                ASSERT.deepEqual(
+		                    output,
+		                    JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/results", "pinf-vfs-0.json")))
+		                );
+		            } else
+		            if (MODE === "write") {
+		                FS.outputFileSync(PATH.join(__dirname, "assets/results", "pinf-vfs-0.json"), JSON.stringify(output, null, 4));
+		            } else {
+		                throw new Error("Unknown `MODE`");
+		            }
 
 					return callback(null);
 				});

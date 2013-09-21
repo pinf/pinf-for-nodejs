@@ -1,0 +1,8 @@
+[
+    "packages/package-b",
+    "packages/package-b/.package.json",
+    "packages/package-b/node_modules",
+    "packages/package-b/index.js",
+    "packages/node_modules",
+    "packages/package-b/package.json"
+]
