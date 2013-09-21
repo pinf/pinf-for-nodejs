@@ -2,3 +2,5 @@
 /.sm/
 /node_modules/
 /test/.program.json
+/test/package.json
+/test/program.json

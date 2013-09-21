@@ -12992,6 +12992,7 @@
                         "pinf-it-program-insight": "~0.1.0",
                         "deepcopy": "~0.3.1",
                         "require.async": "~0.1.1",
+                        "snapshot": "0.0.0",
                         "pinf-it-bundler": "github.com/pinf-it/pinf-it-bundler/~0.1.1"
                     },
                     "development": {
@@ -38945,8 +38946,7 @@
                 "description": "Serialize circular references, custom objects and other types not supported by JSON",
                 "version": "0.0.0",
                 "locator": {
-                    "pointer": "",
-                    "shasum": "5b69b2b920ecaffd04cccc72c0a986c1568be0ab"
+                    "pointer": ""
                 },
                 "social": {
                     "bugs": {
@@ -39041,8 +39041,7 @@
                     "pinf-for-nodejs": "6b7b10cb4ff73cb118627143d3ac89e9df6a43a6-pinf-for-nodejs",
                     "pinf-it-module-insight": "2ff59a1c96b5417887e3872b34d1fa60691fbd19-pinf-it-module-insight",
                     "requirejs": "78d1d8c6bb5ec84a6cac18c4da794c980a1ac5c3-requirejs"
-                },
-                "_resolved": "https://registry.npmjs.org/snapshot/-/snapshot-0.0.0.tgz"
+                }
             }
         },
         "e5affbd0832706079630aaaecc02a02007d243bf-waitfor": {

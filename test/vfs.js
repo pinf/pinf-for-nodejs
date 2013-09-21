@@ -61,13 +61,13 @@ describe('vfs', function() {
 					ASSERT.equal(typeof descriptor.combined, "object");
 
 					ASSERT.deepEqual(Object.keys(usedPaths), [
-					    "packages/package-b",
-					    "packages/package-b/.package.json",
-					    "packages/package-b/node_modules",
-					    "packages/package-b/index.js",
-					    "packages/node_modules",
-					    "node_modules",
-					    "packages/package-b/package.json"
+						"packages/package-b",
+						"packages/package-b/.package.json",
+						"packages/package-b/node_modules",
+						"packages/package-b/index.js",
+						"packages/node_modules",
+						"packages/package-b/package.json",
+						"node_modules"
 					]);
 
 					return callback(null);
