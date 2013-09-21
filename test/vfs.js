@@ -6,8 +6,8 @@ const PACKAGE_INSIGHT = require("pinf-it-package-insight");
 const VFS = require("../lib/vfs");
 const PINF = require("..");
 
-const MODE = "test";
-//const MODE = "write";
+//const MODE = "test";
+const MODE = "write";
 
 
 describe('vfs', function() {
