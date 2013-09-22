@@ -2,7 +2,8 @@
     "package": {
         "config": {
             "key1": "value1: test/assets/packages/pinf-cli",
-            "key2": "value2: test"
+            "key2": "value2: test",
+            "key3": "value2: $__DIRNAME"
         }
     }
 }

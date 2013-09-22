@@ -114,7 +114,7 @@ describe("pinf-cli", function() {
     });
 
     it("get package info", function(done) {
-        return context.getPackageInfo(PATH.join(__dirname, "assets/packages/pinf-cli"), function(err, output) {
+        return context.getPackageInfo(PATH.join(__dirname, "assets/packages/pinf-cli/node_modules/sub"), function(err, output) {
             if (err) return done(err);
             var json = JSON.stringify(output);
             json = json.replace(new RegExp((process.cwd()).replace(/([\/\+])/g, "\\$1"), "g"), "");

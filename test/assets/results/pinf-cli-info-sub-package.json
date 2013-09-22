@@ -31,7 +31,10 @@
         },
         "config": {
             "key1": "value1: test/assets/packages/pinf-cli/node_modules/sub",
-            "key2": "value2: test"
+            "key2": "value2: test",
+            "key3": "value2: test/assets/packages/pinf-cli",
+            "key4": "value2: test/assets/packages/pinf-cli/node_modules/sub",
+            "key5": "value2: $__DIRNAME"
         }
     }
 }
