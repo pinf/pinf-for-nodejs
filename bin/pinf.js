@@ -78,6 +78,7 @@ PINF.main(function(context, callback) {
                 if (path) {
                     return context.getPackageInfo(PATH.resolve(path), function(err, info) {
                         if (err) return callback(err);
+                        if (!info) return callback(new Error("No info found for package at path: " + PATH.resolve(path)));
                         if (typeof program.output === "string" && program.output.toUpperCase() === "JSON") {
                             process.stdout.write(JSON.stringify(info, null, 4) + "\n");
                             return callback(null);
@@ -93,21 +94,19 @@ PINF.main(function(context, callback) {
                         return callback(null);
                     });
                 } else {
-                    return context.getProgramInfo(function(err, info) {
-                        if (err) return callback(err);
-                        if (typeof program.output === "string" && program.output.toUpperCase() === "JSON") {
-                        	process.stdout.write(JSON.stringify(info, null, 4) + "\n");
-                        	return callback(null);
-                        }
-                        // TODO: Expand on this.
-                        console.log("ENV:".bold);
-                        console.log("  CWD:", ("" + info.env.CWD).yellow);
-                        console.log("Program:".bold);
-                        console.log("  Path:", ("" + info.program.path).yellow);
-                        console.log("  Runtime:", ("" + info.program.runtime).yellow);
-                        // TODO: Log dependency tree as determined by following package declarations and directories.
-                        return callback(null);
-                    });
+                    var info = context.getProgramInfo();
+                    if (typeof program.output === "string" && program.output.toUpperCase() === "JSON") {
+                    	process.stdout.write(JSON.stringify(info, null, 4) + "\n");
+                    	return callback(null);
+                    }
+                    // TODO: Expand on this.
+                    console.log("ENV:".bold);
+                    console.log("  CWD:", ("" + info.env.CWD).yellow);
+                    console.log("Program:".bold);
+                    console.log("  Path:", ("" + info.program.path).yellow);
+                    console.log("  Runtime:", ("" + info.program.runtime).yellow);
+                    // TODO: Log dependency tree as determined by following package declarations and directories.
+                    return callback(null);
                 }
             });
         });
@@ -226,29 +225,27 @@ PINF.main(function(context, callback) {
                         if (err) return callback(err);
                         process.stdout.write(JSON.stringify({
                             package: {
-                                config: info.package && info.package.config
+                                config: (info && info.package && info.package.config) || null
                             }
                         }, null, 4) + "\n");
                         return callback(null);
                     });
                 } else {
-                    return context.getProgramInfo(function(err, info) {
-                        if (err) return callback(err);
-                        var config = DEEPCOPY(info.program.descriptor.config);
-                        if (info.packages) {
-                            for (var id in info.packages) {
-                                if (info.packages[id].descriptor && info.packages[id].descriptor.config) {
-                                    config[id] = DEEPMERGE(info.packages[id].descriptor.config, config[id] || {});
-                                }
+                    var info = context.getProgramInfo();
+                    var config = DEEPCOPY(info.program.descriptor.config);
+                    if (info.packages) {
+                        for (var id in info.packages) {
+                            if (info.packages[id].descriptor && info.packages[id].descriptor.config) {
+                                config[id] = DEEPMERGE(info.packages[id].descriptor.config, config[id] || {});
                             }
                         }
-                        process.stdout.write(JSON.stringify({
-                            program: {
-                                config: config
-                            }
-                        }, null, 4) + "\n");
-                        return callback(null);
-                    });
+                    }
+                    process.stdout.write(JSON.stringify({
+                        program: {
+                            config: config
+                        }
+                    }, null, 4) + "\n");
+                    return callback(null);
                 }
             });
         });

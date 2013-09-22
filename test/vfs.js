@@ -29,6 +29,8 @@ describe('vfs', function() {
 
 	it("works for 'pinf-it-package-insight'", function(done) {
 
+		FS.removeSync(PATH.join(__dirname, "../.rt"));
+
 		return PINF.main(function(options, callback) {
 
 			var opts = {

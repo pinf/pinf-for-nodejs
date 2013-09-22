@@ -1,6 +1,6 @@
 {
     "env": {
-        "CWD": "test"
+        "CWD": ""
     },
     "program": {
         "path": "test",
@@ -57,8 +57,7 @@
                 },
                 "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub": {
                     "key2": "value2: test"
-                },
-                "github.com/pinf/pinf-for-nodejs/test": {}
+                }
             }
         }
     },

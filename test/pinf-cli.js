@@ -92,25 +92,22 @@ describe("pinf-cli", function() {
         ], done);
     });
 
-    it("get program info", function(done) {
-        return context.getProgramInfo(function(err, output) {
-            if (err) return done(err);
-            var json = JSON.stringify(output);
-            json = json.replace(new RegExp((process.cwd()).replace(/([\/\+])/g, "\\$1"), "g"), "");
-            output = JSON.parse(json);
-            if (MODE === "test") {
-                ASSERT.deepEqual(
-                    output,
-                    JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/results", "pinf-cli-" + "get-program-info" + ".json")))
-                );
-            } else
-            if (MODE === "write") {
-                FS.outputFileSync(PATH.join(__dirname, "assets/results", "pinf-cli-" + "get-program-info" + ".json"), JSON.stringify(output, null, 4));
-            } else {
-                throw new Error("Unknown `MODE`");
-            }
-            return done();
-        });
+    it("get program info", function() {
+        var output = context.getProgramInfo();
+        var json = JSON.stringify(output);
+        json = json.replace(new RegExp((process.cwd()).replace(/([\/\+])/g, "\\$1"), "g"), "");
+        output = JSON.parse(json);
+        if (MODE === "test") {
+            ASSERT.deepEqual(
+                output,
+                JSON.parse(FS.readFileSync(PATH.join(__dirname, "assets/results", "pinf-cli-" + "get-program-info" + ".json")))
+            );
+        } else
+        if (MODE === "write") {
+            FS.outputFileSync(PATH.join(__dirname, "assets/results", "pinf-cli-" + "get-program-info" + ".json"), JSON.stringify(output, null, 4));
+        } else {
+            throw new Error("Unknown `MODE`");
+        }
     });
 
     it("get package info", function(done) {
@@ -202,7 +199,7 @@ describe("pinf-cli", function() {
             ASSERT.equal(typeof output, "object");
 //console.log(JSON.stringify(output, null, 4));
             var json = JSON.stringify(output);
-            json = json.replace(new RegExp((process.cwd()+"/").replace(/([\/\+])/g, "\\$1"), "g"), "");
+            json = json.replace(new RegExp((process.cwd()+"/?").replace(/([\/\+])/g, "\\$1"), "g"), "");
             output = JSON.parse(json);
             if (MODE === "test") {
                 ASSERT.deepEqual(
