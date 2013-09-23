@@ -37,7 +37,8 @@
     "./lib/main.js": "./context"
   },
   "scripts": {
-    "test": "node_modules/.bin/mocha --reporter list test/*.js"
+    "test": "node_modules/.bin/mocha --reporter list test/*.js",
+    "build": "./bin/pinf bundle"
   },
   "exports": {
     "bundles": {

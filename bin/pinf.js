@@ -278,11 +278,9 @@ PINF.main(function(context, callback) {
             acted = true;
             return getProgramContext(function(err, context) {
                 if (err) return callback(err);
-                return context.bundleProgram(function(err, bundle) {
+                return context.bundleProgram(function(err, info) {
                     if (err) return callback(err);
-                    process.stdout.write(JSON.stringify({
-                        bundle: bundle
-                    }, null, 4) + "\n");
+                    process.stdout.write(JSON.stringify(info, null, 4) + "\n");
                     return callback(null);
                 });
             });
