@@ -39,6 +39,13 @@
   "scripts": {
     "test": "node_modules/.bin/mocha --reporter list test/*.js"
   },
+  "exports": {
+    "bundles": {
+      "lib/pinf.js": "./lib/pinf.js",
+      "lib/main.js": "./lib/main.js",
+      "lib/loader.js": "./lib/loader.js"
+    }
+  },
   "overrides": {
     "./node_modules/request/node_modules/hawk/node_modules/boom": {
       "descriptor": {

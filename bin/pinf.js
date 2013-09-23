@@ -38,7 +38,6 @@ PINF.main(function(context, callback) {
                 },
                 debug: options.debug || program.debug || false,
                 verbose: options.verbose || options.verbose || program.verbose || program.debug || false
-//                forceIndexPackages: options.forceIndexPackages || false
             }, callback);
         });
     }
@@ -51,26 +50,10 @@ PINF.main(function(context, callback) {
         .option("--output <TYPE>", "Output format.");
 
     var acted = false;
-/*
-    program
-        .command("index")
-        .description("Index all packages in the program")
-        .action(function() {
-            acted = true;
-            return getProgramContext({
-                forceIndexPackages: true
-            }, function(err, context) {
-                if (err) return callback(err);
-                process.stdout.write(JSON.stringify({
-                    success: true
-                }, null, 4) + "\n");
-                return callback(null);
-            });
-        });
-*/
+
     program
         .command("info [relpath]")
-        .description("Show information about program")
+        .description("Show information")
         .action(function(path) {
             acted = true;
             return getProgramContext(function(err, context) {
@@ -113,7 +96,7 @@ PINF.main(function(context, callback) {
 
     program
         .command("run")
-        .description("Run program (don't detach on daemonize)")
+        .description("Run (don't detach on daemonize)")
         .action(function() {
             acted = true;
             return getProgramContext(function(err, context) {
@@ -132,7 +115,7 @@ PINF.main(function(context, callback) {
 
     program
         .command("start")
-        .description("Start program (detach on daemonize)")
+        .description("Start (detach on daemonize)")
         .option("--restart", "Stop before starting if already started.")
         .action(function(options) {
             acted = true;
@@ -164,7 +147,7 @@ PINF.main(function(context, callback) {
 
     program
         .command("stop")
-        .description("Stop program (stops daemonized processes)")
+        .description("Stop (daemonized processes)")
         .action(function() {
             acted = true;
             return getProgramContext(function(err, context) {
@@ -193,7 +176,7 @@ PINF.main(function(context, callback) {
 
     program
         .command("test")
-        .description("Test program")
+        .description("Run tests")
         .action(function() {
             acted = true;
             return getProgramContext(function(err, context) {
@@ -214,7 +197,7 @@ PINF.main(function(context, callback) {
 
     program
         .command("config [relpath]")
-        .description("Show currently active program configuration")
+        .description("Show currently active configuration")
         .action(function(path) {
             acted = true;
             return getProgramContext(function(err, context) {
@@ -252,7 +235,7 @@ PINF.main(function(context, callback) {
 
     program
         .command("status")
-        .description("Show current program status")
+        .description("Show current status")
         .action(function() {
             acted = true;
             return getProgramContext(function(err, context) {
@@ -271,7 +254,7 @@ PINF.main(function(context, callback) {
 
     program
         .command("open")
-        .description("Open program in tool")
+        .description("Open in tool")
         .action(function() {
             acted = true;
             return getProgramContext(function(err, context) {
@@ -282,6 +265,23 @@ PINF.main(function(context, callback) {
                         program: {
                             open: info
                         }
+                    }, null, 4) + "\n");
+                    return callback(null);
+                });
+            });
+        });
+
+    program
+        .command("bundle")
+        .description("Bundle for distribution")
+        .action(function() {
+            acted = true;
+            return getProgramContext(function(err, context) {
+                if (err) return callback(err);
+                return context.bundleProgram(function(err, bundle) {
+                    if (err) return callback(err);
+                    process.stdout.write(JSON.stringify({
+                        bundle: bundle
                     }, null, 4) + "\n");
                     return callback(null);
                 });
