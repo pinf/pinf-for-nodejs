@@ -145,7 +145,6 @@ describe("bundle", function() {
                 if (result !== null) {
                     return callback(null, result);
                 }
-                throw new Error("We should never get here!");
             });
         });
 
