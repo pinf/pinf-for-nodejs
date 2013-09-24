@@ -12,6 +12,8 @@ const MODE = "write";
 
 describe("context", function() {
 
+    this.timeout(20 * 1000);
+
     describe("load", function() {
 
         var options = {

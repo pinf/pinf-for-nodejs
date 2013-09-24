@@ -1,0 +1,10 @@
+{
+	"exports": {
+		"main": "./app.js"
+	},
+	"layout": {
+		"directories": {
+			"bundle": "."
+		}
+	}
+}

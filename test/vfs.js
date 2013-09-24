@@ -12,6 +12,8 @@ const MODE = "write";
 
 describe('vfs', function() {
 
+	this.timeout(20 * 1000);
+
 	it('should export `open()`', function() {
 		ASSERT(typeof VFS.open === "function");
 	});
