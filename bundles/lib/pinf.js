@@ -26484,7 +26484,7 @@ return Q;
 
 })
 , {"filename":"node_modules/pinf-it-bundler/node_modules/q/q.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/lib/bundler.js","mtime":1379984698,"wrapper":"commonjs","format":"commonjs","id":"d410d765c4a91b52828ad9d1eba8d92a9eb81b63-pinf-it-bundler/lib/bundler.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/lib/bundler.js","mtime":1379984765,"wrapper":"commonjs","format":"commonjs","id":"d410d765c4a91b52828ad9d1eba8d92a9eb81b63-pinf-it-bundler/lib/bundler.js"}
 require.memoize("d410d765c4a91b52828ad9d1eba8d92a9eb81b63-pinf-it-bundler/lib/bundler.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-it-bundler/lib';
 
@@ -27050,26 +27050,7 @@ exports.bundleFile = function(bundleFilePath, options, callback) {
 				opts.existingModules[id] = {};
 			}
 			if (/^\//.test(memoizeId)) {
-
-console.log("bundleFilePath", bundleFilePath);
-
-console.log("parentMemoizeId", opts.parentMemoizeId);
-console.log("memoizeId", memoizeId);
-console.log("opts.distPath", opts.distPath);
-
-				var distSubPath = opts.parentMemoizeId.replace(/^\/|\.js$/g, "");
-
-//console.log("packageDirpath", packageDirpath);
-console.log("distSubPath", distSubPath);
-
-console.log("---");
-
 				opts.distPath = PATH.join(opts.distPath, opts.parentMemoizeId.replace(/^\/|\.js$/g, ""));
-
-
-console.log("opts.distPath", opts.distPath);
-console.log("path", path);
-
 				delete opts.rootModule;
 				return exports.bundleFile(path, opts, function(err, descriptor) {
 					if (err) return callback(err);
@@ -27159,8 +27140,6 @@ console.log("path", path);
 							if (options.forceMemoizeFiles && options.forceMemoizeFiles[exports.normalizeExtension(memoizeId)]) {
 								return addStatic(path, memoizeId, opts, callback);
 							}
-
-console.log("ADD DYNAMIC", path, memoizeId);			
 
 							opts.parentMemoizeId = exports.normalizeExtension(options.id);
 
