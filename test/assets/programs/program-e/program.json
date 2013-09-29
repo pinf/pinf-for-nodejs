@@ -4,5 +4,8 @@
 		"github.com/pinf/pinf-for-nodejs/test/assets/packages/package-e": {
 			"configE2": "from program-e dir"
 		}
+	},
+	"env": {
+		"TEST_VAR": "TEST_VALUE"
 	}
 }

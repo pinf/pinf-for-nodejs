@@ -7,6 +7,7 @@
     "now": 0,
     "ttl": 0,
     "env": {
+        "TEST_VAR": "TEST_VALUE",
         "PINF_PROGRAM": "programs/program-e/program.json",
         "PINF_PACKAGE": "packages/package-e/package.json",
         "PINF_PACKAGES": "",

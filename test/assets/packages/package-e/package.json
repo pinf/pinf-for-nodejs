@@ -3,5 +3,8 @@
 	"config": {
 		"configE1": "from package-e dir",
 		"configE2": "from package-e dir"
-	}	
+	},
+	"env": {
+		"TEST_VAR": "$TEST_VAR"
+	}
 }
