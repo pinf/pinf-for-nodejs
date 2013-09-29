@@ -32,13 +32,21 @@ PINF.main(function(context, callback) {
 // TODO: Mock program.json in overlay FS with context from `./program.prototype.json`.
                 return callback(new Error("No program descriptor at '" + programPath + "'"));
             }
-            return PINF.context(programPath, "", {
+            var opts = {
                 env: {
                     CWD: process.cwd()
                 },
                 debug: options.debug || program.debug || false,
                 verbose: options.verbose || options.verbose || program.verbose || program.debug || false
-            }, callback);
+            };
+            opts.ttl = 0;
+            if (typeof options.nocache !== "undefined") {
+                opts.ttl = -1;
+            } else
+            if (typeof program.nocache !== "undefined") {
+                opts.ttl = -1;
+            }
+            return PINF.context(programPath, "", opts, callback);
         });
     }
 
@@ -47,6 +55,7 @@ PINF.main(function(context, callback) {
         .version(JSON.parse(FS.readFileSync(PATH.join(__dirname, "../package.json"))).version)
         .option("-v, --verbose", "Show verbose progress.")
         .option("--debug", "Show debug output.")
+        .option("--nocache", "Don't use cache for anything.")
         .option("--output <TYPE>", "Output format.");
 
     var acted = false;

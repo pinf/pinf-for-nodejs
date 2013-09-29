@@ -24,6 +24,17 @@
                     "pinf-stop": "on pinf-start: test/assets/packages/pinf-cli"
                 }
             },
+            "overrides": {
+                "./node_modules/sub": {
+                    "descriptor": {
+                        "config": {
+                            "key3": "value2: test/assets/packages/pinf-cli",
+                            "key4": "value2: $__DIRNAME",
+                            "key5": "value2: \\$__DIRNAME"
+                        }
+                    }
+                }
+            },
             "config": {
                 "key1": "value1: test/assets/packages/pinf-cli",
                 "key2": "value2: test/assets/packages/pinf-cli",
@@ -39,17 +50,6 @@
             },
             "mappings": {
                 "sub": "5a91745a5a03c12907968a6d793836754bf076ce-sub"
-            },
-            "overrides": {
-                "./node_modules/sub": {
-                    "descriptor": {
-                        "config": {
-                            "key3": "value2: test/assets/packages/pinf-cli",
-                            "key4": "value2: $__DIRNAME",
-                            "key5": "value2: \\$__DIRNAME"
-                        }
-                    }
-                }
             }
         },
         "config": {
