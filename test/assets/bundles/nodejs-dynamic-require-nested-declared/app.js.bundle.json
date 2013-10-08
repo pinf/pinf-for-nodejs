@@ -1,0 +1,521 @@
+{
+  "o.js": {
+    "modules": {
+      "/o.js": {
+        "requireId": "/o",
+        "memoizeId": "/o.js",
+        "descriptor": {
+          "filename": "o.js",
+          "filepath": "o.js",
+          "mtime": 1379961379,
+          "code": "\nexports.getLetter = function() {\n\treturn \"o\";\n}\n",
+          "globals": {
+            "exports": {
+              "type": "reference"
+            }
+          },
+          "syntax": "javascript",
+          "format": "commonjs",
+          "undefine": [],
+          "uses": {},
+          "dependencies": {
+            "static": {},
+            "dynamic": {},
+            "computed": false
+          }
+        },
+        "wrapper": {
+          "type": "commonjs",
+          "top": "function(require, exports, module) {var __dirname = '';",
+          "code": "function(require, exports, module) {var __dirname = '';\n\nexports.getLetter = function() {\n\treturn \"o\";\n}\n\n}",
+          "bottom": "}"
+        },
+        "dependencies": {
+          "static": {},
+          "dynamic": {},
+          "computed": false
+        },
+        "warnings": [],
+        "errors": []
+      },
+      "/package.json": {
+        "requireId": "/package.json",
+        "memoizeId": "/package.json",
+        "descriptor": {
+          "dirpath": ".",
+          "dirrealpath": "../../../../../../../github.com+pinf-it+pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
+          "id": "",
+          "lookupPaths": [
+            "package.json",
+            ".package.json"
+          ],
+          "descriptorPaths": [
+            "package.json"
+          ],
+          "raw": {
+            "package.json": {
+              "main": "app",
+              "exports": {
+                "bundles": {
+                  "app.js": "./app.js"
+                }
+              },
+              "require.async": {
+                "./app.js": "./greeting",
+                "./greeting.js": "./hello",
+                "./hello.js": "./o"
+              }
+            }
+          },
+          "normalized": {
+            ".package.json": {},
+            "package.json": {
+              "require.async": {
+                "./app.js": "./greeting",
+                "./greeting.js": "./hello",
+                "./hello.js": "./o"
+              },
+              "exports": {
+                "main": "./app.js"
+              }
+            }
+          },
+          "combined": {
+            "require.async": {
+              "./app.js": "./greeting",
+              "./greeting.js": "./hello",
+              "./hello.js": "./o"
+            },
+            "exports": {
+              "main": "./app.js"
+            }
+          },
+          "warnings": [
+            [
+              "normalize",
+              "Property 'exports' was ignored",
+              "descriptor",
+              "package.json"
+            ]
+          ],
+          "errors": [],
+          "memoized": {
+            "main": "/app.js",
+            "dirpath": "."
+          }
+        },
+        "wrapper": "json"
+      }
+    },
+    "expectExistingModules": {},
+    "bundle": {
+      "path": "/Volumes/Ginseng-Independence-Desktop/ginseng-source/projects/github.com+pinf+pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app/greeting/hello/o.js"
+    },
+    "warnings": [],
+    "errors": []
+  },
+  "hello.js": {
+    "modules": {
+      "/hello.js": {
+        "requireId": "/hello",
+        "memoizeId": "/hello.js",
+        "descriptor": {
+          "filename": "hello.js",
+          "filepath": "hello.js",
+          "mtime": 1379961370,
+          "code": "\nvar APP = require(\"./app\");\n\nexports.getWord = function() {\n\n\tvar moduleId = \"./greeting\";\n\n\tvar GREETING = require(moduleId);\n\n\treturn APP.getLetterH() + \"e\" + GREETING.getLetterL() + \"l\" + require((\"./\" + \"o\")).getLetter();\n}\n",
+          "globals": {
+            "APP": {
+              "type": "assign"
+            },
+            "require": {
+              "type": "call"
+            },
+            "exports": {
+              "type": "reference"
+            }
+          },
+          "syntax": "javascript",
+          "format": "commonjs",
+          "undefine": [],
+          "uses": {},
+          "dependencies": {
+            "static": {
+              "./app": {
+                "where": "inline"
+              }
+            },
+            "dynamic": {},
+            "computed": false
+          }
+        },
+        "wrapper": {
+          "type": "commonjs",
+          "top": "function(require, exports, module) {var __dirname = '';",
+          "code": "function(require, exports, module) {var __dirname = '';\n\nvar APP = require(\"./app\");\n\nexports.getWord = function() {\n\n\tvar moduleId = \"./greeting\";\n\n\tvar GREETING = require(moduleId);\n\n\treturn APP.getLetterH() + \"e\" + GREETING.getLetterL() + \"l\" + require((\"./\" + \"o\")).getLetter();\n}\n\n}",
+          "bottom": "}"
+        },
+        "dependencies": {
+          "static": {
+            "./app": {
+              "where": "inline"
+            }
+          },
+          "dynamic": {},
+          "computed": false
+        },
+        "warnings": [],
+        "errors": []
+      },
+      "/package.json": {
+        "requireId": "/package.json",
+        "memoizeId": "/package.json",
+        "descriptor": {
+          "dirpath": ".",
+          "dirrealpath": "../../../../../../../github.com+pinf-it+pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
+          "id": "",
+          "lookupPaths": [
+            "package.json",
+            ".package.json"
+          ],
+          "descriptorPaths": [
+            "package.json"
+          ],
+          "raw": {
+            "package.json": {
+              "main": "app",
+              "exports": {
+                "bundles": {
+                  "app.js": "./app.js"
+                }
+              },
+              "require.async": {
+                "./app.js": "./greeting",
+                "./greeting.js": "./hello",
+                "./hello.js": "./o"
+              }
+            }
+          },
+          "normalized": {
+            ".package.json": {},
+            "package.json": {
+              "require.async": {
+                "./app.js": "./greeting",
+                "./greeting.js": "./hello",
+                "./hello.js": "./o"
+              },
+              "exports": {
+                "main": "./app.js"
+              }
+            }
+          },
+          "combined": {
+            "require.async": {
+              "./app.js": "./greeting",
+              "./greeting.js": "./hello",
+              "./hello.js": "./o"
+            },
+            "exports": {
+              "main": "./app.js"
+            }
+          },
+          "warnings": [
+            [
+              "normalize",
+              "Property 'exports' was ignored",
+              "descriptor",
+              "package.json"
+            ]
+          ],
+          "errors": [],
+          "memoized": {
+            "main": "/app.js",
+            "dirpath": "."
+          }
+        },
+        "wrapper": "json"
+      }
+    },
+    "expectExistingModules": {
+      "/app": {}
+    },
+    "bundle": {
+      "path": "/Volumes/Ginseng-Independence-Desktop/ginseng-source/projects/github.com+pinf+pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app/greeting/hello.js"
+    },
+    "warnings": [],
+    "errors": []
+  },
+  "greeting.js": {
+    "modules": {
+      "/greeting.js": {
+        "requireId": "/greeting",
+        "memoizeId": "/greeting.js",
+        "descriptor": {
+          "filename": "greeting.js",
+          "filepath": "greeting.js",
+          "mtime": 1379961364,
+          "code": "\nvar APP = require(\"./app\");\n\nexports.getGreeting = function() {\n\n\tvar moduleId = \"./hello\";\n\n\tvar HELLO = require(moduleId);\n\n\treturn HELLO.getWord() + \" \" + APP.getWorld();\n}\n\nexports.getLetterL = function() {\n\treturn \"l\";\t\n}\n",
+          "globals": {
+            "APP": {
+              "type": "assign"
+            },
+            "require": {
+              "type": "call"
+            },
+            "exports": {
+              "type": "reference"
+            }
+          },
+          "syntax": "javascript",
+          "format": "commonjs",
+          "undefine": [],
+          "uses": {},
+          "dependencies": {
+            "static": {
+              "./app": {
+                "where": "inline"
+              }
+            },
+            "dynamic": {},
+            "computed": false
+          }
+        },
+        "wrapper": {
+          "type": "commonjs",
+          "top": "function(require, exports, module) {var __dirname = '';",
+          "code": "function(require, exports, module) {var __dirname = '';\n\nvar APP = require(\"./app\");\n\nexports.getGreeting = function() {\n\n\tvar moduleId = \"./hello\";\n\n\tvar HELLO = require(moduleId);\n\n\treturn HELLO.getWord() + \" \" + APP.getWorld();\n}\n\nexports.getLetterL = function() {\n\treturn \"l\";\t\n}\n\n}",
+          "bottom": "}"
+        },
+        "dependencies": {
+          "static": {
+            "./app": {
+              "where": "inline"
+            }
+          },
+          "dynamic": {},
+          "computed": false
+        },
+        "warnings": [],
+        "errors": []
+      },
+      "/package.json": {
+        "requireId": "/package.json",
+        "memoizeId": "/package.json",
+        "descriptor": {
+          "dirpath": ".",
+          "dirrealpath": "../../../../../../../github.com+pinf-it+pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
+          "id": "",
+          "lookupPaths": [
+            "package.json",
+            ".package.json"
+          ],
+          "descriptorPaths": [
+            "package.json"
+          ],
+          "raw": {
+            "package.json": {
+              "main": "app",
+              "exports": {
+                "bundles": {
+                  "app.js": "./app.js"
+                }
+              },
+              "require.async": {
+                "./app.js": "./greeting",
+                "./greeting.js": "./hello",
+                "./hello.js": "./o"
+              }
+            }
+          },
+          "normalized": {
+            ".package.json": {},
+            "package.json": {
+              "require.async": {
+                "./app.js": "./greeting",
+                "./greeting.js": "./hello",
+                "./hello.js": "./o"
+              },
+              "exports": {
+                "main": "./app.js"
+              }
+            }
+          },
+          "combined": {
+            "require.async": {
+              "./app.js": "./greeting",
+              "./greeting.js": "./hello",
+              "./hello.js": "./o"
+            },
+            "exports": {
+              "main": "./app.js"
+            }
+          },
+          "warnings": [
+            [
+              "normalize",
+              "Property 'exports' was ignored",
+              "descriptor",
+              "package.json"
+            ]
+          ],
+          "errors": [],
+          "memoized": {
+            "main": "/app.js",
+            "dirpath": "."
+          }
+        },
+        "wrapper": "json"
+      }
+    },
+    "expectExistingModules": {
+      "/app": {}
+    },
+    "bundle": {
+      "path": "/Volumes/Ginseng-Independence-Desktop/ginseng-source/projects/github.com+pinf+pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app/greeting.js"
+    },
+    "warnings": [],
+    "errors": []
+  },
+  ".": {
+    "bundles": {
+      "/app.js": {
+        "modules": {
+          "/app.js": {
+            "requireId": "/app",
+            "memoizeId": "/app.js",
+            "descriptor": {
+              "filename": "app.js",
+              "filepath": "app.js",
+              "mtime": 1379961355,
+              "code": "\nfunction main() {\n\n\tvar moduleId = \"./greeting\";\n\n\tvar GREETING = require(moduleId);\n\n\tconsole.log(GREETING.getGreeting());\n}\n\nexports.getWorld = function() {\n\treturn \"World\";\t\n}\n\nexports.getLetterH = function() {\n\treturn \"H\";\t\n}\n\nif (require.main === module) {\n\tmain();\n}\n",
+              "globals": {
+                "main": {
+                  "type": "assign"
+                },
+                "require": {
+                  "type": "call"
+                },
+                "console": {
+                  "type": "reference"
+                },
+                "exports": {
+                  "type": "reference"
+                }
+              },
+              "syntax": "javascript",
+              "format": "commonjs",
+              "undefine": [],
+              "uses": {
+                "require.main": true
+              },
+              "dependencies": {
+                "static": {},
+                "dynamic": {},
+                "computed": false
+              }
+            },
+            "wrapper": {
+              "type": "commonjs",
+              "top": "function(require, exports, module) {var __dirname = '';",
+              "code": "function(require, exports, module) {var __dirname = '';\n\nfunction main() {\n\n\tvar moduleId = \"./greeting\";\n\n\tvar GREETING = require(moduleId);\n\n\tconsole.log(GREETING.getGreeting());\n}\n\nexports.getWorld = function() {\n\treturn \"World\";\t\n}\n\nexports.getLetterH = function() {\n\treturn \"H\";\t\n}\n\nif (require.main === module) {\n\tmain();\n}\n\n}",
+              "bottom": "}"
+            },
+            "dependencies": {
+              "static": {},
+              "dynamic": {},
+              "computed": false
+            },
+            "warnings": [],
+            "errors": []
+          },
+          "/package.json": {
+            "requireId": "/package.json",
+            "memoizeId": "/package.json",
+            "descriptor": {
+              "dirpath": ".",
+              "dirrealpath": "../../../../../../../github.com+pinf-it+pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
+              "id": "",
+              "lookupPaths": [
+                "package.json",
+                ".package.json"
+              ],
+              "descriptorPaths": [
+                "package.json"
+              ],
+              "raw": {
+                "package.json": {
+                  "main": "app",
+                  "exports": {
+                    "bundles": {
+                      "app.js": "./app.js"
+                    }
+                  },
+                  "require.async": {
+                    "./app.js": "./greeting",
+                    "./greeting.js": "./hello",
+                    "./hello.js": "./o"
+                  }
+                }
+              },
+              "normalized": {
+                ".package.json": {},
+                "package.json": {
+                  "require.async": {
+                    "./app.js": "./greeting",
+                    "./greeting.js": "./hello",
+                    "./hello.js": "./o"
+                  },
+                  "exports": {
+                    "main": "./app.js"
+                  }
+                }
+              },
+              "combined": {
+                "require.async": {
+                  "./app.js": "./greeting",
+                  "./greeting.js": "./hello",
+                  "./hello.js": "./o"
+                },
+                "exports": {
+                  "main": "./app.js"
+                }
+              },
+              "warnings": [
+                [
+                  "normalize",
+                  "Property 'exports' was ignored",
+                  "descriptor",
+                  "package.json"
+                ]
+              ],
+              "errors": [],
+              "memoized": {
+                "main": "/app.js",
+                "dirpath": "."
+              }
+            },
+            "wrapper": "json"
+          }
+        },
+        "expectExistingModules": {},
+        "bundle": {
+          "path": "/Volumes/Ginseng-Independence-Desktop/ginseng-source/projects/github.com+pinf+pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app.js"
+        },
+        "warnings": [],
+        "errors": [],
+        "id": "/app.js"
+      }
+    },
+    "warnings": [],
+    "errors": [],
+    "exports": {
+      "main": "/app.js"
+    }
+  },
+  "#pinf": {
+    "status": 200,
+    "data": {
+      "rootBundlePath": "/Volumes/Ginseng-Independence-Desktop/ginseng-source/projects/github.com+pinf+pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app.js"
+    }
+  }
+}
