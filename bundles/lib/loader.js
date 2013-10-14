@@ -15014,7 +15014,7 @@ CookieJar.prototype.cookieString = function(req){
 
 }
 , {"filename":"node_modules/request/node_modules/cookie-jar/jar.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-loader-js/loader.js","mtime":1377064672,"wrapper":"commonjs","format":"commonjs","id":"46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js/./loader.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-loader-js/loader.js","mtime":1381607720,"wrapper":"commonjs","format":"commonjs","id":"46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js/./loader.js"}
 require.memoize("46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js/./loader.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-loader-js';
 /**
@@ -15037,6 +15037,15 @@ function(require, exports, module) {var __dirname = 'node_modules/pinf-loader-js
 		// @see https://github.com/unscriptable/curl/blob/62caf808a8fd358ec782693399670be6806f1845/src/curl.js#L69
 		readyStates = { 'loaded': 1, 'interactive': 1, 'complete': 1 },
 		lastModule = null;
+
+	// For older browsers that don't have `Object.keys()` (Firefox 3.6)
+	function keys(obj) {
+		var keys = [];
+		for (var key in obj) {
+			keys.push(key);
+		}
+		return keys;
+	}
 
 	function normalizeSandboxArguments(implementation) {
 		return function(programIdentifier, options, loadedCallback, errorCallback) {
@@ -15104,7 +15113,7 @@ function(require, exports, module) {var __dirname = 'node_modules/pinf-loader-js
 	            if (/^\/?\{host\}\//.test(uri)) {
 	                uri = location.protocol + "//" + location.host + uri.replace(/^\/?\{host\}/, "");
 	            } else
-	            if (/^\//.test(uri)) {
+	            if (/^\/\//.test(uri)) {
 	                uri = location.protocol + "/" + uri;
 	            }
 				if (!headTag) {
@@ -15374,7 +15383,7 @@ function(require, exports, module) {var __dirname = 'node_modules/pinf-loader-js
 							typeof moduleInterface.exports !== "undefined" &&
 							(
 								typeof moduleInterface.exports !== "object" ||
-								Object.keys(moduleInterface.exports).length !== 0
+								keys(moduleInterface.exports).length !== 0
 							)
 						) {
 							module.exports = moduleInterface.exports;

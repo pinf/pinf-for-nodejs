@@ -73,7 +73,7 @@ function wrapAMD(callback) {
     callback(amdRequire, wrappedDefine);
     return exports;
 }
-// @pinf-bundle-module: {"file":"lib/pinf.js","mtime":1378408558,"wrapper":"commonjs","format":"commonjs","id":"/lib/pinf.js"}
+// @pinf-bundle-module: {"file":"lib/pinf.js","mtime":1380861431,"wrapper":"commonjs","format":"commonjs","id":"/lib/pinf.js"}
 require.memoize("/lib/pinf.js", 
 function(require, exports, module) {var __dirname = 'lib';
 
@@ -81,6 +81,7 @@ const PATH = require("__SYSTEM__/path");
 const FS = require("fs-extra");
 const LOADER = require("./loader");
 const CONTEXT = require("./context");
+const HOIST = require("./hoist");
 const MAIN = require("./main");
 
 // TODO: Use `require.async` to load various APIs.
@@ -89,9 +90,12 @@ exports.reset = LOADER.reset;
 
 exports.sandbox = LOADER.sandbox;
 
+exports.hoist = HOIST.hoist;
+
 exports.getReport = LOADER.getReport;
 
 exports.context = CONTEXT.context;
+exports.contextForProgram = CONTEXT.contextForProgram;
 exports.contextForModule = CONTEXT.contextForModule;
 
 exports.main = MAIN.main;
@@ -15039,7 +15043,7 @@ CookieJar.prototype.cookieString = function(req){
 
 }
 , {"filename":"node_modules/request/node_modules/cookie-jar/jar.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-loader-js/loader.js","mtime":1377064672,"wrapper":"commonjs","format":"commonjs","id":"46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js/./loader.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-loader-js/loader.js","mtime":1381607720,"wrapper":"commonjs","format":"commonjs","id":"46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js/./loader.js"}
 require.memoize("46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js/./loader.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-loader-js';
 /**
@@ -15062,6 +15066,15 @@ function(require, exports, module) {var __dirname = 'node_modules/pinf-loader-js
 		// @see https://github.com/unscriptable/curl/blob/62caf808a8fd358ec782693399670be6806f1845/src/curl.js#L69
 		readyStates = { 'loaded': 1, 'interactive': 1, 'complete': 1 },
 		lastModule = null;
+
+	// For older browsers that don't have `Object.keys()` (Firefox 3.6)
+	function keys(obj) {
+		var keys = [];
+		for (var key in obj) {
+			keys.push(key);
+		}
+		return keys;
+	}
 
 	function normalizeSandboxArguments(implementation) {
 		return function(programIdentifier, options, loadedCallback, errorCallback) {
@@ -15129,7 +15142,7 @@ function(require, exports, module) {var __dirname = 'node_modules/pinf-loader-js
 	            if (/^\/?\{host\}\//.test(uri)) {
 	                uri = location.protocol + "//" + location.host + uri.replace(/^\/?\{host\}/, "");
 	            } else
-	            if (/^\//.test(uri)) {
+	            if (/^\/\//.test(uri)) {
 	                uri = location.protocol + "/" + uri;
 	            }
 				if (!headTag) {
@@ -15399,7 +15412,7 @@ function(require, exports, module) {var __dirname = 'node_modules/pinf-loader-js
 							typeof moduleInterface.exports !== "undefined" &&
 							(
 								typeof moduleInterface.exports !== "object" ||
-								Object.keys(moduleInterface.exports).length !== 0
+								keys(moduleInterface.exports).length !== 0
 							)
 						) {
 							module.exports = moduleInterface.exports;
@@ -15644,7 +15657,7 @@ function(require, exports, module) {var __dirname = 'node_modules/pinf-loader-js
 
 }
 , {"filename":"node_modules/pinf-loader-js/loader.js"});
-// @pinf-bundle-module: {"file":"lib/context.js","mtime":1379980646,"wrapper":"commonjs","format":"commonjs","id":"/lib/context.js"}
+// @pinf-bundle-module: {"file":"lib/context.js","mtime":1381194054,"wrapper":"commonjs","format":"commonjs","id":"/lib/context.js"}
 require.memoize("/lib/context.js", 
 function(require, exports, module) {var __dirname = 'lib';
 
@@ -15668,6 +15681,34 @@ const LOADER = require("./loader");
 const CRYPTO = require("__SYSTEM__/crypto");
 const ZLIB = require("__SYSTEM__/zlib");
 
+
+exports.contextForProgram = function(programUri, options, callback) {
+	if (typeof options === "function" && typeof callback === "undefined") {
+		callback = options;
+		options = null;
+	}
+	options = options || {};
+
+	var opts = {};
+	for (var name in options) {
+		opts[name] = options[name];
+	}
+
+	opts.PINF_PROGRAM = programUri;
+
+	if (typeof opts.PINF_RUNTIME === "undefined") {
+		opts.PINF_RUNTIME = (options.$pinf && options.$pinf.env && options.$pinf.env.PINF_RUNTIME) || process.env.PINF_RUNTIME;
+	}
+
+	return exports.context(opts.PINF_PROGRAM, null, {
+		env: {
+			PINF_RUNTIME: opts.PINF_RUNTIME
+		},
+		debug: opts.debug || false,
+		verbose: opts.verbose || false,
+		test: opts.test || false
+	}, callback);
+}
 
 exports.contextForModule = function(module, options, callback) {
 	if (typeof options === "function" && typeof callback === "undefined") {
@@ -15808,6 +15849,10 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		this.verbose = false;
 		this.test = false;
 		this.now = Date.now();
+	    // If `ttl === -1` then force cache refresh.
+	    // If `ttl === 0` then cache indefinite.
+	    // If `ttl >= 1` then cache for ttl (milliseconds).
+	    // If `ttl <= -1` then cache if newer than (ttl * -1).
 		this.ttl = 0;
 		this.env = {};
 		this.paths = {};
@@ -15825,6 +15870,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 	}
 	UTIL.inherits(Context, EVENTS.EventEmitter);
 
+	// @unstable
 	Context.prototype.clone = function() {
 		var ctx = new Context();
 		for (var name in this) {
@@ -15835,6 +15881,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		return ctx;
 	}
 
+	// @unstable
 	Context.prototype.stringify = function() {
 		var obj = {};
 		for (var name in this) {
@@ -15846,6 +15893,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		return JSON.stringify.apply(null, [obj].concat(Array.prototype.slice.call(arguments, 0)));
 	}
 
+	// @experimental
 	Context.prototype.makeOptions = function(options) {
 		if (typeof options !== "object") {
 			return options;
@@ -15882,10 +15930,19 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		return opts;
 	}
 
+	// @unstable
 	Context.prototype.makePath = function(type, path) {
+		if (!this.paths[type]) return null;
+		if (!path) return ensureParentPath(this.paths[type]);
+		if (Array.isArray(path)) {
+			path = path.map(function(segment) {
+				return segment.replace(/\//g, "+");
+			}).join("/");
+		}
 		return ensureParentPath(this.paths[type], path);
 	}
 
+	// @experimental
 	Context.prototype.getAPI = function(alias) {
 		var obj = this;
 		while(obj) {
@@ -15900,6 +15957,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		return null;
 	}
 
+	// @unstable
 	Context.prototype.sandbox = function(sandboxIdentifier, sandboxOptions, loadedCallback, errorCallback) {
 		var self = this;
 		if (typeof sandboxOptions === "function" && typeof loadedCallback === "function" && typeof errorCallback === "undefined") {
@@ -15933,10 +15991,17 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		});
 	}
 
+	// @experimental
 	Context.prototype.gateway = function(type, gatewayOptions) {
 		var self = this;
 		var gatewayStartTime = Date.now();
 		gatewayOptions = gatewayOptions || {};
+		if (typeof gatewayOptions.verbose === "undefined") {
+			gatewayOptions.verbose = options.verbose;
+		}
+		if (typeof gatewayOptions.ttl === "undefined") {
+			gatewayOptions.ttl = options.ttl;
+		}
 		// TODO: Move these into plugins.
 		// If `FS` is an instance of `./vfs.js` we can bypass gateway if all written files are older than read files.
 		if (type === "vfs-write-from-read-mtime-bypass") {
@@ -16018,12 +16083,19 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 					if (VFS) {
 						throw new Error("`gateway.getAPI()` should not be called before `gateway.onDone()`");
 					}
+					if (gatewayOptions.ttl === -1) {
+						if (gatewayOptions.verbose) console.log(("[pinf-for-nodejs][context] gateway bypass due to `ttl === -1`").cyan);
+						return proceedCallback(null, function() {
+							var args = Array.prototype.slice.call(arguments, 0);
+							return callback.apply(null, args.slice(0, args.length -1));
+						});
+					}
 					var cachePath = getCachePath();
 					function proceed(reason) {
 						var startTime = Date.now();
-						if (options.verbose) console.log(("[pinf-for-nodejs][context] gateway proceed: " + reason + " (" + cachePath + ")").yellow);
+						if (gatewayOptions.verbose) console.log(("[pinf-for-nodejs][context] gateway proceed: " + reason + " (" + cachePath + ")").yellow);
 						return proceedCallback(null, function proxiedCallback(err) {
-							if (options.verbose) console.log(("[pinf-for-nodejs][context] gateway proceed done (used " + Object.keys(paths).length + " files in " + (Date.now() - startTime) + " ms) (key: " + rawKey + ")").yellow);
+							if (gatewayOptions.verbose) console.log(("[pinf-for-nodejs][context] gateway proceed done (used " + Object.keys(paths).length + " files in " + (Date.now() - startTime) + " ms) (key: " + rawKey + ")").yellow);
 							if (typeof VFS.removeListener === "function") {
 								VFS.removeListener("used-path", listener);
 							}
@@ -16054,7 +16126,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 									}
 									if (!data || !data.paths) return proceed("no-paths-in-cache");
 									if (gatewayOptions.skipFSCheck) {
-										if (options.verbose) console.log(("[pinf-for-nodejs][context] gateway skipping cache check (" + cachePath + " in " + (Date.now() - gatewayStartTime) + " ms)").green);
+										if (gatewayOptions.verbose) console.log(("[pinf-for-nodejs][context] gateway skipping cache check (" + cachePath + " in " + (Date.now() - gatewayStartTime) + " ms)").green);
 										// self.getAPI("console").cache("Using cached data based on path mtimes in '" + path + "'");
 										return notModifiedCallback(data.data, {
 											cachePath: cachePath
@@ -16069,13 +16141,13 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 									var waitfor = WAITFOR.parallel(function(err) {
 										if (err) return callback(err);
 										if (canBypass === true) {
-											if (options.verbose) console.log(("[pinf-for-nodejs][context] gateway using cache (checked " + Object.keys(data.paths).length + " (key: " + rawKey + ") paths in " + (Date.now() - gatewayStartTime) + " ms)").green);
+											if (gatewayOptions.verbose) console.log(("[pinf-for-nodejs][context] gateway using cache (checked " + Object.keys(data.paths).length + " (key: " + rawKey + ") paths in " + (Date.now() - gatewayStartTime) + " ms)").green);
 											// self.getAPI("console").cache("Using cached data based on path mtimes in '" + path + "'");
 											return notModifiedCallback(data.data, {
 												cachePath: cachePath
 											});
 										}
-										if (options.verbose) console.log(("[pinf-for-nodejs][context] gateway found change: " + canBypass).yellow);
+										if (gatewayOptions.verbose) console.log(("[pinf-for-nodejs][context] gateway found change: " + canBypass).yellow);
 										// self.getAPI("console").info("Regenerating cached data based on path mtimes in '" + path + "' (" + canBypass + ")");
 										return proceed("cannot-bypass-after-check");
 									});
@@ -16137,6 +16209,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		throw new Error("Proxy of type '" + type + "' not supported!");
 	}
 
+	// @unstable
 	Context.prototype.reloadConfig = function(callback) {
 		var self = this;
 		return reloadContext(self, function(err) {
@@ -16153,6 +16226,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		}
 	}
 
+	// @unstable
 	Context.prototype.ensureDefaultConfig = function(ns, config, callback) {
 		if (!this.uid) {
 			return callback(new Error("`uid` must be set for package '" + options._realpath(this.paths.package) + "'"));
@@ -16177,6 +16251,8 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 			return callback(err);
 		}
 	}
+
+	// @unstable
 	Context.prototype.updateRuntimeConfig = function(ns, config, callback) {
 		if (!this.uid) {
 			return callback(new Error("`uid` must be set for package '" + options._realpath(this.paths.package) + "'"));
@@ -16197,6 +16273,8 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 			return callback(err);
 		}
 	}
+
+	// @unstable
 	Context.prototype.getRuntimeConfig = function(ns, callback) {
 		if (!this.uid) {
 			return callback(new Error("`uid` must be set for package '" + options._realpath(this.paths.package) + "'"));
@@ -16210,6 +16288,8 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 			return callback(err);
 		}
 	}
+
+	// @unstable
 	Context.prototype.clearRuntimeConfig = function(ns, callback) {
 		if (!this.uid) {
 			return callback(new Error("`uid` must be set for package '" + options._realpath(this.paths.package) + "'"));
@@ -16225,6 +16305,8 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 			return callback(err);
 		}
 	}
+
+	// @unstable
 	Context.prototype.clearDefaultConfig = function(ns, callback) {
 		if (!this.uid) {
 			return callback(new Error("`uid` must be set for package '" + options._realpath(this.paths.package) + "'"));
@@ -16242,6 +16324,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		}
 	}
 
+	// @experimental
 	Context.prototype.getPackageInfo = function(path, callback) {
 		var self = this;
 		if (self._packageInfo[path]) {
@@ -16265,6 +16348,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		});
 	}
 
+	// @experimental
 	Context.prototype.getProgramInfo = function(callback) {
 		if (callback) {
 			return callback(new Error("Function is now sync!"));
@@ -16279,7 +16363,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 			!info.program.events.listen ||
 			!info.program.events.listen[eventId]
 		) return callback(null, {});
-		var waitfor = WAITFOR.parallel(function(err) {
+		var waitfor = WAITFOR.serial(function(err) {
 			if (err) return callback(err);
 			return $pinf.updateRuntimeConfig(["pinf/0/runtime/control/0", "program"], config, callback);
 		});
@@ -16296,9 +16380,13 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 				opts.rootModule = handler.handler.substring(packageInfo.dirpath.length + 1);
 	            return $pinf._vm.loadPackage(packageInfo.dirpath, opts, function(err, sandbox) {
 	                if (err) return done(err);
+	                if (options.verbose) console.log("[pinf-for-nodejs][context] notifyPackages - package loaded - " + packageInfo.dirpath);
 		            return exports.context($pinf.env.PINF_PROGRAM, PATH.join(packageInfo.dirpath, "package.json"), opts, function(err, ctx) {
 		                if (err) return done(err);
+		                if (options.verbose) console.log("[pinf-for-nodejs][context] notifyPackages - context loaded");
+		                if (options.verbose) console.log("[pinf-for-nodejs][context] notifyPackages - require root module - " + opts.rootModule);
 		                var mod = sandbox.require(opts.rootModule);
+		                if (options.verbose) console.log("[pinf-for-nodejs][context] notifyPackages - root module required");
 		                if (typeof mod.main !== "function") {
 		                	return done(new Error("Main module for package '" + packageInfo.dirpath + "' does not export 'main' function."));
 		                }
@@ -16324,6 +16412,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		return waitfor();
 	}
 
+	// @unstable
 	Context.prototype.runProgram = function(callback) {
 		var self = this;
 		return self.startProgram({
@@ -16334,6 +16423,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		});
 	}
 
+	// @unstable
 	Context.prototype.startProgram = function(options, callback) {
 		var self = this;
 		if (typeof options === "function" && typeof callback === "undefined") {
@@ -16378,6 +16468,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		});
 	}
 
+	// @unstable
 	Context.prototype.stopProgram = function(callback) {
 		var self = this;
 		return self.getRuntimeConfig(["pinf/0/runtime/control/0", "program"], function(err, config) {
@@ -16405,6 +16496,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		});
 	}
 
+	// @unstable
 	Context.prototype.getProgramStatus = function(callback) {
 		try {
 			var store = new JSON_FILE_STORE(this.env.PINF_RUNTIME);
@@ -16415,6 +16507,7 @@ exports.context = function(programDescriptorPath, packageDescriptorPath, options
 		}
 	}
 
+	// @unstable
 	Context.prototype.testProgram = function(callback) {
 		var self = this;
 		return self.startProgram(function(err) {
@@ -16426,6 +16519,7 @@ console.log("TODO: Run tests program.");
 		});
 	}
 
+	// @unstable
 	Context.prototype.openProgram = function(callback) {
 		var self = this;
 
@@ -16447,6 +16541,7 @@ console.log("TODO: Call `context.config.open` to open program.");
 		});
 	}
 
+	// @unstable
 	Context.prototype.bundleProgram = function(bundleOptions, callback) {
 		var self = this;
 		if (typeof bundleOptions === "function" && typeof callback === "undefined") {
@@ -16484,7 +16579,7 @@ console.log("TODO: Call `context.config.open` to open program.");
 		opts.distPath = opts.distPath || PATH.join(self.paths.program, (
 			bootPackageInfo.descriptor.layout &&
 			bootPackageInfo.descriptor.layout.directories &&
-			bootPackageInfo.descriptor.layout.directories.bundle
+			bootPackageInfo.descriptor.layout.directories.bundles
 		) || "bundles");
 		var vm = new VM(self);
 		var summary = {
@@ -16526,6 +16621,7 @@ console.log("TODO: Call `context.config.open` to open program.");
 				programDescriptorPath: programDescriptorPath,
 				packageDescriptorPath: packageDescriptorPath
 			});
+
 			// NOTE: `callback` will be called by gateway right away if we can bypass.
 			return gateway.onDone(callback, function(err, proxiedCallback) {
 				if (err) return 
@@ -16539,7 +16635,7 @@ console.log("TODO: Call `context.config.open` to open program.");
 					context[name] = cachedData[name];
 				}
 				context["#pinf"] = {
-					status: 403,
+					status: 304,
 					data: cachedData
 				}
 				return callback(null, context);
@@ -16595,10 +16691,14 @@ console.log("TODO: Call `context.config.open` to open program.");
 							} else
 				            if (!packageDescriptorPath) {
 				            	if (descriptor.combined.boot && descriptor.combined.boot.package) {
-				            		packageDescriptorPath = options._relpath(PATH.join(descriptor.dirpath, descriptor.combined.boot.package, "package.json"));
+									if (/^\//.test(descriptor.combined.boot.package)) {
+					            		packageDescriptorPath = options._relpath(PATH.join(descriptor.combined.boot.package.replace(/package\.json$/, "package.json")));
+									} else {
+					            		packageDescriptorPath = options._relpath(PATH.join(descriptor.dirpath, descriptor.combined.boot.package.replace(/package\.json$/, "package.json")));
+									}
+									env.PINF_PACKAGE = packageDescriptorPath;
 				            	}
 				            }
-
 							if (options.verbose) console.log("[pinf-for-nodejs][context] package path:", PATH.dirname(packageDescriptorPath));
 
 							delete opts.lookupPaths;
@@ -16687,6 +16787,21 @@ console.log("TODO: Call `context.config.open` to open program.");
 					});
 				}
 
+				function collectProgramEnvVars(callback) {
+					if (
+						!context._descriptors.program ||
+						!context._descriptors.program.combined ||
+						!context._descriptors.program.combined.requirements ||
+						!context._descriptors.program.combined.requirements.env
+					) return callback();
+					for (var name in context._descriptors.program.combined.requirements.env) {
+						if (typeof env[name] === "undefined") {
+							env[name] = context._descriptors.program.combined.requirements.env[name].replace(new RegExp("\\$" + name, "g"), process.env[name]);
+						}
+					}
+					return callback();
+				}
+
 				function injectPinfVars(callback) {
 					for (var name in env) {
 						if (/^PINF_/.test(name)) {
@@ -16720,8 +16835,11 @@ console.log("TODO: Call `context.config.open` to open program.");
 				function replaceEnvVars(callback) {
 					var json = JSON.stringify(context.env);
 					for (var name in context.env) {
-						if (env[name]) {
+						if (typeof env[name] !== "undefined") {
 							json = json.replace(new RegExp("\\$" + name, "g"), env[name]);
+						} else
+						if (typeof process.env[name] !== "undefined") {
+							json = json.replace(new RegExp("\\$" + name, "g"), process.env[name]);
 						}
 					}
 					var m = json.match(/\$([A-Z]{1}[A-Z0-9_]*)/g);
@@ -16921,47 +17039,51 @@ console.log("TODO: Call `context.config.open` to open program.");
 						context.uid = exports.formatUid(context._descriptors.package.combined.uid);
 					}
 
-					return injectPinfVars(function(err) {
+					return collectProgramEnvVars(function(err) {
 						if (err) return callback(err);
 
-						return rerootEnvPaths(function(err) {
+						return injectPinfVars(function(err) {
 							if (err) return callback(err);
 
-							return replaceEnvVars(function(err) {
+							return rerootEnvPaths(function(err) {
 								if (err) return callback(err);
 
-								return collectConfig(function(err) {
+								return replaceEnvVars(function(err) {
 									if (err) return callback(err);
 
-									if (context.uid) {
-										context.ns = exports.uriToFilename(context.uid);
-									} else {
-										context.ns = PATH.basename(PATH.dirname(context.env.PINF_PACKAGE));
-									}
-
-									return formatPaths(function(err) {
+									return collectConfig(function(err) {
 										if (err) return callback(err);
 
-										return summarizeProgramInfo(function(err) {
+										if (context.uid) {
+											context.ns = exports.uriToFilename(context.uid);
+										} else {
+											context.ns = PATH.basename(PATH.dirname(context.env.PINF_PACKAGE));
+										}
+
+										return formatPaths(function(err) {
 											if (err) return callback(err);
 
-											return summarizePackageInfo(function(err) {
+											return summarizeProgramInfo(function(err) {
 												if (err) return callback(err);
 
-												delete context._descriptors;
+												return summarizePackageInfo(function(err) {
+													if (err) return callback(err);
 
-												var ctx = context.clone();
-												function clearAPI(ctx) {
-													if (ctx.__proto__) {
-														clearAPI(ctx.__proto__);
-													}
-													if (ctx._api) {
-														ctx._api = {};
-													}
-												}
-												clearAPI(ctx);
+													delete context._descriptors;
 
-												return callback(null, ctx, context);
+													var ctx = context.clone();
+													function clearAPI(ctx) {
+														if (ctx.__proto__) {
+															clearAPI(ctx.__proto__);
+														}
+														if (ctx._api) {
+															ctx._api = {};
+														}
+													}
+													clearAPI(ctx);
+
+													return callback(null, ctx, context);
+												});
 											});
 										});
 									});
@@ -17992,7 +18114,7 @@ JsonFileStore.prototype.save = function(force) {
 
 }
 , {"filename":"lib/json-file-store.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-primitives-js/primitives.js","mtime":1379755119,"wrapper":"commonjs","format":"commonjs","id":"cf11d4f040476e26b811c17d7a25673b6a6f6e86-pinf-primitives-js/primitives.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-primitives-js/primitives.js","mtime":1380943073,"wrapper":"commonjs","format":"commonjs","id":"cf11d4f040476e26b811c17d7a25673b6a6f6e86-pinf-primitives-js/primitives.js"}
 require.memoize("cf11d4f040476e26b811c17d7a25673b6a6f6e86-pinf-primitives-js/primitives.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-primitives-js';
 
@@ -18011,12 +18133,9 @@ exports.normalizeEnvironmentVariables = function(env, overrides) {
 	if (!ENV.PINF_PROGRAM && !ENV.CWD) {
 		throw new Error("Either `ENV.PINF_PROGRAM` (" + ENV.PINF_PROGRAM + ") or `ENV.CWD` (" + ENV.CWD + ") must be set!");
 	}
-	if (!ENV.PINF_PACKAGE && !ENV.CWD) {
-		throw new Error("Either `ENV.PINF_PACKAGE` (" + ENV.PINF_PACKAGE + ") or `ENV.CWD` (" + ENV.CWD + ") must be set!");
-	}
 	// `PINF_PACKAGES` contains a list of directories used to lookup packages.
 	// Packages should be stored in these directories where the package directory
-	// represents the global ID of the package.
+	// represents the global ID of the package. This is ideally a DNS-based hostname with path.
 	ENV.PINF_PACKAGES = (typeof ENV.PINF_PACKAGES === "string") ? ENV.PINF_PACKAGES : (process.env.PINF_PACKAGES || "");
 	// If `PINF_PROGRAM_PARENT` is set the parent descriptor will be merged on top of our descriptor.
 	// Under normal conditions the `PINF_PROGRAM_PARENT` varibale should never be set in the shell directly.
@@ -18028,7 +18147,7 @@ exports.normalizeEnvironmentVariables = function(env, overrides) {
 	//   * A local filesystem path to a `program.json` file (how to boot & custom config).
 	ENV.PINF_PROGRAM = ENV.PINF_PROGRAM || PATH.join(ENV.CWD, "program.json");
 	//   * A local filesystem path to a `package.json` file (what to boot & default config).
-	ENV.PINF_PACKAGE = ENV.PINF_PACKAGE || PATH.join(ENV.CWD, "package.json");
+	ENV.PINF_PACKAGE = ENV.PINF_PACKAGE || (ENV.CWD && PATH.join(ENV.CWD, "package.json")) || "";
 	//   * A local filesystem path to a `program.rt.json` file (the state to boot in).
 	ENV.PINF_RUNTIME = ENV.PINF_RUNTIME || PATH.join(ENV.PINF_PROGRAM_PARENT || ENV.PINF_PROGRAM, "../.rt/program.rt.json");
 	//   * The mode the runtime should run it. Will load `program.$PINF_MODE.json`.
@@ -18231,7 +18350,7 @@ return {
 };
 }
 , {"filename":"node_modules/pinf-primitives-js/node_modules/deepcopy/lib/deepcopy.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-it-package-insight/lib/package-insight.js","mtime":1379882253,"wrapper":"commonjs","format":"commonjs","id":"79c3886f38d246eca26d997a4cde1dc621d53b56-pinf-it-package-insight/lib/package-insight.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-it-package-insight/lib/package-insight.js","mtime":1381194112,"wrapper":"commonjs","format":"commonjs","id":"79c3886f38d246eca26d997a4cde1dc621d53b56-pinf-it-package-insight/lib/package-insight.js"}
 require.memoize("79c3886f38d246eca26d997a4cde1dc621d53b56-pinf-it-package-insight/lib/package-insight.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-it-package-insight/lib';
 
@@ -18301,7 +18420,8 @@ exports.parse = function(packagePath, options, callback) {
 				return proceedCallback(callback);
 			}
 			var gateway = options.$pinf.gateway("vfs-write-from-read-mtime-bypass", {
-				cacheNamespace: "pinf-it-package-insight"
+				cacheNamespace: "pinf-it-package-insight",
+				verbose: false
 			});
 			// All criteria that makes this call (argument combination) unique.
 			var opts = {};
@@ -18344,7 +18464,7 @@ exports.parse = function(packagePath, options, callback) {
 					packagePath = PATH.dirname(packagePath);
 				}
 
-				if (options.verbose) console.log("[pinf-it-package-insight] parse package: " + packagePath);
+				if (options.debug) console.log("[pinf-it-package-insight] parse package: " + packagePath);
 
 				var shasum = CRYPTO.createHash("sha1");
 				shasum.update(packagePath);
@@ -18854,312 +18974,312 @@ function normalize(descriptorPath, descriptor, options, callback) {
 
 	var helpers = exports.makeMergeHelpers(exports, descriptor, copied);
 
-	try {
-
-		// If `true` will traverse up all parent directories all the way to '/'.
-		// If 'node_modules' directories found will make package available if not already
-		// for same name (this is consistent with the NodeJS module lookup logic).
-		options.mapParentSiblingPackages = (
-			descriptor.raw &&
-			descriptor.raw.config &&
-			descriptor.raw.config["pinf/0/bundler/options/0"] &&
-			descriptor.raw.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
-		) || false;
-		if (options.$pinf) {
-			try {
-				var info = options.$pinf.getPackageInfo(options._realpath(PATH.dirname(descriptorPath)));
-				if (
-					info &&
-					info.package &&
-					info.package.config &&
-					info.package.config["pinf/0/bundler/options/0"] &&
-					info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
-				) {
-					options.mapParentSiblingPackages = info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages;
-				}
-			} catch(err) {}
+	function realpath(callback) {
+		if (!descriptorPath) {
+			return callback(null, null);
 		}
-
-		helpers.anyToArray("@extends", "@extends");
-
-		helpers.string("uid");
-		helpers.string("name");
-		helpers.string("description");
-		helpers.string("version");
-
-		helpers.removeIfMatch("_id", descriptor.normalized.name + "@" + descriptor.normalized.version);
-		if (typeof descriptor.raw["_from"] === "string") {
-			var m = descriptor.raw["_from"].match(/^([^@]*)@(.*?)$/);
-			if (m && m[1] === descriptor.normalized.name) {
-				if (!descriptor.normalized.locator) {
-					descriptor.normalized.locator = {};
-				}
-				if (
-					typeof descriptor.normalized.locator.pointer !== "undefined" &&
-					descriptor.normalized.locator.pointer !== m[2]
-				) {
-					descriptor.warnings.push([
-						"normalize", "Found two different values for 'locator.pointer': " + JSON.stringify([
-							descriptor.normalized.locator.pointer,
-							m[2]
-						])
-					]);
-				} else {
-					descriptor.normalized.locator.pointer = m[2];
-					copied["_from"] = true;
-				}
+		return options.API.FS.realpath(options._realpath(descriptorPath), function(err, descriptorRealPath) {
+			if (err && err.code !== "ENOENT") {
+				return callback(err);
 			}
-		}
-
-		helpers.mergeObjectTo("boot", "boot");
-
-		helpers.mergeObjectTo("dist", "locator");
-
-
-		helpers.object("pm");
-		helpers.stringToObject("pm", "install");
-		if (options.type === "component") {
-			if (!descriptor.normalized.pm) {
-				descriptor.normalized.pm = {};
-			}
-			if (!descriptor.normalized.pm.install) {
-				descriptor.normalized.pm.install = "component";
-			}
-		}
-
-		helpers.string("homepage");
-
-		helpers.objectToObject("bugs", ["social", "bugs"]);
-		helpers.stringToObject("bugs", ["social", "bugs", "url"]);
-		helpers.stringToObject("twitter", ["social", "bugs", "twitter"], function(value) {
-			return value.replace(/^@/, "");
+			return callback(null, descriptorRealPath);
 		});
+	}
 
-		if (options.type === "component") {
-			helpers.stringToArray("repo", "repositories", function(value) {
-				return {
-					"type": "git",
-		            "url": "http://github.com/" + value + ".git"
-				};
+	return realpath(function(err, descriptorRealPath) {
+		if (err) return callback(err);
+
+		try {
+
+			if (options.ttl === -1)  {
+				addMappingsForPackage__cache = {};
+			}
+
+			// If `true` will traverse up all parent directories all the way to '/'.
+			// If 'node_modules' directories found will make package available if not already
+			// for same name (this is consistent with the NodeJS module lookup logic).
+			options.mapParentSiblingPackages = (
+				descriptor.raw &&
+				descriptor.raw.config &&
+				descriptor.raw.config["pinf/0/bundler/options/0"] &&
+				descriptor.raw.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
+			) || false;
+			if (options.$pinf && descriptorRealPath) {
+				try {
+					var info = options.$pinf.getPackageInfo(PATH.dirname(descriptorRealPath));
+					if (
+						info &&
+						info.package &&
+						info.package.config &&
+						info.package.config["pinf/0/bundler/options/0"] &&
+						info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
+					) {
+						options.mapParentSiblingPackages = info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages;
+					}
+				} catch(err) {}
+			}
+
+			helpers.anyToArray("@extends", "@extends");
+
+			helpers.string("uid");
+			helpers.string("name");
+			helpers.string("description");
+			helpers.string("version");
+
+			helpers.removeIfMatch("_id", descriptor.normalized.name + "@" + descriptor.normalized.version);
+			if (typeof descriptor.raw["_from"] === "string") {
+				var m = descriptor.raw["_from"].match(/^([^@]*)@(.*?)$/);
+				if (m && m[1] === descriptor.normalized.name) {
+					if (!descriptor.normalized.locator) {
+						descriptor.normalized.locator = {};
+					}
+					if (
+						typeof descriptor.normalized.locator.pointer !== "undefined" &&
+						descriptor.normalized.locator.pointer !== m[2]
+					) {
+						descriptor.warnings.push([
+							"normalize", "Found two different values for 'locator.pointer': " + JSON.stringify([
+								descriptor.normalized.locator.pointer,
+								m[2]
+							])
+						]);
+					} else {
+						descriptor.normalized.locator.pointer = m[2];
+						copied["_from"] = true;
+					}
+				}
+			}
+
+			helpers.mergeObjectTo("boot", "boot");
+
+			helpers.mergeObjectTo("dist", "locator");
+
+
+			helpers.object("pm");
+			helpers.stringToObject("pm", "install");
+			if (options.type === "component") {
+				if (!descriptor.normalized.pm) {
+					descriptor.normalized.pm = {};
+				}
+				if (!descriptor.normalized.pm.install) {
+					descriptor.normalized.pm.install = "component";
+				}
+			}
+
+			helpers.string("homepage");
+
+			helpers.objectToObject("bugs", ["social", "bugs"]);
+			helpers.stringToObject("bugs", ["social", "bugs", "url"]);
+			helpers.stringToObject("twitter", ["social", "bugs", "twitter"], function(value) {
+				return value.replace(/^@/, "");
 			});
 
-			function formatComponentDependencies(value) {
-				var dependencies = {};
-				for (var id in value) {
-					dependencies[id.replace("/", "-")] = {
-						repository: {
-							"type": "git",
-							"url": "http://github.com/" + id + ".git"
-						},
-						selector: value[id]
+			if (options.type === "component") {
+				helpers.stringToArray("repo", "repositories", function(value) {
+					return {
+						"type": "git",
+			            "url": "http://github.com/" + value + ".git"
 					};
-				}
-				return dependencies;
-			}
-			helpers.objectToObject("dependencies", ["dependencies", "required"], formatComponentDependencies);
-			helpers.objectToObject("development", ["dependencies", "development"], formatComponentDependencies);
-
-		} else {
-			helpers.array("repositories");
-			helpers.anyToArray("repository", "repositories");
-
-			helpers.objectToObject("dependencies", ["dependencies", "required"]);
-			helpers.objectToObject("devDependencies", ["dependencies", "development"]);
-			helpers.objectToObject("optionalDependencies", ["dependencies", "optional"]);
-			helpers.arrayToObject("bundledDependencies", ["dependencies", "bundled"]);
-			helpers.arrayToObject("bundleDependencies", ["dependencies", "bundled"]);
-			if (
-				descriptor.normalized.dependencies &&
-				descriptor.normalized.dependencies.bundled
-			) {
-				var deps = descriptor.normalized.dependencies.bundled;
-				descriptor.normalized.dependencies.bundled = {};
-				deps.forEach(function(name) {
-					descriptor.normalized.dependencies.bundled[name] = false;
 				});
-			}
 
-			helpers.mergeObjectTo("mappings", ["dependencies", "required"]);
-			helpers.mergeObjectTo("devMappings", ["dependencies", "development"]);
-			helpers.mergeObjectTo("optionalMappings", ["dependencies", "optional"]);
-		}
-
-		helpers.booleanToObject("shrinkwrap", ["config", "shrinkwrap"]);
-		helpers.objectToObject("publishConfig", ["config", "publish"]);
-
-		helpers.objectToObject("engines", ["requirements", "engines"]);
-		helpers.mergeObjectTo("engine", ["requirements", "engines"]);
-
-		helpers.objectToObject("engines", ["requirements", "engines"]);
-		helpers.objectToObject("os", ["config", "os"]);
-
-		helpers.objectToObject("bin", ["exports", "bin"]);
-
-		if (options.type === "component") {
-		} else {
-			helpers.objectToObject("scripts", ["exports", "scripts"]);
-		}
-
-		helpers.objectToObject("on", ["events", "listen"]);
-
-		helpers.booleanToObject("publish", ["events", "publish"]);
-
-		helpers.objectToObject("env", ["requirements", "env"]);
-
-		helpers.objectToObject("layout", ["layout"]);
-		helpers.mergeObjectTo("directories", ["layout", "directories"]);
-
-		helpers.objectToObject("implements", ["config", "implements"]);
-
-		helpers.mergeObjectTo("require.async", "require.async", function(name, value) {
-			return [helpers.prefixRelativePath(name), value];
-		});
-
-		helpers.object("config");
-
-		if (typeof descriptor.raw.overlay === "object") {
-			if (typeof descriptor.normalized.overlay === "undefined") {
-				descriptor.normalized.overlay = {};
-			}
-		}
-
-		helpers.array("licenses");
-		helpers.anyToArray("license", "licenses");
-
-		helpers.stringToObject("main", ["exports", "main"], helpers.prefixRelativePath);
-
-		if (options.type === "component") {
-			function formatComponentExports(value) {
-				var exports = {};
-				if (Array.isArray(value)) {
-					value.forEach(function(path) {
-						exports[path] = helpers.prefixRelativePath(path);
-					});
-				} else {
-					for (var path in value) {
-						exports[path] = helpers.prefixRelativePath(value[path]);
+				function formatComponentDependencies(value) {
+					var dependencies = {};
+					for (var id in value) {
+						dependencies[id.replace("/", "-")] = {
+							repository: {
+								"type": "git",
+								"url": "http://github.com/" + id + ".git"
+							},
+							selector: value[id]
+						};
 					}
+					return dependencies;
 				}
-				return exports;
-			}
-			helpers.anyToObject("scripts", ["exports", "scripts"], formatComponentExports);
-			helpers.anyToObject("styles", ["exports", "styles"], formatComponentExports);
-			helpers.anyToObject("images", ["exports", "images"], formatComponentExports);
-			helpers.anyToObject("fonts", ["exports", "fonts"], formatComponentExports);
-			helpers.anyToObject("files", ["exports", "resources"], formatComponentExports);
-		} else {
-			if (typeof descriptor.raw.component === "object") {
-				if (typeof descriptor.normalized.exports === "undefined") {
-					descriptor.normalized.exports = {};
-				}
-			}
-		}
+				helpers.objectToObject("dependencies", ["dependencies", "required"], formatComponentDependencies);
+				helpers.objectToObject("development", ["dependencies", "development"], formatComponentDependencies);
 
-		helpers.remove("readme");
-		helpers.stringToObject("readmeFilename", ["files", "readme"], helpers.prefixRelativePath);		
-		helpers.anyToObject("man", ["files", "man"]);
-		// TODO: `files` -> `files.distribute`
-		// TODO: `.distignore` -> `files.distignore`
-		// TODO: `.gitignore` -> `files.vcsignore`
+			} else {
+				helpers.array("repositories");
+				helpers.anyToArray("repository", "repositories");
 
-		helpers.array("keywords");
-
-		helpers.array("maintainers");
-		helpers.array("contributors");
-		helpers.anyToArray("author", "contributors");
-
-
-		function processComponent(callback) {
-			if (typeof descriptor.raw.component !== "object") {
-				return callback(null);
-			}
-			var opts = {};
-			for (var name in options) {
-				opts[name] = options[name];
-			}
-			opts.type = "component";
-			return helpers.normalizeSub("component", descriptor.raw.component, opts, function(err, normalized) {
-				if (err) return callback(err);
-				if (typeof normalized.exports === "object") {
-					descriptor.normalized.exports = DEEPMERGE(descriptor.normalized.exports || {}, normalized.exports);
-					copied["component"] = true;
-				}
-				return callback(null);
-			});
-		}
-
-		function processOverlays(callback) {
-			if (typeof descriptor.raw.overlay !== "object") {
-				return callback(null);
-			}
-			var waitfor = WAITFOR.serial(function(err) {
-				if (err) return callback(err);
-				copied["overlay"] = true;
-				return callback(null);
-			});
-			for (var name in descriptor.raw.overlay) {
-				waitfor(name, function(name, done) {
-					return helpers.normalizeSub("overlay", descriptor.raw.overlay[name], options, function(err, normalized) {
-						if (err) return done(err);
-						descriptor.normalized.overlay[name] = normalized;
-						return done(null);
-					});
-				});
-			}
-		}
-
-		function detectInstallPM(callback) {
-			if (descriptor.normalized.pm && typeof descriptor.normalized.pm.install !== "undefined") {
-				return callback(null);
-			}
-			if (!descriptorPath) {
-				return callback(null);
-			}
-			// TODO: Look for other indicators as well.
-			return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
-				if (exists || PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules") {
-					if (!descriptor.normalized.pm) {
-						descriptor.normalized.pm = {};
-					}
-					descriptor.normalized.pm.install = "npm";
-				}
-				return callback(null);
-			});
-		}
-
-		function detectDependencyDirectory(callback) {
-			if (
-				descriptor.normalized.layout && 
-				descriptor.normalized.layout.directories &&
-				typeof descriptor.normalized.layout.directories.dependency !== "undefined"
-			) {
-				return callback(null);
-			}
-			if (
-				descriptor.normalized.requirements &&
-				descriptor.normalized.requirements.engines &&
-				descriptor.normalized.requirements.engines.node
-			) {
-				if (!descriptor.normalized.layout) {
-					descriptor.normalized.layout = {};
-				}
-				if (!descriptor.normalized.layout.directories) {
-					descriptor.normalized.layout.directories = {};
-				}
-				descriptor.normalized.layout.directories.dependency = "node_modules";
-				return callback(null);
-			}
-			if (!descriptorPath) {
-				return callback(null);
-			}
-			return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
+				helpers.objectToObject("dependencies", ["dependencies", "required"]);
+				helpers.objectToObject("devDependencies", ["dependencies", "development"]);
+				helpers.objectToObject("optionalDependencies", ["dependencies", "optional"]);
+				helpers.arrayToObject("bundledDependencies", ["dependencies", "bundled"]);
+				helpers.arrayToObject("bundleDependencies", ["dependencies", "bundled"]);
 				if (
-					exists ||
-					PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules" ||
-					(
-						descriptor.normalized.pm &&
-						descriptor.normalized.pm.install === "npm"
-					)
+					descriptor.normalized.dependencies &&
+					descriptor.normalized.dependencies.bundled
+				) {
+					var deps = descriptor.normalized.dependencies.bundled;
+					descriptor.normalized.dependencies.bundled = {};
+					deps.forEach(function(name) {
+						descriptor.normalized.dependencies.bundled[name] = false;
+					});
+				}
+
+				helpers.mergeObjectTo("mappings", ["dependencies", "required"]);
+				helpers.mergeObjectTo("devMappings", ["dependencies", "development"]);
+				helpers.mergeObjectTo("optionalMappings", ["dependencies", "optional"]);
+			}
+
+			helpers.booleanToObject("shrinkwrap", ["config", "shrinkwrap"]);
+			helpers.objectToObject("publishConfig", ["config", "publish"]);
+
+			helpers.objectToObject("engines", ["requirements", "engines"]);
+			helpers.mergeObjectTo("engine", ["requirements", "engines"]);
+
+			helpers.objectToObject("engines", ["requirements", "engines"]);
+			helpers.objectToObject("os", ["config", "os"]);
+
+			helpers.objectToObject("bin", ["exports", "bin"]);
+
+			if (options.type === "component") {
+			} else {
+				helpers.objectToObject("scripts", ["exports", "scripts"]);
+			}
+
+			helpers.objectToObject("on", ["events", "listen"]);
+
+			helpers.mergeObjectTo("overrides", "overrides");
+
+			helpers.booleanToObject("publish", ["events", "publish"]);
+
+			helpers.objectToObject("env", ["requirements", "env"]);
+
+			helpers.objectToObject("layout", ["layout"]);
+			helpers.mergeObjectTo("directories", ["layout", "directories"]);
+
+			helpers.objectToObject("implements", ["config", "implements"]);
+
+			helpers.mergeObjectTo("require.async", "require.async", function(name, value) {
+				return [helpers.prefixRelativePath(name), value];
+			});
+
+			helpers.object("config");
+
+			if (typeof descriptor.raw.overlay === "object") {
+				if (typeof descriptor.normalized.overlay === "undefined") {
+					descriptor.normalized.overlay = {};
+				}
+			}
+
+			helpers.array("licenses");
+			helpers.anyToArray("license", "licenses");
+
+			helpers.stringToObject("main", ["exports", "main"], helpers.prefixRelativePath);
+
+			if (options.type === "component") {
+				function formatComponentExports(value) {
+					var exports = {};
+					if (Array.isArray(value)) {
+						value.forEach(function(path) {
+							exports[path] = helpers.prefixRelativePath(path);
+						});
+					} else {
+						for (var path in value) {
+							exports[path] = helpers.prefixRelativePath(value[path]);
+						}
+					}
+					return exports;
+				}
+				helpers.anyToObject("scripts", ["exports", "scripts"], formatComponentExports);
+				helpers.anyToObject("styles", ["exports", "styles"], formatComponentExports);
+				helpers.anyToObject("images", ["exports", "images"], formatComponentExports);
+				helpers.anyToObject("fonts", ["exports", "fonts"], formatComponentExports);
+				helpers.anyToObject("files", ["exports", "resources"], formatComponentExports);
+			} else {
+				if (typeof descriptor.raw.component === "object") {
+					if (typeof descriptor.normalized.exports === "undefined") {
+						descriptor.normalized.exports = {};
+					}
+				}
+			}
+
+			helpers.remove("readme");
+			helpers.stringToObject("readmeFilename", ["files", "readme"], helpers.prefixRelativePath);		
+			helpers.anyToObject("man", ["files", "man"]);
+			// TODO: `files` -> `files.distribute`
+			// TODO: `.distignore` -> `files.distignore`
+			// TODO: `.gitignore` -> `files.vcsignore`
+
+			helpers.array("keywords");
+
+			helpers.array("maintainers");
+			helpers.array("contributors");
+			helpers.anyToArray("author", "contributors");
+
+
+			function processComponent(callback) {
+				if (typeof descriptor.raw.component !== "object") {
+					return callback(null);
+				}
+				var opts = {};
+				for (var name in options) {
+					opts[name] = options[name];
+				}
+				opts.type = "component";
+				return helpers.normalizeSub("component", descriptor.raw.component, opts, function(err, normalized) {
+					if (err) return callback(err);
+					if (typeof normalized.exports === "object") {
+						descriptor.normalized.exports = DEEPMERGE(descriptor.normalized.exports || {}, normalized.exports);
+						copied["component"] = true;
+					}
+					return callback(null);
+				});
+			}
+
+			function processOverlays(callback) {
+				if (typeof descriptor.raw.overlay !== "object") {
+					return callback(null);
+				}
+				var waitfor = WAITFOR.serial(function(err) {
+					if (err) return callback(err);
+					copied["overlay"] = true;
+					return callback(null);
+				});
+				for (var name in descriptor.raw.overlay) {
+					waitfor(name, function(name, done) {
+						return helpers.normalizeSub("overlay", descriptor.raw.overlay[name], options, function(err, normalized) {
+							if (err) return done(err);
+							descriptor.normalized.overlay[name] = normalized;
+							return done(null);
+						});
+					});
+				}
+			}
+
+			function detectInstallPM(callback) {
+				if (descriptor.normalized.pm && typeof descriptor.normalized.pm.install !== "undefined") {
+					return callback(null);
+				}
+				if (!descriptorPath) {
+					return callback(null);
+				}
+				// TODO: Look for other indicators as well.
+				return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
+					if (exists || PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules") {
+						if (!descriptor.normalized.pm) {
+							descriptor.normalized.pm = {};
+						}
+						descriptor.normalized.pm.install = "npm";
+					}
+					return callback(null);
+				});
+			}
+
+			function detectDependencyDirectory(callback) {
+				if (
+					descriptor.normalized.layout && 
+					descriptor.normalized.layout.directories &&
+					typeof descriptor.normalized.layout.directories.dependency !== "undefined"
+				) {
+					return callback(null);
+				}
+				if (
+					descriptor.normalized.requirements &&
+					descriptor.normalized.requirements.engines &&
+					descriptor.normalized.requirements.engines.node
 				) {
 					if (!descriptor.normalized.layout) {
 						descriptor.normalized.layout = {};
@@ -19168,250 +19288,272 @@ function normalize(descriptorPath, descriptor, options, callback) {
 						descriptor.normalized.layout.directories = {};
 					}
 					descriptor.normalized.layout.directories.dependency = "node_modules";
+					return callback(null);
 				}
-				return callback(null);
-			});
-		}
-
-		function detectBundledDependencies(callback) {
-			if (
-				descriptor.normalized.layout &&
-				descriptor.normalized.layout.directories &&
-				typeof descriptor.normalized.layout.directories.dependency !== "undefined"
-			) {
-				return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(exists) {
-					if (!exists) return callback(null);
-					if (!descriptor.normalized.dependencies) {
-						descriptor.normalized.dependencies = {};
+				if (!descriptorPath) {
+					return callback(null);
+				}
+				return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
+					if (
+						exists ||
+						PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules" ||
+						(
+							descriptor.normalized.pm &&
+							descriptor.normalized.pm.install === "npm"
+						)
+					) {
+						if (!descriptor.normalized.layout) {
+							descriptor.normalized.layout = {};
+						}
+						if (!descriptor.normalized.layout.directories) {
+							descriptor.normalized.layout.directories = {};
+						}
+						descriptor.normalized.layout.directories.dependency = "node_modules";
 					}
-					if (!descriptor.normalized.dependencies.bundled) {
-						descriptor.normalized.dependencies.bundled = {};
-					}
-					if (!descriptor.normalized.mappings) {
-						descriptor.normalized.mappings = {};
-					}
-					return options.API.FS.readdir(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(err, filenames) {
-						if (err) return callback(err);
-						filenames.forEach(function(filename) {
-							descriptor.normalized.dependencies.bundled[filename] = "./" + descriptor.normalized.layout.directories.dependency + "/" + filename;
-
-							var shasum = CRYPTO.createHash("sha1");
-							shasum.update(PATH.join(options.packagePath, descriptor.normalized.layout.directories.dependency, filename));
-							descriptor.normalized.mappings[filename] = shasum.digest("hex") + "-" + filename;
-						});
-						return callback(null);
-					});
+					return callback(null);
 				});
 			}
-			return callback(null);
-		}
 
-		function extraNormalization(callback) {
+			function detectBundledDependencies(callback) {
+				if (
+					descriptor.normalized.layout &&
+					descriptor.normalized.layout.directories &&
+					typeof descriptor.normalized.layout.directories.dependency !== "undefined"
+				) {
+					return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(exists) {
+						if (!exists) return callback(null);
+						if (!descriptor.normalized.dependencies) {
+							descriptor.normalized.dependencies = {};
+						}
+						if (!descriptor.normalized.dependencies.bundled) {
+							descriptor.normalized.dependencies.bundled = {};
+						}
+						if (!descriptor.normalized.mappings) {
+							descriptor.normalized.mappings = {};
+						}
+						return options.API.FS.readdir(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(err, filenames) {
+							if (err) return callback(err);
+							filenames.forEach(function(filename) {
+								descriptor.normalized.dependencies.bundled[filename] = "./" + descriptor.normalized.layout.directories.dependency + "/" + filename;
 
-			function normalize(property, callback) {
-				if (property === "boot.package") {
-					if (
-						descriptor.normalized.boot &&
-						descriptor.normalized.boot.package &&
-						/^\./.test(descriptor.normalized.boot.package)
-					) {
-						descriptor.normalized.boot.package = options._relpath(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.boot.package));
-					}
-				} else
-				if (property === "exports.main" && descriptorPath) {
-					if (
-						descriptor.normalized.exports &&
-						descriptor.normalized.exports.main &&
-						!/\.js$/.test(descriptor.normalized.exports.main)
-					) {
-						var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.exports.main);
-						return options.API.FS.exists(path, function(exists) {
-							if (exists) return callback(null);
-							var ext = false;
-							if (descriptor.normalized.pm) {
-								if (
-									descriptor.normalized.pm.install === "npm" ||
-									descriptor.normalized.pm.install === "component"
-								) {
-									ext = ".js";
+								var shasum = CRYPTO.createHash("sha1");
+								shasum.update(PATH.join(options.packagePath, descriptor.normalized.layout.directories.dependency, filename));
+								descriptor.normalized.mappings[filename] = shasum.digest("hex") + "-" + filename;
+							});
+							return callback(null);
+						});
+					});
+				}
+				return callback(null);
+			}
+
+			function extraNormalization(callback) {
+
+				function normalize(property, callback) {
+					if (property === "boot.package") {
+						if (
+							descriptor.normalized.boot &&
+							descriptor.normalized.boot.package &&
+							/^\./.test(descriptor.normalized.boot.package)
+						) {
+							descriptor.normalized.boot.package = options._relpath(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.boot.package));
+						}
+					} else
+					if (property === "exports.main" && descriptorPath) {
+						if (
+							descriptor.normalized.exports &&
+							descriptor.normalized.exports.main &&
+							!/\.js$/.test(descriptor.normalized.exports.main)
+						) {
+							var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.exports.main);
+							return options.API.FS.exists(path, function(exists) {
+								if (exists) return callback(null);
+								var ext = false;
+								if (descriptor.normalized.pm) {
+									if (
+										descriptor.normalized.pm.install === "npm" ||
+										descriptor.normalized.pm.install === "component"
+									) {
+										ext = ".js";
+									}
 								}
-							}
-							path += ext || ".js";
+								path += ext || ".js";
+								return options.API.FS.exists(path, function(exists) {
+									if (exists) {
+										descriptor.normalized.exports.main += ".js";
+									} else {
+										// TODO: Try other common module extensions?
+									}
+									return callback(null);
+								});
+							});
+						} else
+						if (
+							!descriptor.normalized.exports ||
+							!descriptor.normalized.exports.main
+						) {
+							var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), "index.js");
 							return options.API.FS.exists(path, function(exists) {
 								if (exists) {
-									descriptor.normalized.exports.main += ".js";
-								} else {
-									// TODO: Try other common module extensions?
+									if (!descriptor.normalized.exports) {
+										descriptor.normalized.exports = {};
+									}
+									descriptor.normalized.exports.main = "./index.js";
 								}
 								return callback(null);
 							});
-						});
-					} else
-					if (
-						!descriptor.normalized.exports ||
-						!descriptor.normalized.exports.main
-					) {
-						var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), "index.js");
-						return options.API.FS.exists(path, function(exists) {
-							if (exists) {
-								if (!descriptor.normalized.exports) {
-									descriptor.normalized.exports = {};
-								}
-								descriptor.normalized.exports.main = "./index.js";
-							}
-							return callback(null);
-						});
-					}
-				} else
-				if (property === "layout.directories") {
-					if (
-						descriptor.normalized.layout &&
-						descriptor.normalized.layout.directories
-					) {
-						for (var type in descriptor.normalized.layout.directories) {
-							descriptor.normalized.layout.directories[type] = helpers.prefixRelativePath(descriptor.normalized.layout.directories[type]).replace(/\/$/, "")
 						}
-					}
-				} else
-				if (property === "mappings") {
-					if (descriptor.normalized.pm && descriptor.normalized.pm.install === "npm") {
-						function addMappingsForPackage(packagePath, level, callback) {
-							// Only collect mappings up to the root path.
-							if (options.rootPath && options._realpath(packagePath).substring(0, options.rootPath.length) !== options.rootPath) {
-								return callback(null);
+					} else
+					if (property === "layout.directories") {
+						if (
+							descriptor.normalized.layout &&
+							descriptor.normalized.layout.directories
+						) {
+							for (var type in descriptor.normalized.layout.directories) {
+								descriptor.normalized.layout.directories[type] = helpers.prefixRelativePath(descriptor.normalized.layout.directories[type]).replace(/\/$/, "")
 							}
-							if (addMappingsForPackage__cache[packagePath]) {
-								if (addMappingsForPackage__cache[packagePath] !== true) {
-									for (var filename in addMappingsForPackage__cache[packagePath].bundled) {
-										if (!descriptor.normalized.dependencies) {
-											descriptor.normalized.dependencies = {};
-										}
-										if (!descriptor.normalized.dependencies.bundled) {
-											descriptor.normalized.dependencies.bundled = {};
-										}
-										if (!descriptor.normalized.mappings) {
-											descriptor.normalized.mappings = {};
-										}
-										if (!descriptor.normalized.mappings[filename]) {
-											descriptor.normalized.dependencies.bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
-											descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
-										}
-									}
-								}
-								if (options._realpath(packagePath) === "/") {
+						}
+					} else
+					if (property === "mappings") {
+						if (descriptor.normalized.pm && descriptor.normalized.pm.install === "npm") {
+							function addMappingsForPackage(packagePath, level, callback) {
+								// Only collect mappings up to the root path.
+								if (options.rootPath && options._realpath(packagePath).substring(0, options.rootPath.length) !== options.rootPath) {
 									return callback(null);
 								}
-								if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) return callback(null);
-								return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
-							}
-							addMappingsForPackage__cache[packagePath] = true;							
-							return options.API.FS.exists(PATH.join(options._realpath(packagePath), "node_modules"), function(exists) {
-								if (!exists) {
-									if (options._realpath(packagePath) === "/") return callback(null);
-									if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
+								if (addMappingsForPackage__cache[packagePath]) {
+									if (addMappingsForPackage__cache[packagePath] !== true) {
+										for (var filename in addMappingsForPackage__cache[packagePath].bundled) {
+											if (!descriptor.normalized.dependencies) {
+												descriptor.normalized.dependencies = {};
+											}
+											if (!descriptor.normalized.dependencies.bundled) {
+												descriptor.normalized.dependencies.bundled = {};
+											}
+											if (!descriptor.normalized.mappings) {
+												descriptor.normalized.mappings = {};
+											}
+											if (!descriptor.normalized.mappings[filename]) {
+												descriptor.normalized.dependencies.bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
+												descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
+											}
+										}
+									}
+									if (options._realpath(packagePath) === "/") {
 										return callback(null);
 									}
+									if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) return callback(null);
 									return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
 								}
-								return options.API.FS.readdir(PATH.join(options._realpath(packagePath), "node_modules"), function(err, filenames) {
-									if (err) return callback(err);
-									filenames.forEach(function(filename) {
-										if (/^\./.test(filename)) return;
-										if (!descriptor.normalized.dependencies) {
-											descriptor.normalized.dependencies = {};
+								addMappingsForPackage__cache[packagePath] = true;							
+								return options.API.FS.exists(PATH.join(options._realpath(packagePath), "node_modules"), function(exists) {
+									if (!exists) {
+										if (options._realpath(packagePath) === "/") return callback(null);
+										if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
+											return callback(null);
 										}
-										if (!descriptor.normalized.dependencies.bundled) {
-											descriptor.normalized.dependencies.bundled = {};
-										}
-										if (!descriptor.normalized.mappings) {
-											descriptor.normalized.mappings = {};
-										}
+										return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
+									}
+									return options.API.FS.readdir(PATH.join(options._realpath(packagePath), "node_modules"), function(err, filenames) {
+										if (err) return callback(err);
+										filenames.forEach(function(filename) {
+											if (/^\./.test(filename)) return;
+											if (!descriptor.normalized.dependencies) {
+												descriptor.normalized.dependencies = {};
+											}
+											if (!descriptor.normalized.dependencies.bundled) {
+												descriptor.normalized.dependencies.bundled = {};
+											}
+											if (!descriptor.normalized.mappings) {
+												descriptor.normalized.mappings = {};
+											}
 
-										if (!addMappingsForPackage__cache[packagePath] || addMappingsForPackage__cache[packagePath] === true) {
-											addMappingsForPackage__cache[packagePath] = {
-												bundled: {},
-												mappings: {}
-											};
-										}
-										addMappingsForPackage__cache[packagePath].bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
-										var shasum = CRYPTO.createHash("sha1");
-										shasum.update(PATH.join(packagePath, "node_modules", filename));
-										addMappingsForPackage__cache[packagePath].mappings[filename] = shasum.digest("hex") + "-" + filename;
+											if (!addMappingsForPackage__cache[packagePath] || addMappingsForPackage__cache[packagePath] === true) {
+												addMappingsForPackage__cache[packagePath] = {
+													bundled: {},
+													mappings: {}
+												};
+											}
+											addMappingsForPackage__cache[packagePath].bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
+											var shasum = CRYPTO.createHash("sha1");
+											shasum.update(PATH.join(packagePath, "node_modules", filename));
+											addMappingsForPackage__cache[packagePath].mappings[filename] = shasum.digest("hex") + "-" + filename;
 
-										if (!descriptor.normalized.mappings[filename]) {
-											descriptor.normalized.dependencies.bundled[filename] = addMappingsForPackage__cache[packagePath].bundled[filename];
-											descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
+											if (!descriptor.normalized.mappings[filename]) {
+												descriptor.normalized.dependencies.bundled[filename] = addMappingsForPackage__cache[packagePath].bundled[filename];
+												descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
+											}
+										});
+										if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
+											return callback(null);
 										}
+										return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
 									});
-									if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
-										return callback(null);
-									}
-									return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
 								});
-							});
-						}
-						return addMappingsForPackage(PATH.join(options.packagePath, ".."), 0, function(err) {
-							if (err) return callback(err);
-							return callback(null);
-						});
-					}
-				}
-				return callback(null);
-			}
-
-			return normalize("boot.package", function(err) {
-				if (err) return callback(err);
-				return normalize("exports.main", function(err) {
-					if (err) return callback(err);
-					return normalize("layout.directories", function(err) {
-						if (err) return callback(err);
-						return normalize("mappings", callback);				
-					});
-				});
-			});
-		}
-
-		return processComponent(function(err) {
-			if (err) return callback(err);
-
-			return processOverlays(function(err) {
-				if (err) return callback(err);
-
-				return detectInstallPM(function(err) {
-					if (err) return callback(err);
-
-					return detectDependencyDirectory(function(err) {
-						if (err) return callback(err);
-
-						return detectBundledDependencies(function(err) {
-							if (err) return callback(err);
-
-							return extraNormalization(function(err) {
+							}
+							return addMappingsForPackage(PATH.join(options.packagePath, ".."), 0, function(err) {
 								if (err) return callback(err);
-
-								Object.keys(descriptor.raw).forEach(function(key) {
-									if (copied[key]) return;
-									if (options.includeUnknownProperties) {
-										descriptor.normalized[key] = descriptor.raw[key];
-										copied[key] = true;
-									} else {
-										descriptor.warnings.push([
-											"normalize", "Property '" + key + "' was ignored"
-										]);
-									}
-								});
-
 								return callback(null);
 							});
+						}
+					}
+					return callback(null);
+				}
+
+				return normalize("boot.package", function(err) {
+					if (err) return callback(err);
+					return normalize("exports.main", function(err) {
+						if (err) return callback(err);
+						return normalize("layout.directories", function(err) {
+							if (err) return callback(err);
+							return normalize("mappings", callback);				
+						});
+					});
+				});
+			}
+
+			return processComponent(function(err) {
+				if (err) return callback(err);
+
+				return processOverlays(function(err) {
+					if (err) return callback(err);
+
+					return detectInstallPM(function(err) {
+						if (err) return callback(err);
+
+						return detectDependencyDirectory(function(err) {
+							if (err) return callback(err);
+
+							return detectBundledDependencies(function(err) {
+								if (err) return callback(err);
+
+								return extraNormalization(function(err) {
+									if (err) return callback(err);
+
+									Object.keys(descriptor.raw).forEach(function(key) {
+										if (copied[key]) return;
+										if (options.includeUnknownProperties) {
+											descriptor.normalized[key] = descriptor.raw[key];
+											copied[key] = true;
+										} else {
+											descriptor.warnings.push([
+												"normalize", "Property '" + key + "' was ignored"
+											]);
+										}
+									});
+
+									return callback(null);
+								});
+							});
 						});
 					});
 				});
 			});
-		});
 
-	} catch(err) {
-		return callback(err);
-	}
+		} catch(err) {
+			return callback(err);
+		}
+	});
 };
 
 }
@@ -19860,7 +20002,7 @@ return {
 };
 }
 , {"filename":"node_modules/pinf-it-package-insight/node_modules/deepmerge/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-it-package-insight/node_modules/pinf-primitives-js/primitives.js","mtime":1379755119,"wrapper":"commonjs","format":"commonjs","id":"f0247bd4db3455e18d3a8b85995b20ee229a444e-pinf-primitives-js/primitives.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-it-package-insight/node_modules/pinf-primitives-js/primitives.js","mtime":1380943073,"wrapper":"commonjs","format":"commonjs","id":"f0247bd4db3455e18d3a8b85995b20ee229a444e-pinf-primitives-js/primitives.js"}
 require.memoize("f0247bd4db3455e18d3a8b85995b20ee229a444e-pinf-primitives-js/primitives.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-it-package-insight/node_modules/pinf-primitives-js';
 
@@ -19879,12 +20021,9 @@ exports.normalizeEnvironmentVariables = function(env, overrides) {
 	if (!ENV.PINF_PROGRAM && !ENV.CWD) {
 		throw new Error("Either `ENV.PINF_PROGRAM` (" + ENV.PINF_PROGRAM + ") or `ENV.CWD` (" + ENV.CWD + ") must be set!");
 	}
-	if (!ENV.PINF_PACKAGE && !ENV.CWD) {
-		throw new Error("Either `ENV.PINF_PACKAGE` (" + ENV.PINF_PACKAGE + ") or `ENV.CWD` (" + ENV.CWD + ") must be set!");
-	}
 	// `PINF_PACKAGES` contains a list of directories used to lookup packages.
 	// Packages should be stored in these directories where the package directory
-	// represents the global ID of the package.
+	// represents the global ID of the package. This is ideally a DNS-based hostname with path.
 	ENV.PINF_PACKAGES = (typeof ENV.PINF_PACKAGES === "string") ? ENV.PINF_PACKAGES : (process.env.PINF_PACKAGES || "");
 	// If `PINF_PROGRAM_PARENT` is set the parent descriptor will be merged on top of our descriptor.
 	// Under normal conditions the `PINF_PROGRAM_PARENT` varibale should never be set in the shell directly.
@@ -19896,7 +20035,7 @@ exports.normalizeEnvironmentVariables = function(env, overrides) {
 	//   * A local filesystem path to a `program.json` file (how to boot & custom config).
 	ENV.PINF_PROGRAM = ENV.PINF_PROGRAM || PATH.join(ENV.CWD, "program.json");
 	//   * A local filesystem path to a `package.json` file (what to boot & default config).
-	ENV.PINF_PACKAGE = ENV.PINF_PACKAGE || PATH.join(ENV.CWD, "package.json");
+	ENV.PINF_PACKAGE = ENV.PINF_PACKAGE || (ENV.CWD && PATH.join(ENV.CWD, "package.json")) || "";
 	//   * A local filesystem path to a `program.rt.json` file (the state to boot in).
 	ENV.PINF_RUNTIME = ENV.PINF_RUNTIME || PATH.join(ENV.PINF_PROGRAM_PARENT || ENV.PINF_PROGRAM, "../.rt/program.rt.json");
 	//   * The mode the runtime should run it. Will load `program.$PINF_MODE.json`.
@@ -20099,7 +20238,7 @@ return {
 };
 }
 , {"filename":"node_modules/pinf-it-package-insight/node_modules/pinf-primitives-js/node_modules/deepcopy/lib/deepcopy.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-it-program-insight/lib/program-insight.js","mtime":1379802961,"wrapper":"commonjs","format":"commonjs","id":"4cbfcf3a6f76b102c8abe5ac9f4f68bc773ef413-pinf-it-program-insight/lib/program-insight.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-it-program-insight/lib/program-insight.js","mtime":1381779559,"wrapper":"commonjs","format":"commonjs","id":"4cbfcf3a6f76b102c8abe5ac9f4f68bc773ef413-pinf-it-program-insight/lib/program-insight.js"}
 require.memoize("4cbfcf3a6f76b102c8abe5ac9f4f68bc773ef413-pinf-it-program-insight/lib/program-insight.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-it-program-insight/lib';
 
@@ -20180,6 +20319,7 @@ exports.parse = function(programPath, options, callback) {
 			var waitfor = WAITFOR.serial(callback);
 			for (var alias in descriptor.combined.dependencies.bundled) {
 				waitfor(alias, function(alias, done) {
+					if (!descriptor.combined.dependencies.bundled[alias]) return done();
 					return followPackage(PATH.join(descriptor.dirpath, descriptor.combined.dependencies.bundled[alias]), done);
 				});
 			}
@@ -20763,7 +20903,7 @@ return {
 };
 }
 , {"filename":"node_modules/pinf-it-program-insight/node_modules/deepcopy/lib/deepcopy.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-it-program-insight/node_modules/pinf-it-package-insight/lib/package-insight.js","mtime":1379882253,"wrapper":"commonjs","format":"commonjs","id":"930bd0ef3346030aef4ddac6eaadb8cd4d7a0d71-pinf-it-package-insight/lib/package-insight.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-it-program-insight/node_modules/pinf-it-package-insight/lib/package-insight.js","mtime":1381194112,"wrapper":"commonjs","format":"commonjs","id":"930bd0ef3346030aef4ddac6eaadb8cd4d7a0d71-pinf-it-package-insight/lib/package-insight.js"}
 require.memoize("930bd0ef3346030aef4ddac6eaadb8cd4d7a0d71-pinf-it-package-insight/lib/package-insight.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-it-program-insight/node_modules/pinf-it-package-insight/lib';
 
@@ -20833,7 +20973,8 @@ exports.parse = function(packagePath, options, callback) {
 				return proceedCallback(callback);
 			}
 			var gateway = options.$pinf.gateway("vfs-write-from-read-mtime-bypass", {
-				cacheNamespace: "pinf-it-package-insight"
+				cacheNamespace: "pinf-it-package-insight",
+				verbose: false
 			});
 			// All criteria that makes this call (argument combination) unique.
 			var opts = {};
@@ -20876,7 +21017,7 @@ exports.parse = function(packagePath, options, callback) {
 					packagePath = PATH.dirname(packagePath);
 				}
 
-				if (options.verbose) console.log("[pinf-it-package-insight] parse package: " + packagePath);
+				if (options.debug) console.log("[pinf-it-package-insight] parse package: " + packagePath);
 
 				var shasum = CRYPTO.createHash("sha1");
 				shasum.update(packagePath);
@@ -21386,312 +21527,312 @@ function normalize(descriptorPath, descriptor, options, callback) {
 
 	var helpers = exports.makeMergeHelpers(exports, descriptor, copied);
 
-	try {
-
-		// If `true` will traverse up all parent directories all the way to '/'.
-		// If 'node_modules' directories found will make package available if not already
-		// for same name (this is consistent with the NodeJS module lookup logic).
-		options.mapParentSiblingPackages = (
-			descriptor.raw &&
-			descriptor.raw.config &&
-			descriptor.raw.config["pinf/0/bundler/options/0"] &&
-			descriptor.raw.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
-		) || false;
-		if (options.$pinf) {
-			try {
-				var info = options.$pinf.getPackageInfo(options._realpath(PATH.dirname(descriptorPath)));
-				if (
-					info &&
-					info.package &&
-					info.package.config &&
-					info.package.config["pinf/0/bundler/options/0"] &&
-					info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
-				) {
-					options.mapParentSiblingPackages = info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages;
-				}
-			} catch(err) {}
+	function realpath(callback) {
+		if (!descriptorPath) {
+			return callback(null, null);
 		}
-
-		helpers.anyToArray("@extends", "@extends");
-
-		helpers.string("uid");
-		helpers.string("name");
-		helpers.string("description");
-		helpers.string("version");
-
-		helpers.removeIfMatch("_id", descriptor.normalized.name + "@" + descriptor.normalized.version);
-		if (typeof descriptor.raw["_from"] === "string") {
-			var m = descriptor.raw["_from"].match(/^([^@]*)@(.*?)$/);
-			if (m && m[1] === descriptor.normalized.name) {
-				if (!descriptor.normalized.locator) {
-					descriptor.normalized.locator = {};
-				}
-				if (
-					typeof descriptor.normalized.locator.pointer !== "undefined" &&
-					descriptor.normalized.locator.pointer !== m[2]
-				) {
-					descriptor.warnings.push([
-						"normalize", "Found two different values for 'locator.pointer': " + JSON.stringify([
-							descriptor.normalized.locator.pointer,
-							m[2]
-						])
-					]);
-				} else {
-					descriptor.normalized.locator.pointer = m[2];
-					copied["_from"] = true;
-				}
+		return options.API.FS.realpath(options._realpath(descriptorPath), function(err, descriptorRealPath) {
+			if (err && err.code !== "ENOENT") {
+				return callback(err);
 			}
-		}
-
-		helpers.mergeObjectTo("boot", "boot");
-
-		helpers.mergeObjectTo("dist", "locator");
-
-
-		helpers.object("pm");
-		helpers.stringToObject("pm", "install");
-		if (options.type === "component") {
-			if (!descriptor.normalized.pm) {
-				descriptor.normalized.pm = {};
-			}
-			if (!descriptor.normalized.pm.install) {
-				descriptor.normalized.pm.install = "component";
-			}
-		}
-
-		helpers.string("homepage");
-
-		helpers.objectToObject("bugs", ["social", "bugs"]);
-		helpers.stringToObject("bugs", ["social", "bugs", "url"]);
-		helpers.stringToObject("twitter", ["social", "bugs", "twitter"], function(value) {
-			return value.replace(/^@/, "");
+			return callback(null, descriptorRealPath);
 		});
+	}
 
-		if (options.type === "component") {
-			helpers.stringToArray("repo", "repositories", function(value) {
-				return {
-					"type": "git",
-		            "url": "http://github.com/" + value + ".git"
-				};
+	return realpath(function(err, descriptorRealPath) {
+		if (err) return callback(err);
+
+		try {
+
+			if (options.ttl === -1)  {
+				addMappingsForPackage__cache = {};
+			}
+
+			// If `true` will traverse up all parent directories all the way to '/'.
+			// If 'node_modules' directories found will make package available if not already
+			// for same name (this is consistent with the NodeJS module lookup logic).
+			options.mapParentSiblingPackages = (
+				descriptor.raw &&
+				descriptor.raw.config &&
+				descriptor.raw.config["pinf/0/bundler/options/0"] &&
+				descriptor.raw.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
+			) || false;
+			if (options.$pinf && descriptorRealPath) {
+				try {
+					var info = options.$pinf.getPackageInfo(PATH.dirname(descriptorRealPath));
+					if (
+						info &&
+						info.package &&
+						info.package.config &&
+						info.package.config["pinf/0/bundler/options/0"] &&
+						info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
+					) {
+						options.mapParentSiblingPackages = info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages;
+					}
+				} catch(err) {}
+			}
+
+			helpers.anyToArray("@extends", "@extends");
+
+			helpers.string("uid");
+			helpers.string("name");
+			helpers.string("description");
+			helpers.string("version");
+
+			helpers.removeIfMatch("_id", descriptor.normalized.name + "@" + descriptor.normalized.version);
+			if (typeof descriptor.raw["_from"] === "string") {
+				var m = descriptor.raw["_from"].match(/^([^@]*)@(.*?)$/);
+				if (m && m[1] === descriptor.normalized.name) {
+					if (!descriptor.normalized.locator) {
+						descriptor.normalized.locator = {};
+					}
+					if (
+						typeof descriptor.normalized.locator.pointer !== "undefined" &&
+						descriptor.normalized.locator.pointer !== m[2]
+					) {
+						descriptor.warnings.push([
+							"normalize", "Found two different values for 'locator.pointer': " + JSON.stringify([
+								descriptor.normalized.locator.pointer,
+								m[2]
+							])
+						]);
+					} else {
+						descriptor.normalized.locator.pointer = m[2];
+						copied["_from"] = true;
+					}
+				}
+			}
+
+			helpers.mergeObjectTo("boot", "boot");
+
+			helpers.mergeObjectTo("dist", "locator");
+
+
+			helpers.object("pm");
+			helpers.stringToObject("pm", "install");
+			if (options.type === "component") {
+				if (!descriptor.normalized.pm) {
+					descriptor.normalized.pm = {};
+				}
+				if (!descriptor.normalized.pm.install) {
+					descriptor.normalized.pm.install = "component";
+				}
+			}
+
+			helpers.string("homepage");
+
+			helpers.objectToObject("bugs", ["social", "bugs"]);
+			helpers.stringToObject("bugs", ["social", "bugs", "url"]);
+			helpers.stringToObject("twitter", ["social", "bugs", "twitter"], function(value) {
+				return value.replace(/^@/, "");
 			});
 
-			function formatComponentDependencies(value) {
-				var dependencies = {};
-				for (var id in value) {
-					dependencies[id.replace("/", "-")] = {
-						repository: {
-							"type": "git",
-							"url": "http://github.com/" + id + ".git"
-						},
-						selector: value[id]
+			if (options.type === "component") {
+				helpers.stringToArray("repo", "repositories", function(value) {
+					return {
+						"type": "git",
+			            "url": "http://github.com/" + value + ".git"
 					};
-				}
-				return dependencies;
-			}
-			helpers.objectToObject("dependencies", ["dependencies", "required"], formatComponentDependencies);
-			helpers.objectToObject("development", ["dependencies", "development"], formatComponentDependencies);
-
-		} else {
-			helpers.array("repositories");
-			helpers.anyToArray("repository", "repositories");
-
-			helpers.objectToObject("dependencies", ["dependencies", "required"]);
-			helpers.objectToObject("devDependencies", ["dependencies", "development"]);
-			helpers.objectToObject("optionalDependencies", ["dependencies", "optional"]);
-			helpers.arrayToObject("bundledDependencies", ["dependencies", "bundled"]);
-			helpers.arrayToObject("bundleDependencies", ["dependencies", "bundled"]);
-			if (
-				descriptor.normalized.dependencies &&
-				descriptor.normalized.dependencies.bundled
-			) {
-				var deps = descriptor.normalized.dependencies.bundled;
-				descriptor.normalized.dependencies.bundled = {};
-				deps.forEach(function(name) {
-					descriptor.normalized.dependencies.bundled[name] = false;
 				});
-			}
 
-			helpers.mergeObjectTo("mappings", ["dependencies", "required"]);
-			helpers.mergeObjectTo("devMappings", ["dependencies", "development"]);
-			helpers.mergeObjectTo("optionalMappings", ["dependencies", "optional"]);
-		}
-
-		helpers.booleanToObject("shrinkwrap", ["config", "shrinkwrap"]);
-		helpers.objectToObject("publishConfig", ["config", "publish"]);
-
-		helpers.objectToObject("engines", ["requirements", "engines"]);
-		helpers.mergeObjectTo("engine", ["requirements", "engines"]);
-
-		helpers.objectToObject("engines", ["requirements", "engines"]);
-		helpers.objectToObject("os", ["config", "os"]);
-
-		helpers.objectToObject("bin", ["exports", "bin"]);
-
-		if (options.type === "component") {
-		} else {
-			helpers.objectToObject("scripts", ["exports", "scripts"]);
-		}
-
-		helpers.objectToObject("on", ["events", "listen"]);
-
-		helpers.booleanToObject("publish", ["events", "publish"]);
-
-		helpers.objectToObject("env", ["requirements", "env"]);
-
-		helpers.objectToObject("layout", ["layout"]);
-		helpers.mergeObjectTo("directories", ["layout", "directories"]);
-
-		helpers.objectToObject("implements", ["config", "implements"]);
-
-		helpers.mergeObjectTo("require.async", "require.async", function(name, value) {
-			return [helpers.prefixRelativePath(name), value];
-		});
-
-		helpers.object("config");
-
-		if (typeof descriptor.raw.overlay === "object") {
-			if (typeof descriptor.normalized.overlay === "undefined") {
-				descriptor.normalized.overlay = {};
-			}
-		}
-
-		helpers.array("licenses");
-		helpers.anyToArray("license", "licenses");
-
-		helpers.stringToObject("main", ["exports", "main"], helpers.prefixRelativePath);
-
-		if (options.type === "component") {
-			function formatComponentExports(value) {
-				var exports = {};
-				if (Array.isArray(value)) {
-					value.forEach(function(path) {
-						exports[path] = helpers.prefixRelativePath(path);
-					});
-				} else {
-					for (var path in value) {
-						exports[path] = helpers.prefixRelativePath(value[path]);
+				function formatComponentDependencies(value) {
+					var dependencies = {};
+					for (var id in value) {
+						dependencies[id.replace("/", "-")] = {
+							repository: {
+								"type": "git",
+								"url": "http://github.com/" + id + ".git"
+							},
+							selector: value[id]
+						};
 					}
+					return dependencies;
 				}
-				return exports;
-			}
-			helpers.anyToObject("scripts", ["exports", "scripts"], formatComponentExports);
-			helpers.anyToObject("styles", ["exports", "styles"], formatComponentExports);
-			helpers.anyToObject("images", ["exports", "images"], formatComponentExports);
-			helpers.anyToObject("fonts", ["exports", "fonts"], formatComponentExports);
-			helpers.anyToObject("files", ["exports", "resources"], formatComponentExports);
-		} else {
-			if (typeof descriptor.raw.component === "object") {
-				if (typeof descriptor.normalized.exports === "undefined") {
-					descriptor.normalized.exports = {};
-				}
-			}
-		}
+				helpers.objectToObject("dependencies", ["dependencies", "required"], formatComponentDependencies);
+				helpers.objectToObject("development", ["dependencies", "development"], formatComponentDependencies);
 
-		helpers.remove("readme");
-		helpers.stringToObject("readmeFilename", ["files", "readme"], helpers.prefixRelativePath);		
-		helpers.anyToObject("man", ["files", "man"]);
-		// TODO: `files` -> `files.distribute`
-		// TODO: `.distignore` -> `files.distignore`
-		// TODO: `.gitignore` -> `files.vcsignore`
+			} else {
+				helpers.array("repositories");
+				helpers.anyToArray("repository", "repositories");
 
-		helpers.array("keywords");
-
-		helpers.array("maintainers");
-		helpers.array("contributors");
-		helpers.anyToArray("author", "contributors");
-
-
-		function processComponent(callback) {
-			if (typeof descriptor.raw.component !== "object") {
-				return callback(null);
-			}
-			var opts = {};
-			for (var name in options) {
-				opts[name] = options[name];
-			}
-			opts.type = "component";
-			return helpers.normalizeSub("component", descriptor.raw.component, opts, function(err, normalized) {
-				if (err) return callback(err);
-				if (typeof normalized.exports === "object") {
-					descriptor.normalized.exports = DEEPMERGE(descriptor.normalized.exports || {}, normalized.exports);
-					copied["component"] = true;
-				}
-				return callback(null);
-			});
-		}
-
-		function processOverlays(callback) {
-			if (typeof descriptor.raw.overlay !== "object") {
-				return callback(null);
-			}
-			var waitfor = WAITFOR.serial(function(err) {
-				if (err) return callback(err);
-				copied["overlay"] = true;
-				return callback(null);
-			});
-			for (var name in descriptor.raw.overlay) {
-				waitfor(name, function(name, done) {
-					return helpers.normalizeSub("overlay", descriptor.raw.overlay[name], options, function(err, normalized) {
-						if (err) return done(err);
-						descriptor.normalized.overlay[name] = normalized;
-						return done(null);
-					});
-				});
-			}
-		}
-
-		function detectInstallPM(callback) {
-			if (descriptor.normalized.pm && typeof descriptor.normalized.pm.install !== "undefined") {
-				return callback(null);
-			}
-			if (!descriptorPath) {
-				return callback(null);
-			}
-			// TODO: Look for other indicators as well.
-			return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
-				if (exists || PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules") {
-					if (!descriptor.normalized.pm) {
-						descriptor.normalized.pm = {};
-					}
-					descriptor.normalized.pm.install = "npm";
-				}
-				return callback(null);
-			});
-		}
-
-		function detectDependencyDirectory(callback) {
-			if (
-				descriptor.normalized.layout && 
-				descriptor.normalized.layout.directories &&
-				typeof descriptor.normalized.layout.directories.dependency !== "undefined"
-			) {
-				return callback(null);
-			}
-			if (
-				descriptor.normalized.requirements &&
-				descriptor.normalized.requirements.engines &&
-				descriptor.normalized.requirements.engines.node
-			) {
-				if (!descriptor.normalized.layout) {
-					descriptor.normalized.layout = {};
-				}
-				if (!descriptor.normalized.layout.directories) {
-					descriptor.normalized.layout.directories = {};
-				}
-				descriptor.normalized.layout.directories.dependency = "node_modules";
-				return callback(null);
-			}
-			if (!descriptorPath) {
-				return callback(null);
-			}
-			return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
+				helpers.objectToObject("dependencies", ["dependencies", "required"]);
+				helpers.objectToObject("devDependencies", ["dependencies", "development"]);
+				helpers.objectToObject("optionalDependencies", ["dependencies", "optional"]);
+				helpers.arrayToObject("bundledDependencies", ["dependencies", "bundled"]);
+				helpers.arrayToObject("bundleDependencies", ["dependencies", "bundled"]);
 				if (
-					exists ||
-					PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules" ||
-					(
-						descriptor.normalized.pm &&
-						descriptor.normalized.pm.install === "npm"
-					)
+					descriptor.normalized.dependencies &&
+					descriptor.normalized.dependencies.bundled
+				) {
+					var deps = descriptor.normalized.dependencies.bundled;
+					descriptor.normalized.dependencies.bundled = {};
+					deps.forEach(function(name) {
+						descriptor.normalized.dependencies.bundled[name] = false;
+					});
+				}
+
+				helpers.mergeObjectTo("mappings", ["dependencies", "required"]);
+				helpers.mergeObjectTo("devMappings", ["dependencies", "development"]);
+				helpers.mergeObjectTo("optionalMappings", ["dependencies", "optional"]);
+			}
+
+			helpers.booleanToObject("shrinkwrap", ["config", "shrinkwrap"]);
+			helpers.objectToObject("publishConfig", ["config", "publish"]);
+
+			helpers.objectToObject("engines", ["requirements", "engines"]);
+			helpers.mergeObjectTo("engine", ["requirements", "engines"]);
+
+			helpers.objectToObject("engines", ["requirements", "engines"]);
+			helpers.objectToObject("os", ["config", "os"]);
+
+			helpers.objectToObject("bin", ["exports", "bin"]);
+
+			if (options.type === "component") {
+			} else {
+				helpers.objectToObject("scripts", ["exports", "scripts"]);
+			}
+
+			helpers.objectToObject("on", ["events", "listen"]);
+
+			helpers.mergeObjectTo("overrides", "overrides");
+
+			helpers.booleanToObject("publish", ["events", "publish"]);
+
+			helpers.objectToObject("env", ["requirements", "env"]);
+
+			helpers.objectToObject("layout", ["layout"]);
+			helpers.mergeObjectTo("directories", ["layout", "directories"]);
+
+			helpers.objectToObject("implements", ["config", "implements"]);
+
+			helpers.mergeObjectTo("require.async", "require.async", function(name, value) {
+				return [helpers.prefixRelativePath(name), value];
+			});
+
+			helpers.object("config");
+
+			if (typeof descriptor.raw.overlay === "object") {
+				if (typeof descriptor.normalized.overlay === "undefined") {
+					descriptor.normalized.overlay = {};
+				}
+			}
+
+			helpers.array("licenses");
+			helpers.anyToArray("license", "licenses");
+
+			helpers.stringToObject("main", ["exports", "main"], helpers.prefixRelativePath);
+
+			if (options.type === "component") {
+				function formatComponentExports(value) {
+					var exports = {};
+					if (Array.isArray(value)) {
+						value.forEach(function(path) {
+							exports[path] = helpers.prefixRelativePath(path);
+						});
+					} else {
+						for (var path in value) {
+							exports[path] = helpers.prefixRelativePath(value[path]);
+						}
+					}
+					return exports;
+				}
+				helpers.anyToObject("scripts", ["exports", "scripts"], formatComponentExports);
+				helpers.anyToObject("styles", ["exports", "styles"], formatComponentExports);
+				helpers.anyToObject("images", ["exports", "images"], formatComponentExports);
+				helpers.anyToObject("fonts", ["exports", "fonts"], formatComponentExports);
+				helpers.anyToObject("files", ["exports", "resources"], formatComponentExports);
+			} else {
+				if (typeof descriptor.raw.component === "object") {
+					if (typeof descriptor.normalized.exports === "undefined") {
+						descriptor.normalized.exports = {};
+					}
+				}
+			}
+
+			helpers.remove("readme");
+			helpers.stringToObject("readmeFilename", ["files", "readme"], helpers.prefixRelativePath);		
+			helpers.anyToObject("man", ["files", "man"]);
+			// TODO: `files` -> `files.distribute`
+			// TODO: `.distignore` -> `files.distignore`
+			// TODO: `.gitignore` -> `files.vcsignore`
+
+			helpers.array("keywords");
+
+			helpers.array("maintainers");
+			helpers.array("contributors");
+			helpers.anyToArray("author", "contributors");
+
+
+			function processComponent(callback) {
+				if (typeof descriptor.raw.component !== "object") {
+					return callback(null);
+				}
+				var opts = {};
+				for (var name in options) {
+					opts[name] = options[name];
+				}
+				opts.type = "component";
+				return helpers.normalizeSub("component", descriptor.raw.component, opts, function(err, normalized) {
+					if (err) return callback(err);
+					if (typeof normalized.exports === "object") {
+						descriptor.normalized.exports = DEEPMERGE(descriptor.normalized.exports || {}, normalized.exports);
+						copied["component"] = true;
+					}
+					return callback(null);
+				});
+			}
+
+			function processOverlays(callback) {
+				if (typeof descriptor.raw.overlay !== "object") {
+					return callback(null);
+				}
+				var waitfor = WAITFOR.serial(function(err) {
+					if (err) return callback(err);
+					copied["overlay"] = true;
+					return callback(null);
+				});
+				for (var name in descriptor.raw.overlay) {
+					waitfor(name, function(name, done) {
+						return helpers.normalizeSub("overlay", descriptor.raw.overlay[name], options, function(err, normalized) {
+							if (err) return done(err);
+							descriptor.normalized.overlay[name] = normalized;
+							return done(null);
+						});
+					});
+				}
+			}
+
+			function detectInstallPM(callback) {
+				if (descriptor.normalized.pm && typeof descriptor.normalized.pm.install !== "undefined") {
+					return callback(null);
+				}
+				if (!descriptorPath) {
+					return callback(null);
+				}
+				// TODO: Look for other indicators as well.
+				return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
+					if (exists || PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules") {
+						if (!descriptor.normalized.pm) {
+							descriptor.normalized.pm = {};
+						}
+						descriptor.normalized.pm.install = "npm";
+					}
+					return callback(null);
+				});
+			}
+
+			function detectDependencyDirectory(callback) {
+				if (
+					descriptor.normalized.layout && 
+					descriptor.normalized.layout.directories &&
+					typeof descriptor.normalized.layout.directories.dependency !== "undefined"
+				) {
+					return callback(null);
+				}
+				if (
+					descriptor.normalized.requirements &&
+					descriptor.normalized.requirements.engines &&
+					descriptor.normalized.requirements.engines.node
 				) {
 					if (!descriptor.normalized.layout) {
 						descriptor.normalized.layout = {};
@@ -21700,250 +21841,272 @@ function normalize(descriptorPath, descriptor, options, callback) {
 						descriptor.normalized.layout.directories = {};
 					}
 					descriptor.normalized.layout.directories.dependency = "node_modules";
+					return callback(null);
 				}
-				return callback(null);
-			});
-		}
-
-		function detectBundledDependencies(callback) {
-			if (
-				descriptor.normalized.layout &&
-				descriptor.normalized.layout.directories &&
-				typeof descriptor.normalized.layout.directories.dependency !== "undefined"
-			) {
-				return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(exists) {
-					if (!exists) return callback(null);
-					if (!descriptor.normalized.dependencies) {
-						descriptor.normalized.dependencies = {};
+				if (!descriptorPath) {
+					return callback(null);
+				}
+				return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
+					if (
+						exists ||
+						PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules" ||
+						(
+							descriptor.normalized.pm &&
+							descriptor.normalized.pm.install === "npm"
+						)
+					) {
+						if (!descriptor.normalized.layout) {
+							descriptor.normalized.layout = {};
+						}
+						if (!descriptor.normalized.layout.directories) {
+							descriptor.normalized.layout.directories = {};
+						}
+						descriptor.normalized.layout.directories.dependency = "node_modules";
 					}
-					if (!descriptor.normalized.dependencies.bundled) {
-						descriptor.normalized.dependencies.bundled = {};
-					}
-					if (!descriptor.normalized.mappings) {
-						descriptor.normalized.mappings = {};
-					}
-					return options.API.FS.readdir(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(err, filenames) {
-						if (err) return callback(err);
-						filenames.forEach(function(filename) {
-							descriptor.normalized.dependencies.bundled[filename] = "./" + descriptor.normalized.layout.directories.dependency + "/" + filename;
-
-							var shasum = CRYPTO.createHash("sha1");
-							shasum.update(PATH.join(options.packagePath, descriptor.normalized.layout.directories.dependency, filename));
-							descriptor.normalized.mappings[filename] = shasum.digest("hex") + "-" + filename;
-						});
-						return callback(null);
-					});
+					return callback(null);
 				});
 			}
-			return callback(null);
-		}
 
-		function extraNormalization(callback) {
+			function detectBundledDependencies(callback) {
+				if (
+					descriptor.normalized.layout &&
+					descriptor.normalized.layout.directories &&
+					typeof descriptor.normalized.layout.directories.dependency !== "undefined"
+				) {
+					return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(exists) {
+						if (!exists) return callback(null);
+						if (!descriptor.normalized.dependencies) {
+							descriptor.normalized.dependencies = {};
+						}
+						if (!descriptor.normalized.dependencies.bundled) {
+							descriptor.normalized.dependencies.bundled = {};
+						}
+						if (!descriptor.normalized.mappings) {
+							descriptor.normalized.mappings = {};
+						}
+						return options.API.FS.readdir(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(err, filenames) {
+							if (err) return callback(err);
+							filenames.forEach(function(filename) {
+								descriptor.normalized.dependencies.bundled[filename] = "./" + descriptor.normalized.layout.directories.dependency + "/" + filename;
 
-			function normalize(property, callback) {
-				if (property === "boot.package") {
-					if (
-						descriptor.normalized.boot &&
-						descriptor.normalized.boot.package &&
-						/^\./.test(descriptor.normalized.boot.package)
-					) {
-						descriptor.normalized.boot.package = options._relpath(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.boot.package));
-					}
-				} else
-				if (property === "exports.main" && descriptorPath) {
-					if (
-						descriptor.normalized.exports &&
-						descriptor.normalized.exports.main &&
-						!/\.js$/.test(descriptor.normalized.exports.main)
-					) {
-						var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.exports.main);
-						return options.API.FS.exists(path, function(exists) {
-							if (exists) return callback(null);
-							var ext = false;
-							if (descriptor.normalized.pm) {
-								if (
-									descriptor.normalized.pm.install === "npm" ||
-									descriptor.normalized.pm.install === "component"
-								) {
-									ext = ".js";
+								var shasum = CRYPTO.createHash("sha1");
+								shasum.update(PATH.join(options.packagePath, descriptor.normalized.layout.directories.dependency, filename));
+								descriptor.normalized.mappings[filename] = shasum.digest("hex") + "-" + filename;
+							});
+							return callback(null);
+						});
+					});
+				}
+				return callback(null);
+			}
+
+			function extraNormalization(callback) {
+
+				function normalize(property, callback) {
+					if (property === "boot.package") {
+						if (
+							descriptor.normalized.boot &&
+							descriptor.normalized.boot.package &&
+							/^\./.test(descriptor.normalized.boot.package)
+						) {
+							descriptor.normalized.boot.package = options._relpath(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.boot.package));
+						}
+					} else
+					if (property === "exports.main" && descriptorPath) {
+						if (
+							descriptor.normalized.exports &&
+							descriptor.normalized.exports.main &&
+							!/\.js$/.test(descriptor.normalized.exports.main)
+						) {
+							var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.exports.main);
+							return options.API.FS.exists(path, function(exists) {
+								if (exists) return callback(null);
+								var ext = false;
+								if (descriptor.normalized.pm) {
+									if (
+										descriptor.normalized.pm.install === "npm" ||
+										descriptor.normalized.pm.install === "component"
+									) {
+										ext = ".js";
+									}
 								}
-							}
-							path += ext || ".js";
+								path += ext || ".js";
+								return options.API.FS.exists(path, function(exists) {
+									if (exists) {
+										descriptor.normalized.exports.main += ".js";
+									} else {
+										// TODO: Try other common module extensions?
+									}
+									return callback(null);
+								});
+							});
+						} else
+						if (
+							!descriptor.normalized.exports ||
+							!descriptor.normalized.exports.main
+						) {
+							var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), "index.js");
 							return options.API.FS.exists(path, function(exists) {
 								if (exists) {
-									descriptor.normalized.exports.main += ".js";
-								} else {
-									// TODO: Try other common module extensions?
+									if (!descriptor.normalized.exports) {
+										descriptor.normalized.exports = {};
+									}
+									descriptor.normalized.exports.main = "./index.js";
 								}
 								return callback(null);
 							});
-						});
-					} else
-					if (
-						!descriptor.normalized.exports ||
-						!descriptor.normalized.exports.main
-					) {
-						var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), "index.js");
-						return options.API.FS.exists(path, function(exists) {
-							if (exists) {
-								if (!descriptor.normalized.exports) {
-									descriptor.normalized.exports = {};
-								}
-								descriptor.normalized.exports.main = "./index.js";
-							}
-							return callback(null);
-						});
-					}
-				} else
-				if (property === "layout.directories") {
-					if (
-						descriptor.normalized.layout &&
-						descriptor.normalized.layout.directories
-					) {
-						for (var type in descriptor.normalized.layout.directories) {
-							descriptor.normalized.layout.directories[type] = helpers.prefixRelativePath(descriptor.normalized.layout.directories[type]).replace(/\/$/, "")
 						}
-					}
-				} else
-				if (property === "mappings") {
-					if (descriptor.normalized.pm && descriptor.normalized.pm.install === "npm") {
-						function addMappingsForPackage(packagePath, level, callback) {
-							// Only collect mappings up to the root path.
-							if (options.rootPath && options._realpath(packagePath).substring(0, options.rootPath.length) !== options.rootPath) {
-								return callback(null);
+					} else
+					if (property === "layout.directories") {
+						if (
+							descriptor.normalized.layout &&
+							descriptor.normalized.layout.directories
+						) {
+							for (var type in descriptor.normalized.layout.directories) {
+								descriptor.normalized.layout.directories[type] = helpers.prefixRelativePath(descriptor.normalized.layout.directories[type]).replace(/\/$/, "")
 							}
-							if (addMappingsForPackage__cache[packagePath]) {
-								if (addMappingsForPackage__cache[packagePath] !== true) {
-									for (var filename in addMappingsForPackage__cache[packagePath].bundled) {
-										if (!descriptor.normalized.dependencies) {
-											descriptor.normalized.dependencies = {};
-										}
-										if (!descriptor.normalized.dependencies.bundled) {
-											descriptor.normalized.dependencies.bundled = {};
-										}
-										if (!descriptor.normalized.mappings) {
-											descriptor.normalized.mappings = {};
-										}
-										if (!descriptor.normalized.mappings[filename]) {
-											descriptor.normalized.dependencies.bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
-											descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
-										}
-									}
-								}
-								if (options._realpath(packagePath) === "/") {
+						}
+					} else
+					if (property === "mappings") {
+						if (descriptor.normalized.pm && descriptor.normalized.pm.install === "npm") {
+							function addMappingsForPackage(packagePath, level, callback) {
+								// Only collect mappings up to the root path.
+								if (options.rootPath && options._realpath(packagePath).substring(0, options.rootPath.length) !== options.rootPath) {
 									return callback(null);
 								}
-								if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) return callback(null);
-								return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
-							}
-							addMappingsForPackage__cache[packagePath] = true;							
-							return options.API.FS.exists(PATH.join(options._realpath(packagePath), "node_modules"), function(exists) {
-								if (!exists) {
-									if (options._realpath(packagePath) === "/") return callback(null);
-									if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
+								if (addMappingsForPackage__cache[packagePath]) {
+									if (addMappingsForPackage__cache[packagePath] !== true) {
+										for (var filename in addMappingsForPackage__cache[packagePath].bundled) {
+											if (!descriptor.normalized.dependencies) {
+												descriptor.normalized.dependencies = {};
+											}
+											if (!descriptor.normalized.dependencies.bundled) {
+												descriptor.normalized.dependencies.bundled = {};
+											}
+											if (!descriptor.normalized.mappings) {
+												descriptor.normalized.mappings = {};
+											}
+											if (!descriptor.normalized.mappings[filename]) {
+												descriptor.normalized.dependencies.bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
+												descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
+											}
+										}
+									}
+									if (options._realpath(packagePath) === "/") {
 										return callback(null);
 									}
+									if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) return callback(null);
 									return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
 								}
-								return options.API.FS.readdir(PATH.join(options._realpath(packagePath), "node_modules"), function(err, filenames) {
-									if (err) return callback(err);
-									filenames.forEach(function(filename) {
-										if (/^\./.test(filename)) return;
-										if (!descriptor.normalized.dependencies) {
-											descriptor.normalized.dependencies = {};
+								addMappingsForPackage__cache[packagePath] = true;							
+								return options.API.FS.exists(PATH.join(options._realpath(packagePath), "node_modules"), function(exists) {
+									if (!exists) {
+										if (options._realpath(packagePath) === "/") return callback(null);
+										if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
+											return callback(null);
 										}
-										if (!descriptor.normalized.dependencies.bundled) {
-											descriptor.normalized.dependencies.bundled = {};
-										}
-										if (!descriptor.normalized.mappings) {
-											descriptor.normalized.mappings = {};
-										}
+										return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
+									}
+									return options.API.FS.readdir(PATH.join(options._realpath(packagePath), "node_modules"), function(err, filenames) {
+										if (err) return callback(err);
+										filenames.forEach(function(filename) {
+											if (/^\./.test(filename)) return;
+											if (!descriptor.normalized.dependencies) {
+												descriptor.normalized.dependencies = {};
+											}
+											if (!descriptor.normalized.dependencies.bundled) {
+												descriptor.normalized.dependencies.bundled = {};
+											}
+											if (!descriptor.normalized.mappings) {
+												descriptor.normalized.mappings = {};
+											}
 
-										if (!addMappingsForPackage__cache[packagePath] || addMappingsForPackage__cache[packagePath] === true) {
-											addMappingsForPackage__cache[packagePath] = {
-												bundled: {},
-												mappings: {}
-											};
-										}
-										addMappingsForPackage__cache[packagePath].bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
-										var shasum = CRYPTO.createHash("sha1");
-										shasum.update(PATH.join(packagePath, "node_modules", filename));
-										addMappingsForPackage__cache[packagePath].mappings[filename] = shasum.digest("hex") + "-" + filename;
+											if (!addMappingsForPackage__cache[packagePath] || addMappingsForPackage__cache[packagePath] === true) {
+												addMappingsForPackage__cache[packagePath] = {
+													bundled: {},
+													mappings: {}
+												};
+											}
+											addMappingsForPackage__cache[packagePath].bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
+											var shasum = CRYPTO.createHash("sha1");
+											shasum.update(PATH.join(packagePath, "node_modules", filename));
+											addMappingsForPackage__cache[packagePath].mappings[filename] = shasum.digest("hex") + "-" + filename;
 
-										if (!descriptor.normalized.mappings[filename]) {
-											descriptor.normalized.dependencies.bundled[filename] = addMappingsForPackage__cache[packagePath].bundled[filename];
-											descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
+											if (!descriptor.normalized.mappings[filename]) {
+												descriptor.normalized.dependencies.bundled[filename] = addMappingsForPackage__cache[packagePath].bundled[filename];
+												descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
+											}
+										});
+										if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
+											return callback(null);
 										}
+										return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
 									});
-									if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
-										return callback(null);
-									}
-									return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
 								});
-							});
-						}
-						return addMappingsForPackage(PATH.join(options.packagePath, ".."), 0, function(err) {
-							if (err) return callback(err);
-							return callback(null);
-						});
-					}
-				}
-				return callback(null);
-			}
-
-			return normalize("boot.package", function(err) {
-				if (err) return callback(err);
-				return normalize("exports.main", function(err) {
-					if (err) return callback(err);
-					return normalize("layout.directories", function(err) {
-						if (err) return callback(err);
-						return normalize("mappings", callback);				
-					});
-				});
-			});
-		}
-
-		return processComponent(function(err) {
-			if (err) return callback(err);
-
-			return processOverlays(function(err) {
-				if (err) return callback(err);
-
-				return detectInstallPM(function(err) {
-					if (err) return callback(err);
-
-					return detectDependencyDirectory(function(err) {
-						if (err) return callback(err);
-
-						return detectBundledDependencies(function(err) {
-							if (err) return callback(err);
-
-							return extraNormalization(function(err) {
+							}
+							return addMappingsForPackage(PATH.join(options.packagePath, ".."), 0, function(err) {
 								if (err) return callback(err);
-
-								Object.keys(descriptor.raw).forEach(function(key) {
-									if (copied[key]) return;
-									if (options.includeUnknownProperties) {
-										descriptor.normalized[key] = descriptor.raw[key];
-										copied[key] = true;
-									} else {
-										descriptor.warnings.push([
-											"normalize", "Property '" + key + "' was ignored"
-										]);
-									}
-								});
-
 								return callback(null);
 							});
+						}
+					}
+					return callback(null);
+				}
+
+				return normalize("boot.package", function(err) {
+					if (err) return callback(err);
+					return normalize("exports.main", function(err) {
+						if (err) return callback(err);
+						return normalize("layout.directories", function(err) {
+							if (err) return callback(err);
+							return normalize("mappings", callback);				
+						});
+					});
+				});
+			}
+
+			return processComponent(function(err) {
+				if (err) return callback(err);
+
+				return processOverlays(function(err) {
+					if (err) return callback(err);
+
+					return detectInstallPM(function(err) {
+						if (err) return callback(err);
+
+						return detectDependencyDirectory(function(err) {
+							if (err) return callback(err);
+
+							return detectBundledDependencies(function(err) {
+								if (err) return callback(err);
+
+								return extraNormalization(function(err) {
+									if (err) return callback(err);
+
+									Object.keys(descriptor.raw).forEach(function(key) {
+										if (copied[key]) return;
+										if (options.includeUnknownProperties) {
+											descriptor.normalized[key] = descriptor.raw[key];
+											copied[key] = true;
+										} else {
+											descriptor.warnings.push([
+												"normalize", "Property '" + key + "' was ignored"
+											]);
+										}
+									});
+
+									return callback(null);
+								});
+							});
 						});
 					});
 				});
 			});
-		});
 
-	} catch(err) {
-		return callback(err);
-	}
+		} catch(err) {
+			return callback(err);
+		}
+	});
 };
 
 }
@@ -22392,7 +22555,7 @@ return {
 };
 }
 , {"filename":"node_modules/pinf-it-program-insight/node_modules/pinf-it-package-insight/node_modules/deepmerge/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-it-program-insight/node_modules/pinf-it-package-insight/node_modules/pinf-primitives-js/primitives.js","mtime":1379755119,"wrapper":"commonjs","format":"commonjs","id":"78c325ed1929112310e192c92ac8f6785d8a10ee-pinf-primitives-js/primitives.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-it-program-insight/node_modules/pinf-it-package-insight/node_modules/pinf-primitives-js/primitives.js","mtime":1380943073,"wrapper":"commonjs","format":"commonjs","id":"78c325ed1929112310e192c92ac8f6785d8a10ee-pinf-primitives-js/primitives.js"}
 require.memoize("78c325ed1929112310e192c92ac8f6785d8a10ee-pinf-primitives-js/primitives.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-it-program-insight/node_modules/pinf-it-package-insight/node_modules/pinf-primitives-js';
 
@@ -22411,12 +22574,9 @@ exports.normalizeEnvironmentVariables = function(env, overrides) {
 	if (!ENV.PINF_PROGRAM && !ENV.CWD) {
 		throw new Error("Either `ENV.PINF_PROGRAM` (" + ENV.PINF_PROGRAM + ") or `ENV.CWD` (" + ENV.CWD + ") must be set!");
 	}
-	if (!ENV.PINF_PACKAGE && !ENV.CWD) {
-		throw new Error("Either `ENV.PINF_PACKAGE` (" + ENV.PINF_PACKAGE + ") or `ENV.CWD` (" + ENV.CWD + ") must be set!");
-	}
 	// `PINF_PACKAGES` contains a list of directories used to lookup packages.
 	// Packages should be stored in these directories where the package directory
-	// represents the global ID of the package.
+	// represents the global ID of the package. This is ideally a DNS-based hostname with path.
 	ENV.PINF_PACKAGES = (typeof ENV.PINF_PACKAGES === "string") ? ENV.PINF_PACKAGES : (process.env.PINF_PACKAGES || "");
 	// If `PINF_PROGRAM_PARENT` is set the parent descriptor will be merged on top of our descriptor.
 	// Under normal conditions the `PINF_PROGRAM_PARENT` varibale should never be set in the shell directly.
@@ -22428,7 +22588,7 @@ exports.normalizeEnvironmentVariables = function(env, overrides) {
 	//   * A local filesystem path to a `program.json` file (how to boot & custom config).
 	ENV.PINF_PROGRAM = ENV.PINF_PROGRAM || PATH.join(ENV.CWD, "program.json");
 	//   * A local filesystem path to a `package.json` file (what to boot & default config).
-	ENV.PINF_PACKAGE = ENV.PINF_PACKAGE || PATH.join(ENV.CWD, "package.json");
+	ENV.PINF_PACKAGE = ENV.PINF_PACKAGE || (ENV.CWD && PATH.join(ENV.CWD, "package.json")) || "";
 	//   * A local filesystem path to a `program.rt.json` file (the state to boot in).
 	ENV.PINF_RUNTIME = ENV.PINF_RUNTIME || PATH.join(ENV.PINF_PROGRAM_PARENT || ENV.PINF_PROGRAM, "../.rt/program.rt.json");
 	//   * The mode the runtime should run it. Will load `program.$PINF_MODE.json`.
@@ -22631,7 +22791,7 @@ return {
 };
 }
 , {"filename":"node_modules/pinf-it-program-insight/node_modules/pinf-it-package-insight/node_modules/pinf-primitives-js/node_modules/deepcopy/lib/deepcopy.js"});
-// @pinf-bundle-module: {"file":"lib/vm.js","mtime":1379972735,"wrapper":"commonjs","format":"commonjs","id":"/lib/vm.js"}
+// @pinf-bundle-module: {"file":"lib/vm.js","mtime":1381190478,"wrapper":"commonjs","format":"commonjs","id":"/lib/vm.js"}
 require.memoize("/lib/vm.js", 
 function(require, exports, module) {var __dirname = 'lib';
 
@@ -22649,15 +22809,25 @@ var VM = exports.VM = function($pinf) {
 	this.sandboxes = {};
 }
 
-VM.prototype.loadPackage = function(uri, options, callback) {
+VM.prototype.loadPackage = function(uri, options, finalCallback) {
 	var self = this;
-	if (typeof options === "function" && typeof callback === "undefined") {
-		callback = options;
+	if (typeof options === "function" && typeof finalCallback === "undefined") {
+		finalCallback = options;
 		options = null;
 	}
 	options = options || {};
 	var key = uri + ":" + (options.rootModule || "");
-	if (self.sandboxes[key]) {
+
+	var startTime = Date.now();
+	if (options.verbose) console.log(("[pinf-for-nodejs][vm][START] load package: " + uri).inverse);
+
+	var callback = function() {
+		if (options.verbose) console.log(("[pinf-for-nodejs][vm][END] (" + (Date.now() - startTime) + " ms) load package: " + uri).inverse);
+		return finalCallback.apply(this, arguments);
+	}
+
+	if (self.sandboxes[key] && options.ttl !== -1) {
+		if (options.verbose) console.log(("[pinf-for-nodejs][vm] using cached sandbox: " + key).green);
 		return callback(null, self.sandboxes[key]);
 	}
 
@@ -22699,9 +22869,11 @@ VM.prototype.loadPackage = function(uri, options, callback) {
 					// Root bundle not found where it should be. It has likely not been generated yet.
 					return bundleCallback(null);
 				}
+				if (options.verbose) console.log(("[pinf-for-nodejs][vm] using pre-generated root bundle: " + rootBundlePath).green);
 				return LOADER.sandbox(rootBundlePath, {
 					verbose: options.verbose || false,
 					debug: options.debug || false,
+					ttl: options.ttl,
 					rootPath: options.rootPath,
 					globals: options.globals,
 					resolveDynamicSync: function (moduleObj, pkg, sandbox, canonicalId, options) {
@@ -22729,11 +22901,15 @@ VM.prototype.loadPackage = function(uri, options, callback) {
 		if (err) return callback(err);
 
 		var distPath = options.distPath || self.$pinf.makePath("cache", PATH.join("vm", CONTEXT.uriToFilename(uri), "dist"));
+
+		if (options.verbose) console.log(("[pinf-for-nodejs][vm] load via bundler").yellow);
+
 		var opts = self.$pinf.makeOptions({
 			$pinf: options.$pinf || null,
 			verbose: options.verbose || false,
 			debug: options.debug || false,
 			test: options.test || false,
+			ttl: options.ttl,
 			rootPath: options.rootPath,
 			rootModule: options.rootModule,
 			distPath: distPath,
@@ -22747,7 +22923,10 @@ VM.prototype.loadPackage = function(uri, options, callback) {
 			}
 		});
 
-		if (options.$pinf && options.$pinf.ttl === -1) {
+		if (typeof options.ttl === "undefined" && options.$pinf) {
+			options.ttl = options.$pinf.ttl;
+		}
+		if (options.ttl === -1) {
 			// Remove the dist path to force re-generate the bundle.
 			FS.removeSync(opts.distPath);
 		} else {
@@ -22761,12 +22940,19 @@ VM.prototype.loadPackage = function(uri, options, callback) {
 
 			opts.$pinf._api.FS = vfs;
 
+			if (options.verbose) console.log(("[pinf-for-nodejs][vm] bundling package: " + uri));
+
 			return RT_BUNDLER.bundlePackage(uri, opts, function(err, bundleDescriptors, helpers) {
 				if (err) return callback(err);
+
+				FS.outputJson(bundleDescriptors["#pinf"].data.rootBundlePath + ".bundle.json", bundleDescriptors);
+
+				if (options.verbose) console.log(("[pinf-for-nodejs][vm] using root bundle: " + bundleDescriptors["#pinf"].data.rootBundlePath));
 
 				return LOADER.sandbox(bundleDescriptors["#pinf"].data.rootBundlePath, {
 					verbose: options.verbose || false,
 					debug: options.debug || false,
+					ttl: options.ttl,
 		            resolveDynamicSync: helpers.resolveDynamicSync,
 		            ensureAsync: helpers.ensureAsync
 				}, function(sandbox) {
@@ -22780,7 +22966,7 @@ VM.prototype.loadPackage = function(uri, options, callback) {
 
 }
 , {"filename":"lib/vm.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/lib/rt-bundler.js","mtime":1379971958,"wrapper":"commonjs","format":"commonjs","id":"d410d765c4a91b52828ad9d1eba8d92a9eb81b63-pinf-it-bundler/lib/rt-bundler.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/lib/rt-bundler.js","mtime":1381194278,"wrapper":"commonjs","format":"commonjs","id":"d410d765c4a91b52828ad9d1eba8d92a9eb81b63-pinf-it-bundler/lib/rt-bundler.js"}
 require.memoize("d410d765c4a91b52828ad9d1eba8d92a9eb81b63-pinf-it-bundler/lib/rt-bundler.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-it-bundler/lib';
 
@@ -23106,7 +23292,7 @@ exports.bundlePackage = function(bundlePackagePath, bundleOptions, callback) {
 				if (/^\//.test(canonicalId)) {
 					path = PATH.join(bundleBasePath, canonicalId);
 
-					if (!bundleOptions.API.FS.existsSync(PATH.join(bundleOptions.rootPath, path))) {
+					if (!bundleOptions.API.FS.existsSync(PATH.join(bundleOptions.rootPath || "", path))) {
 						var filePath = PATH.join(bundlePackagePath, canonicalId);
 						var options = {
 							$pinf: bundleOptions.$pinf || null,
@@ -23128,7 +23314,7 @@ exports.bundlePackage = function(bundlePackagePath, bundleOptions, callback) {
 						bundling.push(deferred.promise);
 						// We throw to stop sandbox execution and catch it below
 						// so we can re-run sandbox when bundle is generated.
-						var error = new Error("Bundling dynamic require.");
+						var error = new Error("Bundling dynamic require '" + canonicalId + "' for '" + ((moduleObj.parentModule && moduleObj.parentModule.id) || "<main>") + "'.");
 						error.code = "BUNDLING_DYNAMIC_REQUIRE";
 						throw error;
 					}
@@ -27742,7 +27928,7 @@ return {
 };
 }
 , {"filename":"node_modules/pinf-it-bundler/node_modules/waitfor/node_modules/setimmediate/setImmediate.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/node_modules/pinf-it-module-insight/lib/module-insight.js","mtime":1379832659,"wrapper":"commonjs","format":"commonjs","id":"b930ebdd389f52ad47542b825bd2fb6705f2a6d4-pinf-it-module-insight/lib/module-insight.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/node_modules/pinf-it-module-insight/lib/module-insight.js","mtime":1380151140,"wrapper":"commonjs","format":"commonjs","id":"b930ebdd389f52ad47542b825bd2fb6705f2a6d4-pinf-it-module-insight/lib/module-insight.js"}
 require.memoize("b930ebdd389f52ad47542b825bd2fb6705f2a6d4-pinf-it-module-insight/lib/module-insight.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-it-bundler/node_modules/pinf-it-module-insight/lib';
 
@@ -27771,7 +27957,9 @@ exports.parseFile = function(filePath, options, callback) {
 		if (!options.$pinf) {
 			return proceedCallback(callback);
 		}
-		var gateway = options.$pinf.gateway("vfs-write-from-read-mtime-bypass");
+		var gateway = options.$pinf.gateway("vfs-write-from-read-mtime-bypass", {
+			verbose: false
+		});
 		// All criteria that makes this call (argument combination) unique.
 		gateway.setKey({
 			filePath: filePath
@@ -33856,7 +34044,7 @@ parseStatement: true, parseSourceElement: true */
 
 })
 , {"filename":"node_modules/pinf-it-bundler/node_modules/pinf-it-module-insight/node_modules/esprima/esprima.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/node_modules/pinf-it-package-insight/lib/package-insight.js","mtime":1379882253,"wrapper":"commonjs","format":"commonjs","id":"b357eaf1268ffeb8ba51bc0ea7cf154db5841df7-pinf-it-package-insight/lib/package-insight.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/node_modules/pinf-it-package-insight/lib/package-insight.js","mtime":1381194112,"wrapper":"commonjs","format":"commonjs","id":"b357eaf1268ffeb8ba51bc0ea7cf154db5841df7-pinf-it-package-insight/lib/package-insight.js"}
 require.memoize("b357eaf1268ffeb8ba51bc0ea7cf154db5841df7-pinf-it-package-insight/lib/package-insight.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-it-bundler/node_modules/pinf-it-package-insight/lib';
 
@@ -33926,7 +34114,8 @@ exports.parse = function(packagePath, options, callback) {
 				return proceedCallback(callback);
 			}
 			var gateway = options.$pinf.gateway("vfs-write-from-read-mtime-bypass", {
-				cacheNamespace: "pinf-it-package-insight"
+				cacheNamespace: "pinf-it-package-insight",
+				verbose: false
 			});
 			// All criteria that makes this call (argument combination) unique.
 			var opts = {};
@@ -33969,7 +34158,7 @@ exports.parse = function(packagePath, options, callback) {
 					packagePath = PATH.dirname(packagePath);
 				}
 
-				if (options.verbose) console.log("[pinf-it-package-insight] parse package: " + packagePath);
+				if (options.debug) console.log("[pinf-it-package-insight] parse package: " + packagePath);
 
 				var shasum = CRYPTO.createHash("sha1");
 				shasum.update(packagePath);
@@ -34479,312 +34668,312 @@ function normalize(descriptorPath, descriptor, options, callback) {
 
 	var helpers = exports.makeMergeHelpers(exports, descriptor, copied);
 
-	try {
-
-		// If `true` will traverse up all parent directories all the way to '/'.
-		// If 'node_modules' directories found will make package available if not already
-		// for same name (this is consistent with the NodeJS module lookup logic).
-		options.mapParentSiblingPackages = (
-			descriptor.raw &&
-			descriptor.raw.config &&
-			descriptor.raw.config["pinf/0/bundler/options/0"] &&
-			descriptor.raw.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
-		) || false;
-		if (options.$pinf) {
-			try {
-				var info = options.$pinf.getPackageInfo(options._realpath(PATH.dirname(descriptorPath)));
-				if (
-					info &&
-					info.package &&
-					info.package.config &&
-					info.package.config["pinf/0/bundler/options/0"] &&
-					info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
-				) {
-					options.mapParentSiblingPackages = info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages;
-				}
-			} catch(err) {}
+	function realpath(callback) {
+		if (!descriptorPath) {
+			return callback(null, null);
 		}
-
-		helpers.anyToArray("@extends", "@extends");
-
-		helpers.string("uid");
-		helpers.string("name");
-		helpers.string("description");
-		helpers.string("version");
-
-		helpers.removeIfMatch("_id", descriptor.normalized.name + "@" + descriptor.normalized.version);
-		if (typeof descriptor.raw["_from"] === "string") {
-			var m = descriptor.raw["_from"].match(/^([^@]*)@(.*?)$/);
-			if (m && m[1] === descriptor.normalized.name) {
-				if (!descriptor.normalized.locator) {
-					descriptor.normalized.locator = {};
-				}
-				if (
-					typeof descriptor.normalized.locator.pointer !== "undefined" &&
-					descriptor.normalized.locator.pointer !== m[2]
-				) {
-					descriptor.warnings.push([
-						"normalize", "Found two different values for 'locator.pointer': " + JSON.stringify([
-							descriptor.normalized.locator.pointer,
-							m[2]
-						])
-					]);
-				} else {
-					descriptor.normalized.locator.pointer = m[2];
-					copied["_from"] = true;
-				}
+		return options.API.FS.realpath(options._realpath(descriptorPath), function(err, descriptorRealPath) {
+			if (err && err.code !== "ENOENT") {
+				return callback(err);
 			}
-		}
-
-		helpers.mergeObjectTo("boot", "boot");
-
-		helpers.mergeObjectTo("dist", "locator");
-
-
-		helpers.object("pm");
-		helpers.stringToObject("pm", "install");
-		if (options.type === "component") {
-			if (!descriptor.normalized.pm) {
-				descriptor.normalized.pm = {};
-			}
-			if (!descriptor.normalized.pm.install) {
-				descriptor.normalized.pm.install = "component";
-			}
-		}
-
-		helpers.string("homepage");
-
-		helpers.objectToObject("bugs", ["social", "bugs"]);
-		helpers.stringToObject("bugs", ["social", "bugs", "url"]);
-		helpers.stringToObject("twitter", ["social", "bugs", "twitter"], function(value) {
-			return value.replace(/^@/, "");
+			return callback(null, descriptorRealPath);
 		});
+	}
 
-		if (options.type === "component") {
-			helpers.stringToArray("repo", "repositories", function(value) {
-				return {
-					"type": "git",
-		            "url": "http://github.com/" + value + ".git"
-				};
+	return realpath(function(err, descriptorRealPath) {
+		if (err) return callback(err);
+
+		try {
+
+			if (options.ttl === -1)  {
+				addMappingsForPackage__cache = {};
+			}
+
+			// If `true` will traverse up all parent directories all the way to '/'.
+			// If 'node_modules' directories found will make package available if not already
+			// for same name (this is consistent with the NodeJS module lookup logic).
+			options.mapParentSiblingPackages = (
+				descriptor.raw &&
+				descriptor.raw.config &&
+				descriptor.raw.config["pinf/0/bundler/options/0"] &&
+				descriptor.raw.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
+			) || false;
+			if (options.$pinf && descriptorRealPath) {
+				try {
+					var info = options.$pinf.getPackageInfo(PATH.dirname(descriptorRealPath));
+					if (
+						info &&
+						info.package &&
+						info.package.config &&
+						info.package.config["pinf/0/bundler/options/0"] &&
+						info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages
+					) {
+						options.mapParentSiblingPackages = info.package.config["pinf/0/bundler/options/0"].mapParentSiblingPackages;
+					}
+				} catch(err) {}
+			}
+
+			helpers.anyToArray("@extends", "@extends");
+
+			helpers.string("uid");
+			helpers.string("name");
+			helpers.string("description");
+			helpers.string("version");
+
+			helpers.removeIfMatch("_id", descriptor.normalized.name + "@" + descriptor.normalized.version);
+			if (typeof descriptor.raw["_from"] === "string") {
+				var m = descriptor.raw["_from"].match(/^([^@]*)@(.*?)$/);
+				if (m && m[1] === descriptor.normalized.name) {
+					if (!descriptor.normalized.locator) {
+						descriptor.normalized.locator = {};
+					}
+					if (
+						typeof descriptor.normalized.locator.pointer !== "undefined" &&
+						descriptor.normalized.locator.pointer !== m[2]
+					) {
+						descriptor.warnings.push([
+							"normalize", "Found two different values for 'locator.pointer': " + JSON.stringify([
+								descriptor.normalized.locator.pointer,
+								m[2]
+							])
+						]);
+					} else {
+						descriptor.normalized.locator.pointer = m[2];
+						copied["_from"] = true;
+					}
+				}
+			}
+
+			helpers.mergeObjectTo("boot", "boot");
+
+			helpers.mergeObjectTo("dist", "locator");
+
+
+			helpers.object("pm");
+			helpers.stringToObject("pm", "install");
+			if (options.type === "component") {
+				if (!descriptor.normalized.pm) {
+					descriptor.normalized.pm = {};
+				}
+				if (!descriptor.normalized.pm.install) {
+					descriptor.normalized.pm.install = "component";
+				}
+			}
+
+			helpers.string("homepage");
+
+			helpers.objectToObject("bugs", ["social", "bugs"]);
+			helpers.stringToObject("bugs", ["social", "bugs", "url"]);
+			helpers.stringToObject("twitter", ["social", "bugs", "twitter"], function(value) {
+				return value.replace(/^@/, "");
 			});
 
-			function formatComponentDependencies(value) {
-				var dependencies = {};
-				for (var id in value) {
-					dependencies[id.replace("/", "-")] = {
-						repository: {
-							"type": "git",
-							"url": "http://github.com/" + id + ".git"
-						},
-						selector: value[id]
+			if (options.type === "component") {
+				helpers.stringToArray("repo", "repositories", function(value) {
+					return {
+						"type": "git",
+			            "url": "http://github.com/" + value + ".git"
 					};
-				}
-				return dependencies;
-			}
-			helpers.objectToObject("dependencies", ["dependencies", "required"], formatComponentDependencies);
-			helpers.objectToObject("development", ["dependencies", "development"], formatComponentDependencies);
-
-		} else {
-			helpers.array("repositories");
-			helpers.anyToArray("repository", "repositories");
-
-			helpers.objectToObject("dependencies", ["dependencies", "required"]);
-			helpers.objectToObject("devDependencies", ["dependencies", "development"]);
-			helpers.objectToObject("optionalDependencies", ["dependencies", "optional"]);
-			helpers.arrayToObject("bundledDependencies", ["dependencies", "bundled"]);
-			helpers.arrayToObject("bundleDependencies", ["dependencies", "bundled"]);
-			if (
-				descriptor.normalized.dependencies &&
-				descriptor.normalized.dependencies.bundled
-			) {
-				var deps = descriptor.normalized.dependencies.bundled;
-				descriptor.normalized.dependencies.bundled = {};
-				deps.forEach(function(name) {
-					descriptor.normalized.dependencies.bundled[name] = false;
 				});
-			}
 
-			helpers.mergeObjectTo("mappings", ["dependencies", "required"]);
-			helpers.mergeObjectTo("devMappings", ["dependencies", "development"]);
-			helpers.mergeObjectTo("optionalMappings", ["dependencies", "optional"]);
-		}
-
-		helpers.booleanToObject("shrinkwrap", ["config", "shrinkwrap"]);
-		helpers.objectToObject("publishConfig", ["config", "publish"]);
-
-		helpers.objectToObject("engines", ["requirements", "engines"]);
-		helpers.mergeObjectTo("engine", ["requirements", "engines"]);
-
-		helpers.objectToObject("engines", ["requirements", "engines"]);
-		helpers.objectToObject("os", ["config", "os"]);
-
-		helpers.objectToObject("bin", ["exports", "bin"]);
-
-		if (options.type === "component") {
-		} else {
-			helpers.objectToObject("scripts", ["exports", "scripts"]);
-		}
-
-		helpers.objectToObject("on", ["events", "listen"]);
-
-		helpers.booleanToObject("publish", ["events", "publish"]);
-
-		helpers.objectToObject("env", ["requirements", "env"]);
-
-		helpers.objectToObject("layout", ["layout"]);
-		helpers.mergeObjectTo("directories", ["layout", "directories"]);
-
-		helpers.objectToObject("implements", ["config", "implements"]);
-
-		helpers.mergeObjectTo("require.async", "require.async", function(name, value) {
-			return [helpers.prefixRelativePath(name), value];
-		});
-
-		helpers.object("config");
-
-		if (typeof descriptor.raw.overlay === "object") {
-			if (typeof descriptor.normalized.overlay === "undefined") {
-				descriptor.normalized.overlay = {};
-			}
-		}
-
-		helpers.array("licenses");
-		helpers.anyToArray("license", "licenses");
-
-		helpers.stringToObject("main", ["exports", "main"], helpers.prefixRelativePath);
-
-		if (options.type === "component") {
-			function formatComponentExports(value) {
-				var exports = {};
-				if (Array.isArray(value)) {
-					value.forEach(function(path) {
-						exports[path] = helpers.prefixRelativePath(path);
-					});
-				} else {
-					for (var path in value) {
-						exports[path] = helpers.prefixRelativePath(value[path]);
+				function formatComponentDependencies(value) {
+					var dependencies = {};
+					for (var id in value) {
+						dependencies[id.replace("/", "-")] = {
+							repository: {
+								"type": "git",
+								"url": "http://github.com/" + id + ".git"
+							},
+							selector: value[id]
+						};
 					}
+					return dependencies;
 				}
-				return exports;
-			}
-			helpers.anyToObject("scripts", ["exports", "scripts"], formatComponentExports);
-			helpers.anyToObject("styles", ["exports", "styles"], formatComponentExports);
-			helpers.anyToObject("images", ["exports", "images"], formatComponentExports);
-			helpers.anyToObject("fonts", ["exports", "fonts"], formatComponentExports);
-			helpers.anyToObject("files", ["exports", "resources"], formatComponentExports);
-		} else {
-			if (typeof descriptor.raw.component === "object") {
-				if (typeof descriptor.normalized.exports === "undefined") {
-					descriptor.normalized.exports = {};
-				}
-			}
-		}
+				helpers.objectToObject("dependencies", ["dependencies", "required"], formatComponentDependencies);
+				helpers.objectToObject("development", ["dependencies", "development"], formatComponentDependencies);
 
-		helpers.remove("readme");
-		helpers.stringToObject("readmeFilename", ["files", "readme"], helpers.prefixRelativePath);		
-		helpers.anyToObject("man", ["files", "man"]);
-		// TODO: `files` -> `files.distribute`
-		// TODO: `.distignore` -> `files.distignore`
-		// TODO: `.gitignore` -> `files.vcsignore`
+			} else {
+				helpers.array("repositories");
+				helpers.anyToArray("repository", "repositories");
 
-		helpers.array("keywords");
-
-		helpers.array("maintainers");
-		helpers.array("contributors");
-		helpers.anyToArray("author", "contributors");
-
-
-		function processComponent(callback) {
-			if (typeof descriptor.raw.component !== "object") {
-				return callback(null);
-			}
-			var opts = {};
-			for (var name in options) {
-				opts[name] = options[name];
-			}
-			opts.type = "component";
-			return helpers.normalizeSub("component", descriptor.raw.component, opts, function(err, normalized) {
-				if (err) return callback(err);
-				if (typeof normalized.exports === "object") {
-					descriptor.normalized.exports = DEEPMERGE(descriptor.normalized.exports || {}, normalized.exports);
-					copied["component"] = true;
-				}
-				return callback(null);
-			});
-		}
-
-		function processOverlays(callback) {
-			if (typeof descriptor.raw.overlay !== "object") {
-				return callback(null);
-			}
-			var waitfor = WAITFOR.serial(function(err) {
-				if (err) return callback(err);
-				copied["overlay"] = true;
-				return callback(null);
-			});
-			for (var name in descriptor.raw.overlay) {
-				waitfor(name, function(name, done) {
-					return helpers.normalizeSub("overlay", descriptor.raw.overlay[name], options, function(err, normalized) {
-						if (err) return done(err);
-						descriptor.normalized.overlay[name] = normalized;
-						return done(null);
-					});
-				});
-			}
-		}
-
-		function detectInstallPM(callback) {
-			if (descriptor.normalized.pm && typeof descriptor.normalized.pm.install !== "undefined") {
-				return callback(null);
-			}
-			if (!descriptorPath) {
-				return callback(null);
-			}
-			// TODO: Look for other indicators as well.
-			return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
-				if (exists || PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules") {
-					if (!descriptor.normalized.pm) {
-						descriptor.normalized.pm = {};
-					}
-					descriptor.normalized.pm.install = "npm";
-				}
-				return callback(null);
-			});
-		}
-
-		function detectDependencyDirectory(callback) {
-			if (
-				descriptor.normalized.layout && 
-				descriptor.normalized.layout.directories &&
-				typeof descriptor.normalized.layout.directories.dependency !== "undefined"
-			) {
-				return callback(null);
-			}
-			if (
-				descriptor.normalized.requirements &&
-				descriptor.normalized.requirements.engines &&
-				descriptor.normalized.requirements.engines.node
-			) {
-				if (!descriptor.normalized.layout) {
-					descriptor.normalized.layout = {};
-				}
-				if (!descriptor.normalized.layout.directories) {
-					descriptor.normalized.layout.directories = {};
-				}
-				descriptor.normalized.layout.directories.dependency = "node_modules";
-				return callback(null);
-			}
-			if (!descriptorPath) {
-				return callback(null);
-			}
-			return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
+				helpers.objectToObject("dependencies", ["dependencies", "required"]);
+				helpers.objectToObject("devDependencies", ["dependencies", "development"]);
+				helpers.objectToObject("optionalDependencies", ["dependencies", "optional"]);
+				helpers.arrayToObject("bundledDependencies", ["dependencies", "bundled"]);
+				helpers.arrayToObject("bundleDependencies", ["dependencies", "bundled"]);
 				if (
-					exists ||
-					PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules" ||
-					(
-						descriptor.normalized.pm &&
-						descriptor.normalized.pm.install === "npm"
-					)
+					descriptor.normalized.dependencies &&
+					descriptor.normalized.dependencies.bundled
+				) {
+					var deps = descriptor.normalized.dependencies.bundled;
+					descriptor.normalized.dependencies.bundled = {};
+					deps.forEach(function(name) {
+						descriptor.normalized.dependencies.bundled[name] = false;
+					});
+				}
+
+				helpers.mergeObjectTo("mappings", ["dependencies", "required"]);
+				helpers.mergeObjectTo("devMappings", ["dependencies", "development"]);
+				helpers.mergeObjectTo("optionalMappings", ["dependencies", "optional"]);
+			}
+
+			helpers.booleanToObject("shrinkwrap", ["config", "shrinkwrap"]);
+			helpers.objectToObject("publishConfig", ["config", "publish"]);
+
+			helpers.objectToObject("engines", ["requirements", "engines"]);
+			helpers.mergeObjectTo("engine", ["requirements", "engines"]);
+
+			helpers.objectToObject("engines", ["requirements", "engines"]);
+			helpers.objectToObject("os", ["config", "os"]);
+
+			helpers.objectToObject("bin", ["exports", "bin"]);
+
+			if (options.type === "component") {
+			} else {
+				helpers.objectToObject("scripts", ["exports", "scripts"]);
+			}
+
+			helpers.objectToObject("on", ["events", "listen"]);
+
+			helpers.mergeObjectTo("overrides", "overrides");
+
+			helpers.booleanToObject("publish", ["events", "publish"]);
+
+			helpers.objectToObject("env", ["requirements", "env"]);
+
+			helpers.objectToObject("layout", ["layout"]);
+			helpers.mergeObjectTo("directories", ["layout", "directories"]);
+
+			helpers.objectToObject("implements", ["config", "implements"]);
+
+			helpers.mergeObjectTo("require.async", "require.async", function(name, value) {
+				return [helpers.prefixRelativePath(name), value];
+			});
+
+			helpers.object("config");
+
+			if (typeof descriptor.raw.overlay === "object") {
+				if (typeof descriptor.normalized.overlay === "undefined") {
+					descriptor.normalized.overlay = {};
+				}
+			}
+
+			helpers.array("licenses");
+			helpers.anyToArray("license", "licenses");
+
+			helpers.stringToObject("main", ["exports", "main"], helpers.prefixRelativePath);
+
+			if (options.type === "component") {
+				function formatComponentExports(value) {
+					var exports = {};
+					if (Array.isArray(value)) {
+						value.forEach(function(path) {
+							exports[path] = helpers.prefixRelativePath(path);
+						});
+					} else {
+						for (var path in value) {
+							exports[path] = helpers.prefixRelativePath(value[path]);
+						}
+					}
+					return exports;
+				}
+				helpers.anyToObject("scripts", ["exports", "scripts"], formatComponentExports);
+				helpers.anyToObject("styles", ["exports", "styles"], formatComponentExports);
+				helpers.anyToObject("images", ["exports", "images"], formatComponentExports);
+				helpers.anyToObject("fonts", ["exports", "fonts"], formatComponentExports);
+				helpers.anyToObject("files", ["exports", "resources"], formatComponentExports);
+			} else {
+				if (typeof descriptor.raw.component === "object") {
+					if (typeof descriptor.normalized.exports === "undefined") {
+						descriptor.normalized.exports = {};
+					}
+				}
+			}
+
+			helpers.remove("readme");
+			helpers.stringToObject("readmeFilename", ["files", "readme"], helpers.prefixRelativePath);		
+			helpers.anyToObject("man", ["files", "man"]);
+			// TODO: `files` -> `files.distribute`
+			// TODO: `.distignore` -> `files.distignore`
+			// TODO: `.gitignore` -> `files.vcsignore`
+
+			helpers.array("keywords");
+
+			helpers.array("maintainers");
+			helpers.array("contributors");
+			helpers.anyToArray("author", "contributors");
+
+
+			function processComponent(callback) {
+				if (typeof descriptor.raw.component !== "object") {
+					return callback(null);
+				}
+				var opts = {};
+				for (var name in options) {
+					opts[name] = options[name];
+				}
+				opts.type = "component";
+				return helpers.normalizeSub("component", descriptor.raw.component, opts, function(err, normalized) {
+					if (err) return callback(err);
+					if (typeof normalized.exports === "object") {
+						descriptor.normalized.exports = DEEPMERGE(descriptor.normalized.exports || {}, normalized.exports);
+						copied["component"] = true;
+					}
+					return callback(null);
+				});
+			}
+
+			function processOverlays(callback) {
+				if (typeof descriptor.raw.overlay !== "object") {
+					return callback(null);
+				}
+				var waitfor = WAITFOR.serial(function(err) {
+					if (err) return callback(err);
+					copied["overlay"] = true;
+					return callback(null);
+				});
+				for (var name in descriptor.raw.overlay) {
+					waitfor(name, function(name, done) {
+						return helpers.normalizeSub("overlay", descriptor.raw.overlay[name], options, function(err, normalized) {
+							if (err) return done(err);
+							descriptor.normalized.overlay[name] = normalized;
+							return done(null);
+						});
+					});
+				}
+			}
+
+			function detectInstallPM(callback) {
+				if (descriptor.normalized.pm && typeof descriptor.normalized.pm.install !== "undefined") {
+					return callback(null);
+				}
+				if (!descriptorPath) {
+					return callback(null);
+				}
+				// TODO: Look for other indicators as well.
+				return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
+					if (exists || PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules") {
+						if (!descriptor.normalized.pm) {
+							descriptor.normalized.pm = {};
+						}
+						descriptor.normalized.pm.install = "npm";
+					}
+					return callback(null);
+				});
+			}
+
+			function detectDependencyDirectory(callback) {
+				if (
+					descriptor.normalized.layout && 
+					descriptor.normalized.layout.directories &&
+					typeof descriptor.normalized.layout.directories.dependency !== "undefined"
+				) {
+					return callback(null);
+				}
+				if (
+					descriptor.normalized.requirements &&
+					descriptor.normalized.requirements.engines &&
+					descriptor.normalized.requirements.engines.node
 				) {
 					if (!descriptor.normalized.layout) {
 						descriptor.normalized.layout = {};
@@ -34793,250 +34982,272 @@ function normalize(descriptorPath, descriptor, options, callback) {
 						descriptor.normalized.layout.directories = {};
 					}
 					descriptor.normalized.layout.directories.dependency = "node_modules";
+					return callback(null);
 				}
-				return callback(null);
-			});
-		}
-
-		function detectBundledDependencies(callback) {
-			if (
-				descriptor.normalized.layout &&
-				descriptor.normalized.layout.directories &&
-				typeof descriptor.normalized.layout.directories.dependency !== "undefined"
-			) {
-				return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(exists) {
-					if (!exists) return callback(null);
-					if (!descriptor.normalized.dependencies) {
-						descriptor.normalized.dependencies = {};
+				if (!descriptorPath) {
+					return callback(null);
+				}
+				return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), "node_modules"), function(exists) {
+					if (
+						exists ||
+						PATH.basename(PATH.dirname(PATH.dirname(options._realpath(descriptorPath)))) === "node_modules" ||
+						(
+							descriptor.normalized.pm &&
+							descriptor.normalized.pm.install === "npm"
+						)
+					) {
+						if (!descriptor.normalized.layout) {
+							descriptor.normalized.layout = {};
+						}
+						if (!descriptor.normalized.layout.directories) {
+							descriptor.normalized.layout.directories = {};
+						}
+						descriptor.normalized.layout.directories.dependency = "node_modules";
 					}
-					if (!descriptor.normalized.dependencies.bundled) {
-						descriptor.normalized.dependencies.bundled = {};
-					}
-					if (!descriptor.normalized.mappings) {
-						descriptor.normalized.mappings = {};
-					}
-					return options.API.FS.readdir(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(err, filenames) {
-						if (err) return callback(err);
-						filenames.forEach(function(filename) {
-							descriptor.normalized.dependencies.bundled[filename] = "./" + descriptor.normalized.layout.directories.dependency + "/" + filename;
-
-							var shasum = CRYPTO.createHash("sha1");
-							shasum.update(PATH.join(options.packagePath, descriptor.normalized.layout.directories.dependency, filename));
-							descriptor.normalized.mappings[filename] = shasum.digest("hex") + "-" + filename;
-						});
-						return callback(null);
-					});
+					return callback(null);
 				});
 			}
-			return callback(null);
-		}
 
-		function extraNormalization(callback) {
+			function detectBundledDependencies(callback) {
+				if (
+					descriptor.normalized.layout &&
+					descriptor.normalized.layout.directories &&
+					typeof descriptor.normalized.layout.directories.dependency !== "undefined"
+				) {
+					return options.API.FS.exists(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(exists) {
+						if (!exists) return callback(null);
+						if (!descriptor.normalized.dependencies) {
+							descriptor.normalized.dependencies = {};
+						}
+						if (!descriptor.normalized.dependencies.bundled) {
+							descriptor.normalized.dependencies.bundled = {};
+						}
+						if (!descriptor.normalized.mappings) {
+							descriptor.normalized.mappings = {};
+						}
+						return options.API.FS.readdir(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.layout.directories.dependency), function(err, filenames) {
+							if (err) return callback(err);
+							filenames.forEach(function(filename) {
+								descriptor.normalized.dependencies.bundled[filename] = "./" + descriptor.normalized.layout.directories.dependency + "/" + filename;
 
-			function normalize(property, callback) {
-				if (property === "boot.package") {
-					if (
-						descriptor.normalized.boot &&
-						descriptor.normalized.boot.package &&
-						/^\./.test(descriptor.normalized.boot.package)
-					) {
-						descriptor.normalized.boot.package = options._relpath(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.boot.package));
-					}
-				} else
-				if (property === "exports.main" && descriptorPath) {
-					if (
-						descriptor.normalized.exports &&
-						descriptor.normalized.exports.main &&
-						!/\.js$/.test(descriptor.normalized.exports.main)
-					) {
-						var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.exports.main);
-						return options.API.FS.exists(path, function(exists) {
-							if (exists) return callback(null);
-							var ext = false;
-							if (descriptor.normalized.pm) {
-								if (
-									descriptor.normalized.pm.install === "npm" ||
-									descriptor.normalized.pm.install === "component"
-								) {
-									ext = ".js";
+								var shasum = CRYPTO.createHash("sha1");
+								shasum.update(PATH.join(options.packagePath, descriptor.normalized.layout.directories.dependency, filename));
+								descriptor.normalized.mappings[filename] = shasum.digest("hex") + "-" + filename;
+							});
+							return callback(null);
+						});
+					});
+				}
+				return callback(null);
+			}
+
+			function extraNormalization(callback) {
+
+				function normalize(property, callback) {
+					if (property === "boot.package") {
+						if (
+							descriptor.normalized.boot &&
+							descriptor.normalized.boot.package &&
+							/^\./.test(descriptor.normalized.boot.package)
+						) {
+							descriptor.normalized.boot.package = options._relpath(PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.boot.package));
+						}
+					} else
+					if (property === "exports.main" && descriptorPath) {
+						if (
+							descriptor.normalized.exports &&
+							descriptor.normalized.exports.main &&
+							!/\.js$/.test(descriptor.normalized.exports.main)
+						) {
+							var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), descriptor.normalized.exports.main);
+							return options.API.FS.exists(path, function(exists) {
+								if (exists) return callback(null);
+								var ext = false;
+								if (descriptor.normalized.pm) {
+									if (
+										descriptor.normalized.pm.install === "npm" ||
+										descriptor.normalized.pm.install === "component"
+									) {
+										ext = ".js";
+									}
 								}
-							}
-							path += ext || ".js";
+								path += ext || ".js";
+								return options.API.FS.exists(path, function(exists) {
+									if (exists) {
+										descriptor.normalized.exports.main += ".js";
+									} else {
+										// TODO: Try other common module extensions?
+									}
+									return callback(null);
+								});
+							});
+						} else
+						if (
+							!descriptor.normalized.exports ||
+							!descriptor.normalized.exports.main
+						) {
+							var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), "index.js");
 							return options.API.FS.exists(path, function(exists) {
 								if (exists) {
-									descriptor.normalized.exports.main += ".js";
-								} else {
-									// TODO: Try other common module extensions?
+									if (!descriptor.normalized.exports) {
+										descriptor.normalized.exports = {};
+									}
+									descriptor.normalized.exports.main = "./index.js";
 								}
 								return callback(null);
 							});
-						});
-					} else
-					if (
-						!descriptor.normalized.exports ||
-						!descriptor.normalized.exports.main
-					) {
-						var path = PATH.join(PATH.dirname(options._realpath(descriptorPath)), "index.js");
-						return options.API.FS.exists(path, function(exists) {
-							if (exists) {
-								if (!descriptor.normalized.exports) {
-									descriptor.normalized.exports = {};
-								}
-								descriptor.normalized.exports.main = "./index.js";
-							}
-							return callback(null);
-						});
-					}
-				} else
-				if (property === "layout.directories") {
-					if (
-						descriptor.normalized.layout &&
-						descriptor.normalized.layout.directories
-					) {
-						for (var type in descriptor.normalized.layout.directories) {
-							descriptor.normalized.layout.directories[type] = helpers.prefixRelativePath(descriptor.normalized.layout.directories[type]).replace(/\/$/, "")
 						}
-					}
-				} else
-				if (property === "mappings") {
-					if (descriptor.normalized.pm && descriptor.normalized.pm.install === "npm") {
-						function addMappingsForPackage(packagePath, level, callback) {
-							// Only collect mappings up to the root path.
-							if (options.rootPath && options._realpath(packagePath).substring(0, options.rootPath.length) !== options.rootPath) {
-								return callback(null);
+					} else
+					if (property === "layout.directories") {
+						if (
+							descriptor.normalized.layout &&
+							descriptor.normalized.layout.directories
+						) {
+							for (var type in descriptor.normalized.layout.directories) {
+								descriptor.normalized.layout.directories[type] = helpers.prefixRelativePath(descriptor.normalized.layout.directories[type]).replace(/\/$/, "")
 							}
-							if (addMappingsForPackage__cache[packagePath]) {
-								if (addMappingsForPackage__cache[packagePath] !== true) {
-									for (var filename in addMappingsForPackage__cache[packagePath].bundled) {
-										if (!descriptor.normalized.dependencies) {
-											descriptor.normalized.dependencies = {};
-										}
-										if (!descriptor.normalized.dependencies.bundled) {
-											descriptor.normalized.dependencies.bundled = {};
-										}
-										if (!descriptor.normalized.mappings) {
-											descriptor.normalized.mappings = {};
-										}
-										if (!descriptor.normalized.mappings[filename]) {
-											descriptor.normalized.dependencies.bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
-											descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
-										}
-									}
-								}
-								if (options._realpath(packagePath) === "/") {
+						}
+					} else
+					if (property === "mappings") {
+						if (descriptor.normalized.pm && descriptor.normalized.pm.install === "npm") {
+							function addMappingsForPackage(packagePath, level, callback) {
+								// Only collect mappings up to the root path.
+								if (options.rootPath && options._realpath(packagePath).substring(0, options.rootPath.length) !== options.rootPath) {
 									return callback(null);
 								}
-								if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) return callback(null);
-								return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
-							}
-							addMappingsForPackage__cache[packagePath] = true;							
-							return options.API.FS.exists(PATH.join(options._realpath(packagePath), "node_modules"), function(exists) {
-								if (!exists) {
-									if (options._realpath(packagePath) === "/") return callback(null);
-									if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
+								if (addMappingsForPackage__cache[packagePath]) {
+									if (addMappingsForPackage__cache[packagePath] !== true) {
+										for (var filename in addMappingsForPackage__cache[packagePath].bundled) {
+											if (!descriptor.normalized.dependencies) {
+												descriptor.normalized.dependencies = {};
+											}
+											if (!descriptor.normalized.dependencies.bundled) {
+												descriptor.normalized.dependencies.bundled = {};
+											}
+											if (!descriptor.normalized.mappings) {
+												descriptor.normalized.mappings = {};
+											}
+											if (!descriptor.normalized.mappings[filename]) {
+												descriptor.normalized.dependencies.bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
+												descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
+											}
+										}
+									}
+									if (options._realpath(packagePath) === "/") {
 										return callback(null);
 									}
+									if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) return callback(null);
 									return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
 								}
-								return options.API.FS.readdir(PATH.join(options._realpath(packagePath), "node_modules"), function(err, filenames) {
-									if (err) return callback(err);
-									filenames.forEach(function(filename) {
-										if (/^\./.test(filename)) return;
-										if (!descriptor.normalized.dependencies) {
-											descriptor.normalized.dependencies = {};
+								addMappingsForPackage__cache[packagePath] = true;							
+								return options.API.FS.exists(PATH.join(options._realpath(packagePath), "node_modules"), function(exists) {
+									if (!exists) {
+										if (options._realpath(packagePath) === "/") return callback(null);
+										if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
+											return callback(null);
 										}
-										if (!descriptor.normalized.dependencies.bundled) {
-											descriptor.normalized.dependencies.bundled = {};
-										}
-										if (!descriptor.normalized.mappings) {
-											descriptor.normalized.mappings = {};
-										}
+										return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
+									}
+									return options.API.FS.readdir(PATH.join(options._realpath(packagePath), "node_modules"), function(err, filenames) {
+										if (err) return callback(err);
+										filenames.forEach(function(filename) {
+											if (/^\./.test(filename)) return;
+											if (!descriptor.normalized.dependencies) {
+												descriptor.normalized.dependencies = {};
+											}
+											if (!descriptor.normalized.dependencies.bundled) {
+												descriptor.normalized.dependencies.bundled = {};
+											}
+											if (!descriptor.normalized.mappings) {
+												descriptor.normalized.mappings = {};
+											}
 
-										if (!addMappingsForPackage__cache[packagePath] || addMappingsForPackage__cache[packagePath] === true) {
-											addMappingsForPackage__cache[packagePath] = {
-												bundled: {},
-												mappings: {}
-											};
-										}
-										addMappingsForPackage__cache[packagePath].bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
-										var shasum = CRYPTO.createHash("sha1");
-										shasum.update(PATH.join(packagePath, "node_modules", filename));
-										addMappingsForPackage__cache[packagePath].mappings[filename] = shasum.digest("hex") + "-" + filename;
+											if (!addMappingsForPackage__cache[packagePath] || addMappingsForPackage__cache[packagePath] === true) {
+												addMappingsForPackage__cache[packagePath] = {
+													bundled: {},
+													mappings: {}
+												};
+											}
+											addMappingsForPackage__cache[packagePath].bundled[filename] = PATH.relative(options.packagePath, PATH.join(packagePath, "node_modules", filename)) || ".";
+											var shasum = CRYPTO.createHash("sha1");
+											shasum.update(PATH.join(packagePath, "node_modules", filename));
+											addMappingsForPackage__cache[packagePath].mappings[filename] = shasum.digest("hex") + "-" + filename;
 
-										if (!descriptor.normalized.mappings[filename]) {
-											descriptor.normalized.dependencies.bundled[filename] = addMappingsForPackage__cache[packagePath].bundled[filename];
-											descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
+											if (!descriptor.normalized.mappings[filename]) {
+												descriptor.normalized.dependencies.bundled[filename] = addMappingsForPackage__cache[packagePath].bundled[filename];
+												descriptor.normalized.mappings[filename] = addMappingsForPackage__cache[packagePath].mappings[filename];
+											}
+										});
+										if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
+											return callback(null);
 										}
+										return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
 									});
-									if (level >=0 && (!options.mapParentSiblingPackages || level >= options.mapParentSiblingPackages)) {
-										return callback(null);
-									}
-									return addMappingsForPackage(PATH.join(packagePath, ".."), level + 1, callback);
 								});
-							});
-						}
-						return addMappingsForPackage(PATH.join(options.packagePath, ".."), 0, function(err) {
-							if (err) return callback(err);
-							return callback(null);
-						});
-					}
-				}
-				return callback(null);
-			}
-
-			return normalize("boot.package", function(err) {
-				if (err) return callback(err);
-				return normalize("exports.main", function(err) {
-					if (err) return callback(err);
-					return normalize("layout.directories", function(err) {
-						if (err) return callback(err);
-						return normalize("mappings", callback);				
-					});
-				});
-			});
-		}
-
-		return processComponent(function(err) {
-			if (err) return callback(err);
-
-			return processOverlays(function(err) {
-				if (err) return callback(err);
-
-				return detectInstallPM(function(err) {
-					if (err) return callback(err);
-
-					return detectDependencyDirectory(function(err) {
-						if (err) return callback(err);
-
-						return detectBundledDependencies(function(err) {
-							if (err) return callback(err);
-
-							return extraNormalization(function(err) {
+							}
+							return addMappingsForPackage(PATH.join(options.packagePath, ".."), 0, function(err) {
 								if (err) return callback(err);
-
-								Object.keys(descriptor.raw).forEach(function(key) {
-									if (copied[key]) return;
-									if (options.includeUnknownProperties) {
-										descriptor.normalized[key] = descriptor.raw[key];
-										copied[key] = true;
-									} else {
-										descriptor.warnings.push([
-											"normalize", "Property '" + key + "' was ignored"
-										]);
-									}
-								});
-
 								return callback(null);
 							});
+						}
+					}
+					return callback(null);
+				}
+
+				return normalize("boot.package", function(err) {
+					if (err) return callback(err);
+					return normalize("exports.main", function(err) {
+						if (err) return callback(err);
+						return normalize("layout.directories", function(err) {
+							if (err) return callback(err);
+							return normalize("mappings", callback);				
+						});
+					});
+				});
+			}
+
+			return processComponent(function(err) {
+				if (err) return callback(err);
+
+				return processOverlays(function(err) {
+					if (err) return callback(err);
+
+					return detectInstallPM(function(err) {
+						if (err) return callback(err);
+
+						return detectDependencyDirectory(function(err) {
+							if (err) return callback(err);
+
+							return detectBundledDependencies(function(err) {
+								if (err) return callback(err);
+
+								return extraNormalization(function(err) {
+									if (err) return callback(err);
+
+									Object.keys(descriptor.raw).forEach(function(key) {
+										if (copied[key]) return;
+										if (options.includeUnknownProperties) {
+											descriptor.normalized[key] = descriptor.raw[key];
+											copied[key] = true;
+										} else {
+											descriptor.warnings.push([
+												"normalize", "Property '" + key + "' was ignored"
+											]);
+										}
+									});
+
+									return callback(null);
+								});
+							});
 						});
 					});
 				});
 			});
-		});
 
-	} catch(err) {
-		return callback(err);
-	}
+		} catch(err) {
+			return callback(err);
+		}
+	});
 };
 
 }
@@ -35485,7 +35696,7 @@ return {
 };
 }
 , {"filename":"node_modules/pinf-it-bundler/node_modules/pinf-it-package-insight/node_modules/deepmerge/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/node_modules/pinf-it-package-insight/node_modules/pinf-primitives-js/primitives.js","mtime":1379755119,"wrapper":"commonjs","format":"commonjs","id":"487b1109cf7a9249ed0e893c8b320b7547e44c0c-pinf-primitives-js/primitives.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/node_modules/pinf-it-package-insight/node_modules/pinf-primitives-js/primitives.js","mtime":1380943073,"wrapper":"commonjs","format":"commonjs","id":"487b1109cf7a9249ed0e893c8b320b7547e44c0c-pinf-primitives-js/primitives.js"}
 require.memoize("487b1109cf7a9249ed0e893c8b320b7547e44c0c-pinf-primitives-js/primitives.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-it-bundler/node_modules/pinf-it-package-insight/node_modules/pinf-primitives-js';
 
@@ -35504,12 +35715,9 @@ exports.normalizeEnvironmentVariables = function(env, overrides) {
 	if (!ENV.PINF_PROGRAM && !ENV.CWD) {
 		throw new Error("Either `ENV.PINF_PROGRAM` (" + ENV.PINF_PROGRAM + ") or `ENV.CWD` (" + ENV.CWD + ") must be set!");
 	}
-	if (!ENV.PINF_PACKAGE && !ENV.CWD) {
-		throw new Error("Either `ENV.PINF_PACKAGE` (" + ENV.PINF_PACKAGE + ") or `ENV.CWD` (" + ENV.CWD + ") must be set!");
-	}
 	// `PINF_PACKAGES` contains a list of directories used to lookup packages.
 	// Packages should be stored in these directories where the package directory
-	// represents the global ID of the package.
+	// represents the global ID of the package. This is ideally a DNS-based hostname with path.
 	ENV.PINF_PACKAGES = (typeof ENV.PINF_PACKAGES === "string") ? ENV.PINF_PACKAGES : (process.env.PINF_PACKAGES || "");
 	// If `PINF_PROGRAM_PARENT` is set the parent descriptor will be merged on top of our descriptor.
 	// Under normal conditions the `PINF_PROGRAM_PARENT` varibale should never be set in the shell directly.
@@ -35521,7 +35729,7 @@ exports.normalizeEnvironmentVariables = function(env, overrides) {
 	//   * A local filesystem path to a `program.json` file (how to boot & custom config).
 	ENV.PINF_PROGRAM = ENV.PINF_PROGRAM || PATH.join(ENV.CWD, "program.json");
 	//   * A local filesystem path to a `package.json` file (what to boot & default config).
-	ENV.PINF_PACKAGE = ENV.PINF_PACKAGE || PATH.join(ENV.CWD, "package.json");
+	ENV.PINF_PACKAGE = ENV.PINF_PACKAGE || (ENV.CWD && PATH.join(ENV.CWD, "package.json")) || "";
 	//   * A local filesystem path to a `program.rt.json` file (the state to boot in).
 	ENV.PINF_RUNTIME = ENV.PINF_RUNTIME || PATH.join(ENV.PINF_PROGRAM_PARENT || ENV.PINF_PROGRAM, "../.rt/program.rt.json");
 	//   * The mode the runtime should run it. Will load `program.$PINF_MODE.json`.
@@ -36116,7 +36324,7 @@ Bundle.prototype.save = function(callback) {
 
 }
 , {"filename":"node_modules/pinf-it-bundler/lib/bundle.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/node_modules/pinf-loader-js/loader.js","mtime":1377064672,"wrapper":"commonjs","format":"commonjs","id":"19418dae005c4d23567770942bd446bf4ab98489-pinf-loader-js/./loader.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-it-bundler/node_modules/pinf-loader-js/loader.js","mtime":1381607720,"wrapper":"commonjs","format":"commonjs","id":"19418dae005c4d23567770942bd446bf4ab98489-pinf-loader-js/./loader.js"}
 require.memoize("19418dae005c4d23567770942bd446bf4ab98489-pinf-loader-js/./loader.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-it-bundler/node_modules/pinf-loader-js';
 /**
@@ -36139,6 +36347,15 @@ function(require, exports, module) {var __dirname = 'node_modules/pinf-it-bundle
 		// @see https://github.com/unscriptable/curl/blob/62caf808a8fd358ec782693399670be6806f1845/src/curl.js#L69
 		readyStates = { 'loaded': 1, 'interactive': 1, 'complete': 1 },
 		lastModule = null;
+
+	// For older browsers that don't have `Object.keys()` (Firefox 3.6)
+	function keys(obj) {
+		var keys = [];
+		for (var key in obj) {
+			keys.push(key);
+		}
+		return keys;
+	}
 
 	function normalizeSandboxArguments(implementation) {
 		return function(programIdentifier, options, loadedCallback, errorCallback) {
@@ -36206,7 +36423,7 @@ function(require, exports, module) {var __dirname = 'node_modules/pinf-it-bundle
 	            if (/^\/?\{host\}\//.test(uri)) {
 	                uri = location.protocol + "//" + location.host + uri.replace(/^\/?\{host\}/, "");
 	            } else
-	            if (/^\//.test(uri)) {
+	            if (/^\/\//.test(uri)) {
 	                uri = location.protocol + "/" + uri;
 	            }
 				if (!headTag) {
@@ -36476,7 +36693,7 @@ function(require, exports, module) {var __dirname = 'node_modules/pinf-it-bundle
 							typeof moduleInterface.exports !== "undefined" &&
 							(
 								typeof moduleInterface.exports !== "object" ||
-								Object.keys(moduleInterface.exports).length !== 0
+								keys(moduleInterface.exports).length !== 0
 							)
 						) {
 							module.exports = moduleInterface.exports;
@@ -63353,7 +63570,7 @@ Object.keys(FS).forEach(function(name) {
 
 }
 , {"filename":"lib/vfs.js"});
-// @pinf-bundle-module: {"file":"lib/main.js","mtime":1378409378,"wrapper":"commonjs","format":"commonjs","id":"/lib/main.js"}
+// @pinf-bundle-module: {"file":"lib/main.js","mtime":1380950068,"wrapper":"commonjs","format":"commonjs","id":"/lib/main.js"}
 require.memoize("/lib/main.js", 
 function(require, exports, module) {var __dirname = 'lib';
 
@@ -63385,9 +63602,9 @@ exports.main = function(main, module, options, callback) {
             if (err !== true) {
                 console.error(err.stack);
             }
-            process.exit(1);
+            if (typeof arguments[1] !== "object" || arguments[1].EXIT !== false) process.exit(1);
         }
-        process.exit(0);
+        if (typeof arguments[1] !== "object" || arguments[1].EXIT !== false) process.exit(0);
 	}
 	if (!module) {
 	    try {
@@ -63491,6 +63708,7 @@ require.memoize("/package.json",
         "pinf-it-package-insight": "79c3886f38d246eca26d997a4cde1dc621d53b56-pinf-it-package-insight",
         "pinf-it-program-insight": "4cbfcf3a6f76b102c8abe5ac9f4f68bc773ef413-pinf-it-program-insight",
         "pinf-it-bundler": "d410d765c4a91b52828ad9d1eba8d92a9eb81b63-pinf-it-bundler",
+        "send": "578e39eb720000db89052482057dd13216c8d2bf-send",
         "require.async": "437ef8aee826325a41c701ca21e78f84f35ff9f1-require.async"
     },
     "dirpath": "."
@@ -64236,6 +64454,1234 @@ require.memoize("437ef8aee826325a41c701ca21e78f84f35ff9f1-require.async/package.
     "dirpath": "node_modules/require.async"
 }
 , {"filename":"node_modules/require.async/package.json"});
+// @pinf-bundle-module: {"file":"lib/hoist.js","mtime":1381194479,"wrapper":"commonjs","format":"commonjs","id":"/lib/hoist.js"}
+require.memoize("/lib/hoist.js", 
+function(require, exports, module) {var __dirname = 'lib';
+
+const PATH = require("__SYSTEM__/path");
+const URL = require("__SYSTEM__/url");
+const PINF = require("..");
+const SEND = require("send");
+
+
+exports.hoist = function(programUri, options) {
+
+	options = options || {};
+
+	if (options.verbose) console.log("[pinf-for-nodejs][hoist]", "programUri", programUri);
+
+	function hoist(callback) {
+
+		return PINF.contextForProgram(programUri, {
+            verbose: options.verbose || false,
+            debug: options.debug || false
+        }, function(err, $pinf) {
+            if (err) return callback(err);
+
+			var distPath = options.distPath || $pinf.makePath("bundles") || $pinf.makePath("cache", ["bundles", programUri]);
+
+            return $pinf.bundleProgram({
+                distPath: distPath
+            }, function(err, summary) {
+                if (err) return callback(err);
+
+                summary.distPath = distPath;
+
+				return callback(null, summary);
+            });
+        });
+	}
+
+	var responder = function(req, res, next) {
+		res.writeHead(503, "Service Temporarily Unavailable", {
+			"Content-Type": "text/plain",
+			// `Retry-After` can be a relative number of seconds from now, or an RFC 1123 Date.
+			"Retry-After": "5"
+		});
+		return res.end("Service Temporarily Unavailable\n");
+	};
+
+	hoist(function(err, summary) {
+		if (err) throw err;
+
+		if (options.verbose) console.log("[pinf-for-nodejs][hoist] Mounted", JSON.stringify(summary, null, 4));
+
+		responder = function(req, res, next) {
+			if (!Array.isArray(req.params)) {
+				throw new Error("`req.param[0]` must be set to the uri to load.");
+			}
+			return SEND(req, req.params[0])
+				.root(summary.distPath)
+				.on("error", function (err) {
+					if (err && err.code !== "ENOENT") return next(err);
+					if (/^loader\./.test(req.params[0])) {
+						return SEND(req, req.params[0])
+							.root(PATH.join(__dirname, "../node_modules/pinf-loader-js"))
+							.on("error", next)
+							.on('directory', next)
+							.pipe(res);
+					}
+					return next();
+				})
+				.on('directory', next)
+				.pipe(res);
+		};
+	});
+
+	return function(req, res, next) {
+		return responder(req, res, next);
+	};
+}
+
+}
+, {"filename":"lib/hoist.js"});
+// @pinf-bundle-module: {"file":"node_modules/send/index.js","mtime":1354920889,"wrapper":"commonjs/leaky","format":"leaky","id":"578e39eb720000db89052482057dd13216c8d2bf-send/index.js"}
+require.memoize("578e39eb720000db89052482057dd13216c8d2bf-send/index.js", 
+function(require, exports, module) {var __dirname = 'node_modules/send';
+
+module.exports = require('./lib/send');
+return {
+    module: (typeof module !== "undefined") ? module : null,
+    require: (typeof require !== "undefined") ? require : null
+};
+}
+, {"filename":"node_modules/send/index.js"});
+// @pinf-bundle-module: {"file":"node_modules/send/lib/send.js","mtime":1373319431,"wrapper":"commonjs","format":"commonjs","id":"578e39eb720000db89052482057dd13216c8d2bf-send/lib/send.js"}
+require.memoize("578e39eb720000db89052482057dd13216c8d2bf-send/lib/send.js", 
+function(require, exports, module) {var __dirname = 'node_modules/send/lib';
+
+/**
+ * Module dependencies.
+ */
+
+var debug = require('debug')('send')
+  , parseRange = require('range-parser')
+  , Stream = require('__SYSTEM__/stream')
+  , mime = require('mime')
+  , fresh = require('fresh')
+  , path = require('__SYSTEM__/path')
+  , http = require('__SYSTEM__/http')
+  , fs = require('__SYSTEM__/fs')
+  , basename = path.basename
+  , normalize = path.normalize
+  , join = path.join
+  , utils = require('./utils');
+
+/**
+ * Expose `send`.
+ */
+
+exports = module.exports = send;
+
+/**
+ * Expose mime module.
+ */
+
+exports.mime = mime;
+
+/**
+ * Return a `SendStream` for `req` and `path`.
+ *
+ * @param {Request} req
+ * @param {String} path
+ * @param {Object} options
+ * @return {SendStream}
+ * @api public
+ */
+
+function send(req, path, options) {
+  return new SendStream(req, path, options);
+}
+
+/**
+ * Initialize a `SendStream` with the given `path`.
+ *
+ * Events:
+ *
+ *  - `error` an error occurred
+ *  - `stream` file streaming has started
+ *  - `end` streaming has completed
+ *  - `directory` a directory was requested
+ *
+ * @param {Request} req
+ * @param {String} path
+ * @param {Object} options
+ * @api private
+ */
+
+function SendStream(req, path, options) {
+  var self = this;
+  this.req = req;
+  this.path = path;
+  this.options = options || {};
+  this.maxage(0);
+  this.hidden(false);
+  this.index('index.html');
+}
+
+/**
+ * Inherits from `Stream.prototype`.
+ */
+
+SendStream.prototype.__proto__ = Stream.prototype;
+
+/**
+ * Enable or disable "hidden" (dot) files.
+ *
+ * @param {Boolean} path
+ * @return {SendStream}
+ * @api public
+ */
+
+SendStream.prototype.hidden = function(val){
+  debug('hidden %s', val);
+  this._hidden = val;
+  return this;
+};
+
+/**
+ * Set index `path`, set to a falsy
+ * value to disable index support.
+ *
+ * @param {String|Boolean} path
+ * @return {SendStream}
+ * @api public
+ */
+
+SendStream.prototype.index = function(path){
+  debug('index %s', path);
+  this._index = path;
+  return this;
+};
+
+/**
+ * Set root `path`.
+ *
+ * @param {String} path
+ * @return {SendStream}
+ * @api public
+ */
+
+SendStream.prototype.root = 
+SendStream.prototype.from = function(path){
+  this._root = normalize(path);
+  return this;
+};
+
+/**
+ * Set max-age to `ms`.
+ *
+ * @param {Number} ms
+ * @return {SendStream}
+ * @api public
+ */
+
+SendStream.prototype.maxage = function(ms){
+  if (Infinity == ms) ms = 60 * 60 * 24 * 365 * 1000;
+  debug('max-age %d', ms);
+  this._maxage = ms;
+  return this;
+};
+
+/**
+ * Emit error with `status`.
+ *
+ * @param {Number} status
+ * @api private
+ */
+
+SendStream.prototype.error = function(status, err){
+  var res = this.res;
+  var msg = http.STATUS_CODES[status];
+  err = err || new Error(msg);
+  err.status = status;
+  if (this.listeners('error').length) return this.emit('error', err);
+  res.statusCode = err.status;
+  res.end(msg);
+};
+
+/**
+ * Check if the pathname is potentially malicious.
+ *
+ * @return {Boolean}
+ * @api private
+ */
+
+SendStream.prototype.isMalicious = function(){
+  return !this._root && ~this.path.indexOf('..');
+};
+
+/**
+ * Check if the pathname ends with "/".
+ *
+ * @return {Boolean}
+ * @api private
+ */
+
+SendStream.prototype.hasTrailingSlash = function(){
+  return '/' == this.path[this.path.length - 1];
+};
+
+/**
+ * Check if the basename leads with ".".
+ *
+ * @return {Boolean}
+ * @api private
+ */
+
+SendStream.prototype.hasLeadingDot = function(){
+  return '.' == basename(this.path)[0];
+};
+
+/**
+ * Check if this is a conditional GET request.
+ *
+ * @return {Boolean}
+ * @api private
+ */
+
+SendStream.prototype.isConditionalGET = function(){
+  return this.req.headers['if-none-match']
+    || this.req.headers['if-modified-since'];
+};
+
+/**
+ * Strip content-* header fields.
+ *
+ * @api private
+ */
+
+SendStream.prototype.removeContentHeaderFields = function(){
+  var res = this.res;
+  Object.keys(res._headers).forEach(function(field){
+    if (0 == field.indexOf('content')) {
+      res.removeHeader(field);
+    }
+  });
+};
+
+/**
+ * Respond with 304 not modified.
+ *
+ * @api private
+ */
+
+SendStream.prototype.notModified = function(){
+  var res = this.res;
+  debug('not modified');
+  this.removeContentHeaderFields();
+  res.statusCode = 304;
+  res.end();
+};
+
+/**
+ * Check if the request is cacheable, aka
+ * responded with 2xx or 304 (see RFC 2616 section 14.2{5,6}).
+ *
+ * @return {Boolean}
+ * @api private
+ */
+
+SendStream.prototype.isCachable = function(){
+  var res = this.res;
+  return (res.statusCode >= 200 && res.statusCode < 300) || 304 == res.statusCode;
+};
+
+/**
+ * Handle stat() error.
+ *
+ * @param {Error} err
+ * @api private
+ */
+
+SendStream.prototype.onStatError = function(err){
+  var notfound = ['ENOENT', 'ENAMETOOLONG', 'ENOTDIR'];
+  if (~notfound.indexOf(err.code)) return this.error(404, err);
+  this.error(500, err);
+};
+
+/**
+ * Check if the cache is fresh.
+ *
+ * @return {Boolean}
+ * @api private
+ */
+
+SendStream.prototype.isFresh = function(){
+  return fresh(this.req.headers, this.res._headers);
+};
+
+/**
+ * Redirect to `path`.
+ *
+ * @param {String} path
+ * @api private
+ */
+
+SendStream.prototype.redirect = function(path){
+  if (this.listeners('directory').length) return this.emit('directory');
+  var res = this.res;
+  path += '/';
+  res.statusCode = 301;
+  res.setHeader('Location', path);
+  res.end('Redirecting to ' + utils.escape(path));
+};
+
+/**
+ * Pipe to `res.
+ *
+ * @param {Stream} res
+ * @return {Stream} res
+ * @api public
+ */
+
+SendStream.prototype.pipe = function(res){
+  var self = this
+    , args = arguments
+    , path = this.path
+    , root = this._root;
+
+  // references
+  this.res = res;
+
+  // invalid request uri
+  path = utils.decode(path);
+  if (-1 == path) return this.error(400);
+
+  // null byte(s)
+  if (~path.indexOf('\0')) return this.error(400);
+
+  // join / normalize from optional root dir
+  if (root) path = normalize(join(this._root, path));
+
+  // ".." is malicious without "root"
+  if (this.isMalicious()) return this.error(403);
+
+  // malicious path
+  if (root && 0 != path.indexOf(root)) return this.error(403);
+
+  // hidden file support
+  if (!this._hidden && this.hasLeadingDot()) return this.error(404);
+
+  // index file support
+  if (this._index && this.hasTrailingSlash()) path += this._index;
+
+  debug('stat "%s"', path);
+  fs.stat(path, function(err, stat){
+    if (err) return self.onStatError(err);
+    if (stat.isDirectory()) return self.redirect(self.path);
+    self.emit('file', path, stat);
+    self.send(path, stat);
+  });
+
+  return res;
+};
+
+/**
+ * Transfer `path`.
+ *
+ * @param {String} path
+ * @api public
+ */
+
+SendStream.prototype.send = function(path, stat){
+  var options = this.options;
+  var len = stat.size;
+  var res = this.res;
+  var req = this.req;
+  var ranges = req.headers.range;
+  var offset = options.start || 0;
+
+  // set header fields
+  this.setHeader(stat);
+
+  // set content-type
+  this.type(path);
+
+  // conditional GET support
+  if (this.isConditionalGET()
+    && this.isCachable()
+    && this.isFresh()) {
+    return this.notModified();
+  }
+
+  // adjust len to start/end options
+  len = Math.max(0, len - offset);
+  if (options.end !== undefined) {
+    var bytes = options.end - offset + 1;
+    if (len > bytes) len = bytes;
+  }
+
+  // Range support
+  if (ranges) {
+    ranges = parseRange(len, ranges);
+
+    // unsatisfiable
+    if (-1 == ranges) {
+      res.setHeader('Content-Range', 'bytes */' + stat.size);
+      return this.error(416);
+    }
+
+    // valid (syntactically invalid ranges are treated as a regular response)
+    if (-2 != ranges) {
+      options.start = offset + ranges[0].start;
+      options.end = offset + ranges[0].end;
+
+      // Content-Range
+      res.statusCode = 206;
+      res.setHeader('Content-Range', 'bytes '
+        + ranges[0].start
+        + '-'
+        + ranges[0].end
+        + '/'
+        + len);
+      len = options.end - options.start + 1;
+    }
+  }
+
+  // content-length
+  res.setHeader('Content-Length', len);
+
+  // HEAD support
+  if ('HEAD' == req.method) return res.end();
+
+  this.stream(path, options);
+};
+
+/**
+ * Stream `path` to the response.
+ *
+ * @param {String} path
+ * @param {Object} options
+ * @api private
+ */
+
+SendStream.prototype.stream = function(path, options){
+  // TODO: this is all lame, refactor meeee
+  var self = this;
+  var res = this.res;
+  var req = this.req;
+
+  // pipe
+  var stream = fs.createReadStream(path, options);
+  this.emit('stream', stream);
+  stream.pipe(res);
+
+  // socket closed, done with the fd
+  req.on('close', stream.destroy.bind(stream));
+
+  // error handling code-smell
+  stream.on('error', function(err){
+    // no hope in responding
+    if (res._header) {
+      console.error(err.stack);
+      req.destroy();
+      return;
+    }
+
+    // 500
+    err.status = 500;
+    self.emit('error', err);
+  });
+
+  // end
+  stream.on('end', function(){
+    self.emit('end');
+  });
+};
+
+/**
+ * Set content-type based on `path`
+ * if it hasn't been explicitly set.
+ *
+ * @param {String} path
+ * @api private
+ */
+
+SendStream.prototype.type = function(path){
+  var res = this.res;
+  if (res.getHeader('Content-Type')) return;
+  var type = mime.lookup(path);
+  var charset = mime.charsets.lookup(type);
+  debug('content-type %s', type);
+  res.setHeader('Content-Type', type + (charset ? '; charset=' + charset : ''));
+};
+
+/**
+ * Set reaponse header fields, most
+ * fields may be pre-defined.
+ *
+ * @param {Object} stat
+ * @api private
+ */
+
+SendStream.prototype.setHeader = function(stat){
+  var res = this.res;
+  if (!res.getHeader('Accept-Ranges')) res.setHeader('Accept-Ranges', 'bytes');
+  if (!res.getHeader('ETag')) res.setHeader('ETag', utils.etag(stat));
+  if (!res.getHeader('Date')) res.setHeader('Date', new Date().toUTCString());
+  if (!res.getHeader('Cache-Control')) res.setHeader('Cache-Control', 'public, max-age=' + (this._maxage / 1000));
+  if (!res.getHeader('Last-Modified')) res.setHeader('Last-Modified', stat.mtime.toUTCString());
+};
+
+}
+, {"filename":"node_modules/send/lib/send.js"});
+// @pinf-bundle-module: {"file":"node_modules/send/node_modules/debug/index.js","mtime":1360083107,"wrapper":"commonjs/leaky","format":"leaky","id":"6f7399ae8a8325da7b24fff05b0b0687611f396c-debug/index.js"}
+require.memoize("6f7399ae8a8325da7b24fff05b0b0687611f396c-debug/index.js", 
+function(require, exports, module) {var __dirname = 'node_modules/send/node_modules/debug';
+if ('undefined' == typeof window) {
+  module.exports = require('./lib/debug');
+} else {
+  module.exports = require('./debug');
+}
+
+return {
+    window: (typeof window !== "undefined") ? window : null,
+    module: (typeof module !== "undefined") ? module : null,
+    require: (typeof require !== "undefined") ? require : null
+};
+}
+, {"filename":"node_modules/send/node_modules/debug/index.js"});
+// @pinf-bundle-module: {"file":"node_modules/send/node_modules/debug/lib/debug.js","mtime":1360187905,"wrapper":"commonjs/leaky","format":"leaky","id":"6f7399ae8a8325da7b24fff05b0b0687611f396c-debug/lib/debug.js"}
+require.memoize("6f7399ae8a8325da7b24fff05b0b0687611f396c-debug/lib/debug.js", 
+function(require, exports, module) {var __dirname = 'node_modules/send/node_modules/debug/lib';
+/**
+ * Module dependencies.
+ */
+
+var tty = require('__SYSTEM__/tty');
+
+/**
+ * Expose `debug()` as the module.
+ */
+
+module.exports = debug;
+
+/**
+ * Enabled debuggers.
+ */
+
+var names = []
+  , skips = [];
+
+(process.env.DEBUG || '')
+  .split(/[\s,]+/)
+  .forEach(function(name){
+    name = name.replace('*', '.*?');
+    if (name[0] === '-') {
+      skips.push(new RegExp('^' + name.substr(1) + '$'));
+    } else {
+      names.push(new RegExp('^' + name + '$'));
+    }
+  });
+
+/**
+ * Colors.
+ */
+
+var colors = [6, 2, 3, 4, 5, 1];
+
+/**
+ * Previous debug() call.
+ */
+
+var prev = {};
+
+/**
+ * Previously assigned color.
+ */
+
+var prevColor = 0;
+
+/**
+ * Is stdout a TTY? Colored output is disabled when `true`.
+ */
+
+var isatty = tty.isatty(2);
+
+/**
+ * Select a color.
+ *
+ * @return {Number}
+ * @api private
+ */
+
+function color() {
+  return colors[prevColor++ % colors.length];
+}
+
+/**
+ * Humanize the given `ms`.
+ *
+ * @param {Number} m
+ * @return {String}
+ * @api private
+ */
+
+function humanize(ms) {
+  var sec = 1000
+    , min = 60 * 1000
+    , hour = 60 * min;
+
+  if (ms >= hour) return (ms / hour).toFixed(1) + 'h';
+  if (ms >= min) return (ms / min).toFixed(1) + 'm';
+  if (ms >= sec) return (ms / sec | 0) + 's';
+  return ms + 'ms';
+}
+
+/**
+ * Create a debugger with the given `name`.
+ *
+ * @param {String} name
+ * @return {Type}
+ * @api public
+ */
+
+function debug(name) {
+  function disabled(){}
+  disabled.enabled = false;
+
+  var match = skips.some(function(re){
+    return re.test(name);
+  });
+
+  if (match) return disabled;
+
+  match = names.some(function(re){
+    return re.test(name);
+  });
+
+  if (!match) return disabled;
+  var c = color();
+
+  function colored(fmt) {
+    var curr = new Date;
+    var ms = curr - (prev[name] || curr);
+    prev[name] = curr;
+
+    fmt = '  \u001b[9' + c + 'm' + name + ' '
+      + '\u001b[3' + c + 'm\u001b[90m'
+      + fmt + '\u001b[3' + c + 'm'
+      + ' +' + humanize(ms) + '\u001b[0m';
+
+    console.error.apply(this, arguments);
+  }
+
+  function plain(fmt) {
+    fmt = new Date().toUTCString()
+      + ' ' + name + ' ' + fmt;
+    console.error.apply(this, arguments);
+  }
+
+  colored.enabled = plain.enabled = true;
+
+  return isatty || process.env.DEBUG_COLORS
+    ? colored
+    : plain;
+}
+
+return {
+    tty: (typeof tty !== "undefined") ? tty : null,
+    require: (typeof require !== "undefined") ? require : null,
+    module: (typeof module !== "undefined") ? module : null,
+    names: (typeof names !== "undefined") ? names : null,
+    skips: (typeof skips !== "undefined") ? skips : null,
+    process: (typeof process !== "undefined") ? process : null,
+    colors: (typeof colors !== "undefined") ? colors : null,
+    prev: (typeof prev !== "undefined") ? prev : null,
+    prevColor: (typeof prevColor !== "undefined") ? prevColor : null,
+    isatty: (typeof isatty !== "undefined") ? isatty : null,
+    color: (typeof color !== "undefined") ? color : null,
+    humanize: (typeof humanize !== "undefined") ? humanize : null,
+    debug: (typeof debug !== "undefined") ? debug : null,
+    console: (typeof console !== "undefined") ? console : null
+};
+}
+, {"filename":"node_modules/send/node_modules/debug/lib/debug.js"});
+// @pinf-bundle-module: {"file":"node_modules/send/node_modules/debug/debug.js","mtime":1360187905,"wrapper":"commonjs/leaky","format":"leaky","id":"6f7399ae8a8325da7b24fff05b0b0687611f396c-debug/debug.js"}
+require.memoize("6f7399ae8a8325da7b24fff05b0b0687611f396c-debug/debug.js", 
+function(require, exports, module) {var __dirname = 'node_modules/send/node_modules/debug';
+
+/**
+ * Expose `debug()` as the module.
+ */
+
+module.exports = debug;
+
+/**
+ * Create a debugger with the given `name`.
+ *
+ * @param {String} name
+ * @return {Type}
+ * @api public
+ */
+
+function debug(name) {
+  if (!debug.enabled(name)) return function(){};
+
+  return function(fmt){
+    var curr = new Date;
+    var ms = curr - (debug[name] || curr);
+    debug[name] = curr;
+
+    fmt = name
+      + ' '
+      + fmt
+      + ' +' + debug.humanize(ms);
+
+    // This hackery is required for IE8
+    // where `console.log` doesn't have 'apply'
+    window.console
+      && console.log
+      && Function.prototype.apply.call(console.log, console, arguments);
+  }
+}
+
+/**
+ * The currently active debug mode names.
+ */
+
+debug.names = [];
+debug.skips = [];
+
+/**
+ * Enables a debug mode by name. This can include modes
+ * separated by a colon and wildcards.
+ *
+ * @param {String} name
+ * @api public
+ */
+
+debug.enable = function(name) {
+  try {
+    localStorage.debug = name;
+  } catch(e){}
+
+  var split = (name || '').split(/[\s,]+/)
+    , len = split.length;
+
+  for (var i = 0; i < len; i++) {
+    name = split[i].replace('*', '.*?');
+    if (name[0] === '-') {
+      debug.skips.push(new RegExp('^' + name.substr(1) + '$'));
+    }
+    else {
+      debug.names.push(new RegExp('^' + name + '$'));
+    }
+  }
+};
+
+/**
+ * Disable debug output.
+ *
+ * @api public
+ */
+
+debug.disable = function(){
+  debug.enable('');
+};
+
+/**
+ * Humanize the given `ms`.
+ *
+ * @param {Number} m
+ * @return {String}
+ * @api private
+ */
+
+debug.humanize = function(ms) {
+  var sec = 1000
+    , min = 60 * 1000
+    , hour = 60 * min;
+
+  if (ms >= hour) return (ms / hour).toFixed(1) + 'h';
+  if (ms >= min) return (ms / min).toFixed(1) + 'm';
+  if (ms >= sec) return (ms / sec | 0) + 's';
+  return ms + 'ms';
+};
+
+/**
+ * Returns true if the given mode name is enabled, false otherwise.
+ *
+ * @param {String} name
+ * @return {Boolean}
+ * @api public
+ */
+
+debug.enabled = function(name) {
+  for (var i = 0, len = debug.skips.length; i < len; i++) {
+    if (debug.skips[i].test(name)) {
+      return false;
+    }
+  }
+  for (var i = 0, len = debug.names.length; i < len; i++) {
+    if (debug.names[i].test(name)) {
+      return true;
+    }
+  }
+  return false;
+};
+
+// persist
+
+if (window.localStorage) debug.enable(localStorage.debug);
+
+return {
+    module: (typeof module !== "undefined") ? module : null,
+    debug: (typeof debug !== "undefined") ? debug : null,
+    window: (typeof window !== "undefined") ? window : null,
+    console: (typeof console !== "undefined") ? console : null,
+    Function: (typeof Function !== "undefined") ? Function : null,
+    localStorage: (typeof localStorage !== "undefined") ? localStorage : null
+};
+}
+, {"filename":"node_modules/send/node_modules/debug/debug.js"});
+// @pinf-bundle-module: {"file":"node_modules/send/node_modules/range-parser/index.js","mtime":1339980854,"wrapper":"commonjs/leaky","format":"leaky","id":"e783b99a60d338e0cba1ea757a67a65d70437c36-range-parser/index.js"}
+require.memoize("e783b99a60d338e0cba1ea757a67a65d70437c36-range-parser/index.js", 
+function(require, exports, module) {var __dirname = 'node_modules/send/node_modules/range-parser';
+
+/**
+ * Parse "Range" header `str` relative to the given file `size`.
+ *
+ * @param {Number} size
+ * @param {String} str
+ * @return {Array}
+ * @api public
+ */
+
+module.exports = function(size, str){
+  var valid = true;
+  var i = str.indexOf('=');
+
+  if (-1 == i) return -2;
+
+  var arr = str.slice(i + 1).split(',').map(function(range){
+    var range = range.split('-')
+      , start = parseInt(range[0], 10)
+      , end = parseInt(range[1], 10);
+
+    // -nnn
+    if (isNaN(start)) {
+      start = size - end;
+      end = size - 1;
+    // nnn-
+    } else if (isNaN(end)) {
+      end = size - 1;
+    }
+
+    // limit last-byte-pos to current length
+    if (end > size - 1) end = size - 1;
+
+    // invalid
+    if (isNaN(start)
+      || isNaN(end)
+      || start > end
+      || start < 0) valid = false;
+
+    return {
+      start: start,
+      end: end
+    };
+  });
+
+  arr.type = str.slice(0, i);
+
+  return valid ? arr : -1;
+};
+return {
+    module: (typeof module !== "undefined") ? module : null,
+    parseInt: (typeof parseInt !== "undefined") ? parseInt : null,
+    isNaN: (typeof isNaN !== "undefined") ? isNaN : null
+};
+}
+, {"filename":"node_modules/send/node_modules/range-parser/index.js"});
+// @pinf-bundle-module: {"file":"node_modules/send/node_modules/mime/mime.js","mtime":1376588058,"wrapper":"commonjs/leaky","format":"leaky","id":"cadcc2e143d7f2df7aaf9467148bc4ed4599b7e3-mime/mime.js"}
+require.memoize("cadcc2e143d7f2df7aaf9467148bc4ed4599b7e3-mime/mime.js", 
+function(require, exports, module) {var __dirname = 'node_modules/send/node_modules/mime';
+var path = require('__SYSTEM__/path');
+var fs = require('__SYSTEM__/fs');
+
+function Mime() {
+  // Map of extension -> mime type
+  this.types = Object.create(null);
+
+  // Map of mime type -> extension
+  this.extensions = Object.create(null);
+}
+
+/**
+ * Define mimetype -> extension mappings.  Each key is a mime-type that maps
+ * to an array of extensions associated with the type.  The first extension is
+ * used as the default extension for the type.
+ *
+ * e.g. mime.define({'audio/ogg', ['oga', 'ogg', 'spx']});
+ *
+ * @param map (Object) type definitions
+ */
+Mime.prototype.define = function (map) {
+  for (var type in map) {
+    var exts = map[type];
+
+    for (var i = 0; i < exts.length; i++) {
+      if (process.env.DEBUG_MIME && this.types[exts]) {
+        console.warn(this._loading.replace(/.*\//, ''), 'changes "' + exts[i] + '" extension type from ' +
+          this.types[exts] + ' to ' + type);
+      }
+
+      this.types[exts[i]] = type;
+    }
+
+    // Default extension is the first one we encounter
+    if (!this.extensions[type]) {
+      this.extensions[type] = exts[0];
+    }
+  }
+};
+
+/**
+ * Load an Apache2-style ".types" file
+ *
+ * This may be called multiple times (it's expected).  Where files declare
+ * overlapping types/extensions, the last file wins.
+ *
+ * @param file (String) path of file to load.
+ */
+Mime.prototype.load = function(file) {
+
+  this._loading = file;
+  // Read file and split into lines
+  var map = {},
+      content = fs.readFileSync(file, 'ascii'),
+      lines = content.split(/[\r\n]+/);
+
+  lines.forEach(function(line) {
+    // Clean up whitespace/comments, and split into fields
+    var fields = line.replace(/\s*#.*|^\s*|\s*$/g, '').split(/\s+/);
+    map[fields.shift()] = fields;
+  });
+
+  this.define(map);
+
+  this._loading = null;
+};
+
+/**
+ * Lookup a mime type based on extension
+ */
+Mime.prototype.lookup = function(path, fallback) {
+  var ext = path.replace(/.*[\.\/\\]/, '').toLowerCase();
+
+  return this.types[ext] || fallback || this.default_type;
+};
+
+/**
+ * Return file extension associated with a mime type
+ */
+Mime.prototype.extension = function(mimeType) {
+  var type = mimeType.match(/^\s*([^;\s]*)(?:;|\s|$)/)[1].toLowerCase();
+  return this.extensions[type];
+};
+
+// Default instance
+var mime = new Mime();
+
+// Load local copy of
+// http://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types
+mime.load(path.join(__dirname, 'types/mime.types'));
+
+// Load additional types from node.js community
+mime.load(path.join(__dirname, 'types/node.types'));
+
+// Default type
+mime.default_type = mime.lookup('bin');
+
+//
+// Additional API specific to the default instance
+//
+
+mime.Mime = Mime;
+
+/**
+ * Lookup a charset based on mime type.
+ */
+mime.charsets = {
+  lookup: function(mimeType, fallback) {
+    // Assume text types are utf8
+    return (/^text\//).test(mimeType) ? 'UTF-8' : fallback;
+  }
+};
+
+module.exports = mime;
+
+return {
+    path: (typeof path !== "undefined") ? path : null,
+    require: (typeof require !== "undefined") ? require : null,
+    fs: (typeof fs !== "undefined") ? fs : null,
+    Mime: (typeof Mime !== "undefined") ? Mime : null,
+    Object: (typeof Object !== "undefined") ? Object : null,
+    process: (typeof process !== "undefined") ? process : null,
+    console: (typeof console !== "undefined") ? console : null,
+    mime: (typeof mime !== "undefined") ? mime : null,
+    __dirname: (typeof __dirname !== "undefined") ? __dirname : null,
+    module: (typeof module !== "undefined") ? module : null
+};
+}
+, {"filename":"node_modules/send/node_modules/mime/mime.js"});
+// @pinf-bundle-module: {"file":"node_modules/send/node_modules/fresh/index.js","mtime":1376170994,"wrapper":"commonjs/leaky","format":"leaky","id":"f9f28be0fa831ad934b9c91f986440002decd55e-fresh/index.js"}
+require.memoize("f9f28be0fa831ad934b9c91f986440002decd55e-fresh/index.js", 
+function(require, exports, module) {var __dirname = 'node_modules/send/node_modules/fresh';
+
+/**
+ * Expose `fresh()`.
+ */
+
+module.exports = fresh;
+
+/**
+ * Check freshness of `req` and `res` headers.
+ *
+ * When the cache is "fresh" __true__ is returned,
+ * otherwise __false__ is returned to indicate that
+ * the cache is now stale.
+ *
+ * @param {Object} req
+ * @param {Object} res
+ * @return {Boolean}
+ * @api public
+ */
+
+function fresh(req, res) {
+  // defaults
+  var etagMatches = true;
+  var notModified = true;
+
+  // fields
+  var modifiedSince = req['if-modified-since'];
+  var noneMatch = req['if-none-match'];
+  var lastModified = res['last-modified'];
+  var etag = res['etag'];
+  var cc = req['cache-control'];
+
+  // unconditional request
+  if (!modifiedSince && !noneMatch) return false;
+
+  // check for no-cache cache request directive
+  if (cc && cc.indexOf('no-cache') !== -1) return false;  
+
+  // parse if-none-match
+  if (noneMatch) noneMatch = noneMatch.split(/ *, */);
+
+  // if-none-match
+  if (noneMatch) etagMatches = ~noneMatch.indexOf(etag) || '*' == noneMatch[0];
+
+  // if-modified-since
+  if (modifiedSince) {
+    modifiedSince = new Date(modifiedSince);
+    lastModified = new Date(lastModified);
+    notModified = lastModified <= modifiedSince;
+  }
+
+  return !! (etagMatches && notModified);
+}
+return {
+    module: (typeof module !== "undefined") ? module : null,
+    fresh: (typeof fresh !== "undefined") ? fresh : null
+};
+}
+, {"filename":"node_modules/send/node_modules/fresh/index.js"});
+// @pinf-bundle-module: {"file":"node_modules/send/lib/utils.js","mtime":1354920889,"wrapper":"commonjs","format":"commonjs","id":"578e39eb720000db89052482057dd13216c8d2bf-send/lib/utils.js"}
+require.memoize("578e39eb720000db89052482057dd13216c8d2bf-send/lib/utils.js", 
+function(require, exports, module) {var __dirname = 'node_modules/send/lib';
+
+/**
+ * Return an ETag in the form of `"<size>-<mtime>"`
+ * from the given `stat`.
+ *
+ * @param {Object} stat
+ * @return {String}
+ * @api private
+ */
+
+exports.etag = function(stat) {
+  return '"' + stat.size + '-' + Number(stat.mtime) + '"';
+};
+
+/**
+ * decodeURIComponent.
+ *
+ * Allows V8 to only deoptimize this fn instead of all
+ * of send().
+ *
+ * @param {String} path
+ * @api private
+ */
+
+exports.decode = function(path){
+  try {
+    return decodeURIComponent(path);
+  } catch (err) {
+    return -1;
+  }
+};
+
+/**
+ * Escape the given string of `html`.
+ *
+ * @param {String} html
+ * @return {String}
+ * @api private
+ */
+
+exports.escape = function(html){
+  return String(html)
+    .replace(/&(?!\w+;)/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+};
+}
+, {"filename":"node_modules/send/lib/utils.js"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"578e39eb720000db89052482057dd13216c8d2bf-send/package.json"}
+require.memoize("578e39eb720000db89052482057dd13216c8d2bf-send/package.json", 
+{
+    "main": "578e39eb720000db89052482057dd13216c8d2bf-send/index.js",
+    "mappings": {
+        "debug": "6f7399ae8a8325da7b24fff05b0b0687611f396c-debug",
+        "range-parser": "e783b99a60d338e0cba1ea757a67a65d70437c36-range-parser",
+        "mime": "cadcc2e143d7f2df7aaf9467148bc4ed4599b7e3-mime",
+        "fresh": "f9f28be0fa831ad934b9c91f986440002decd55e-fresh"
+    },
+    "dirpath": "node_modules/send"
+}
+, {"filename":"node_modules/send/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"6f7399ae8a8325da7b24fff05b0b0687611f396c-debug/package.json"}
+require.memoize("6f7399ae8a8325da7b24fff05b0b0687611f396c-debug/package.json", 
+{
+    "main": "6f7399ae8a8325da7b24fff05b0b0687611f396c-debug/index.js",
+    "dirpath": "node_modules/send/node_modules/debug"
+}
+, {"filename":"node_modules/send/node_modules/debug/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"e783b99a60d338e0cba1ea757a67a65d70437c36-range-parser/package.json"}
+require.memoize("e783b99a60d338e0cba1ea757a67a65d70437c36-range-parser/package.json", 
+{
+    "main": "e783b99a60d338e0cba1ea757a67a65d70437c36-range-parser/index.js",
+    "dirpath": "node_modules/send/node_modules/range-parser"
+}
+, {"filename":"node_modules/send/node_modules/range-parser/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"cadcc2e143d7f2df7aaf9467148bc4ed4599b7e3-mime/package.json"}
+require.memoize("cadcc2e143d7f2df7aaf9467148bc4ed4599b7e3-mime/package.json", 
+{
+    "main": "cadcc2e143d7f2df7aaf9467148bc4ed4599b7e3-mime/mime.js",
+    "dirpath": "node_modules/send/node_modules/mime"
+}
+, {"filename":"node_modules/send/node_modules/mime/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"f9f28be0fa831ad934b9c91f986440002decd55e-fresh/package.json"}
+require.memoize("f9f28be0fa831ad934b9c91f986440002decd55e-fresh/package.json", 
+{
+    "main": "f9f28be0fa831ad934b9c91f986440002decd55e-fresh/index.js",
+    "dirpath": "node_modules/send/node_modules/fresh"
+}
+, {"filename":"node_modules/send/node_modules/fresh/package.json"});
 // @pinf-bundle-ignore: 
 });
 // @pinf-bundle-report: {}

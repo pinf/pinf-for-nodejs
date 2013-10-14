@@ -1,6 +1,6 @@
 // @pinf-bundle-ignore: 
 PINF.bundle("", function(require) {
-// @pinf-bundle-module: {"file":"lib/main.js","mtime":1378409378,"wrapper":"commonjs","format":"commonjs","id":"/lib/main.js"}
+// @pinf-bundle-module: {"file":"lib/main.js","mtime":1380950068,"wrapper":"commonjs","format":"commonjs","id":"/lib/main.js"}
 require.memoize("/lib/main.js", 
 function(require, exports, module) {var __dirname = 'lib';
 
@@ -32,9 +32,9 @@ exports.main = function(main, module, options, callback) {
             if (err !== true) {
                 console.error(err.stack);
             }
-            process.exit(1);
+            if (typeof arguments[1] !== "object" || arguments[1].EXIT !== false) process.exit(1);
         }
-        process.exit(0);
+        if (typeof arguments[1] !== "object" || arguments[1].EXIT !== false) process.exit(0);
 	}
 	if (!module) {
 	    try {
