@@ -78,7 +78,7 @@ describe("loader-bundles", function() {
             "/10-Sandbox/main.js": "Hello from 10-Sandbox!",
             "/10-Sandbox/SandboxedExtraBundle/main.js": "Hello from 10-Sandbox/SandboxedExtraBundle!",
             "/11-CrossDomain/main.js": "Hello from 11-CrossDomain!",
-            "https://raw.github.com/pinf/pinf-loader-js/master/features/11-CrossDomain/CrossDomainBundle/main.js": "Hello from 11-CrossDomain/CrossDomainBundle!",
+            "http://rawgithub.com/pinf/pinf-loader-js/master/features/11-CrossDomain/CrossDomainBundle/main.js": "Hello from 11-CrossDomain/CrossDomainBundle!",
             "/12-Environment/main.js": "Hello from 12-Environment!",
             "/13-AssignExports/main.js": "Hello from 13-AssignExports!",
             "/14-NamedBundle/main.js": "Hello from 14-NamedBundle!",
