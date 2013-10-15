@@ -104,6 +104,25 @@ PINF.main(function(context, callback) {
         });
 
     program
+        .command("dev")
+        .description("Start development envrionment")
+        .action(function() {
+            acted = true;
+            return getProgramContext(function(err, context) {
+                if (err) return callback(err);
+                return context.devProgram(function(err, info) {
+                    if (err) return callback(err);
+                    process.stdout.write(JSON.stringify({
+                        program: {
+                            status: info
+                        }
+                    }, null, 4) + "\n");
+                    return callback(null);
+                });
+            });
+        });
+
+    program
         .command("run")
         .description("Run (don't detach on daemonize)")
         .action(function() {
