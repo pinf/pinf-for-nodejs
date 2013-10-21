@@ -26,6 +26,8 @@
     },
     "binPaths": [
         "packages/package-c/bin",
+        "packages/package-c/.bin",
+        "packages/package-c/bin",
         "packages/package-c/.bin"
     ],
     "config": {},
