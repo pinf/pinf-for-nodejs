@@ -28,7 +28,6 @@
         "tmp": "programs/program-d/.rt/tmp/package-d"
     },
     "binPaths": [
-        "programs/program-d/bin",
         "programs/program-d/bin"
     ],
     "config": {},
