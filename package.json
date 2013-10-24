@@ -29,7 +29,9 @@
     "q": "~0.9.3"
   },
   "mappings": {
-    "pinf-it-bundler": "github.com/pinf-it/pinf-it-bundler/~0.1.1"
+    "pinf-it-bundler": "github.com/pinf-it/pinf-it-bundler/~0.1.1",
+    "pinf-config": "github.com/pinf/pinf-config-js/~0.1.0",
+    "pinf-vfs": "github.com/pinf/pinf-vfs-js/~0.1.0"
   },
   "devMappings": {
     "pinf-loader-js": "github.com/pinf/pinf-loader-js/~0.4.5"
