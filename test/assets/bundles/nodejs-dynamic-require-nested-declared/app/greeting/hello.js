@@ -1,6 +1,6 @@
 // @pinf-bundle-ignore: 
 PINF.bundle("", function(require) {
-// @pinf-bundle-module: {"file":"hello.js","mtime":1379961370,"wrapper":"commonjs","format":"commonjs","id":"/hello.js"}
+// @pinf-bundle-module: {"file":"hello.js","mtime":1402713883,"wrapper":"commonjs","format":"commonjs","id":"/hello.js"}
 require.memoize("/hello.js", 
 function(require, exports, module) {var __dirname = '';
 
