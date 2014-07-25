@@ -73,7 +73,7 @@ function wrapAMD(callback) {
     callback(amdRequire, wrappedDefine);
     return exports;
 }
-// @pinf-bundle-module: {"file":"lib/loader.js","mtime":1379828059,"wrapper":"commonjs","format":"commonjs","id":"/lib/loader.js"}
+// @pinf-bundle-module: {"file":"lib/loader.js","mtime":1402713825,"wrapper":"commonjs","format":"commonjs","id":"/lib/loader.js"}
 require.memoize("/lib/loader.js", 
 function(require, exports, module) {var __dirname = 'lib';
 
@@ -176,6 +176,9 @@ exports.sandbox = function(sandboxIdentifier, sandboxOptions, loadedCallback, er
     		for (var name in sandboxOptions.globals) {
     			globals[name] = sandboxOptions.globals[name];
     		}
+    	}
+    	if (sandboxOptions.test && sandboxOptions.rootPath) {
+    		globals.TEST_ROOT_PATH = sandboxOptions.rootPath;
     	}
         VM.runInNewContext(code, globals, uri, true);
 	}
@@ -284,6 +287,11 @@ exports.sandbox = function(sandboxIdentifier, sandboxOptions, loadedCallback, er
 				// Check if we are delaing with a native nodejs module.
 				// TODO: Use a better flag than '__' to indicate that module should be loaded here! Use proper versioned uri.
 				if (splitIdentifier[0] === "__SYSTEM__") {
+					// Check if the system module is memoized first. If it is it takes precedence.
+					var canonicalId = identifier + ".js";
+					if (options.initializedModules[canonicalId] || options.moduleInitializers[canonicalId]) {
+						return origRequire(identifier);
+					}
 					return require(splitIdentifier.slice(1).join("/"));
 				}
 				// HACK: We catch any module IDs that were not re-written in the hope that we catch any system modules.
@@ -382,7 +390,14 @@ exports.sandbox = function(sandboxIdentifier, sandboxOptions, loadedCallback, er
 					return origRequire(origModuleIdentifier);
 				}
 			}
+/*
+console.log("pkg.id", pkg.id);
+console.log("canonicalId", canonicalId);
 
+			if (pkg.id === "__SYSTEM__") {
+				return require(canonicalId.replace(/^__SYSTEM__\/|\.js$/g, ""));
+			}
+*/
 			// We encountered a dynamic sync require.
 
 			if (sandboxOptions.debug) console.log("[loader-for-nodejs][pkg.require]", "moduleIdentifier", moduleIdentifier, "pkg.id", pkg.id, "canonicalId", canonicalId);
@@ -440,7 +455,7 @@ exports.reset = LOADER.reset;
 
 }
 , {"filename":"lib/loader.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/index.js","mtime":1368547337,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/index.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/index.js"}
 require.memoize("b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/lib';
 "use strict"
@@ -570,7 +585,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/lib/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/jsonfile/lib/jsonfile.js","mtime":1372433517,"wrapper":"commonjs/leaky","format":"leaky","id":"d5ba5d20168aa9175f55feda3f60aab1a6ace818-jsonfile/lib/jsonfile.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/jsonfile/lib/jsonfile.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"d5ba5d20168aa9175f55feda3f60aab1a6ace818-jsonfile/lib/jsonfile.js"}
 require.memoize("d5ba5d20168aa9175f55feda3f60aab1a6ace818-jsonfile/lib/jsonfile.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/node_modules/jsonfile/lib';
 var fs = require('__SYSTEM__/fs');
@@ -619,7 +634,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/node_modules/jsonfile/lib/jsonfile.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/json.js","mtime":1368547291,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/json.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/json.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/json.js"}
 require.memoize("b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/json.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/lib';
 "use strict"
@@ -663,7 +678,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/lib/json.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/mkdir.js","mtime":1368545736,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/mkdir.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/mkdir.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/mkdir.js"}
 require.memoize("b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/mkdir.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/lib';
 "use strict"
@@ -682,7 +697,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/lib/mkdir.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/mkdirp/index.js","mtime":1345465530,"wrapper":"commonjs/leaky","format":"leaky","id":"693ec9cb1f2f61428c63e9cd17e57775f4df0f74-mkdirp/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/mkdirp/index.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"693ec9cb1f2f61428c63e9cd17e57775f4df0f74-mkdirp/index.js"}
 require.memoize("693ec9cb1f2f61428c63e9cd17e57775f4df0f74-mkdirp/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/node_modules/mkdirp';
 var path = require('__SYSTEM__/path');
@@ -779,7 +794,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/node_modules/mkdirp/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/copy.js","mtime":1368545713,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/copy.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/copy.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/copy.js"}
 require.memoize("b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/copy.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/lib';
 "use strict"
@@ -839,7 +854,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/lib/copy.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/ncp/lib/ncp.js","mtime":1363107721,"wrapper":"commonjs/leaky","format":"leaky","id":"c99227b03d285ab9292c0748af53c56ffc9ac859-ncp/lib/ncp.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/ncp/lib/ncp.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"c99227b03d285ab9292c0748af53c56ffc9ac859-ncp/lib/ncp.js"}
 require.memoize("c99227b03d285ab9292c0748af53c56ffc9ac859-ncp/lib/ncp.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/node_modules/ncp/lib';
 var fs = require('__SYSTEM__/fs'),
@@ -1076,7 +1091,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/node_modules/ncp/lib/ncp.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/remove.js","mtime":1368545758,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/remove.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/remove.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/remove.js"}
 require.memoize("b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/remove.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/lib';
 "use strict"
@@ -1109,7 +1124,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/lib/remove.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/rimraf/rimraf.js","mtime":1373827261,"wrapper":"commonjs","format":"commonjs","id":"16117a71d212e842209fc0336b7b2cf0572a5023-rimraf/rimraf.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/rimraf/rimraf.js","mtime":1402713825,"wrapper":"commonjs","format":"commonjs","id":"16117a71d212e842209fc0336b7b2cf0572a5023-rimraf/rimraf.js"}
 require.memoize("16117a71d212e842209fc0336b7b2cf0572a5023-rimraf/rimraf.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/node_modules/rimraf';
 module.exports = rimraf
@@ -1299,7 +1314,7 @@ function rmkidsSync (p) {
 
 }
 , {"filename":"node_modules/fs-extra/node_modules/rimraf/rimraf.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/rimraf/node_modules/graceful-fs/graceful-fs.js","mtime":1373526487,"wrapper":"commonjs/leaky","format":"leaky","id":"8221f2fbd3f3ff50c6ef3876a188d48a8e78bc6e-graceful-fs/graceful-fs.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/rimraf/node_modules/graceful-fs/graceful-fs.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"8221f2fbd3f3ff50c6ef3876a188d48a8e78bc6e-graceful-fs/graceful-fs.js"}
 require.memoize("8221f2fbd3f3ff50c6ef3876a188d48a8e78bc6e-graceful-fs/graceful-fs.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/node_modules/rimraf/node_modules/graceful-fs';
 // Monkey-patching the fs module.
@@ -1483,7 +1498,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/node_modules/rimraf/node_modules/graceful-fs/graceful-fs.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/rimraf/node_modules/graceful-fs/polyfills.js","mtime":1373526487,"wrapper":"commonjs/leaky","format":"leaky","id":"8221f2fbd3f3ff50c6ef3876a188d48a8e78bc6e-graceful-fs/polyfills.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/node_modules/rimraf/node_modules/graceful-fs/polyfills.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"8221f2fbd3f3ff50c6ef3876a188d48a8e78bc6e-graceful-fs/polyfills.js"}
 require.memoize("8221f2fbd3f3ff50c6ef3876a188d48a8e78bc6e-graceful-fs/polyfills.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/node_modules/rimraf/node_modules/graceful-fs';
 var fs = require('__SYSTEM__/fs')
@@ -1733,7 +1748,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/node_modules/rimraf/node_modules/graceful-fs/polyfills.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/create.js","mtime":1368545697,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/create.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/create.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/create.js"}
 require.memoize("b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/create.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/lib';
 "use strict"
@@ -1804,7 +1819,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/lib/create.js"});
-// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/output.js","mtime":1368545747,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/output.js"}
+// @pinf-bundle-module: {"file":"node_modules/fs-extra/lib/output.js","mtime":1402713825,"wrapper":"commonjs/leaky","format":"leaky","id":"b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/output.js"}
 require.memoize("b98063a15c6bafaefa93c7f701af192d69a9efd8-fs-extra/lib/output.js", 
 function(require, exports, module) {var __dirname = 'node_modules/fs-extra/lib';
 "use strict"
@@ -1857,7 +1872,7 @@ return {
 };
 }
 , {"filename":"node_modules/fs-extra/lib/output.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/index.js","mtime":1367357303,"wrapper":"commonjs/leaky","format":"leaky","id":"ed4bb06796db1905581e7b400da006dd7b8b1b55-request/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"ed4bb06796db1905581e7b400da006dd7b8b1b55-request/index.js"}
 require.memoize("ed4bb06796db1905581e7b400da006dd7b8b1b55-request/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request';
 // Copyright 2010-2012 Mikeal Rogers
@@ -3277,7 +3292,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/qs/index.js","mtime":1368459125,"wrapper":"commonjs","format":"commonjs","id":"bad905498fb7a8a034fa664d6ed1a9c67f1b189c-qs/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/qs/index.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"bad905498fb7a8a034fa664d6ed1a9c67f1b189c-qs/index.js"}
 require.memoize("bad905498fb7a8a034fa664d6ed1a9c67f1b189c-qs/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/qs';
 /**
@@ -3670,7 +3685,7 @@ function decode(str) {
 
 }
 , {"filename":"node_modules/request/node_modules/qs/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/oauth-sign/index.js","mtime":1362169119,"wrapper":"commonjs","format":"commonjs","id":"4c8c493e0464365389fe0601e4bb6254d3b41a3c-oauth-sign/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/oauth-sign/index.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"4c8c493e0464365389fe0601e4bb6254d3b41a3c-oauth-sign/index.js"}
 require.memoize("4c8c493e0464365389fe0601e4bb6254d3b41a3c-oauth-sign/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/oauth-sign';
 var crypto = require('__SYSTEM__/crypto')
@@ -3719,7 +3734,7 @@ exports.rfc3986 = rfc3986
 
 }
 , {"filename":"node_modules/request/node_modules/oauth-sign/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/index.js","mtime":1365188840,"wrapper":"commonjs/leaky","format":"leaky","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/index.js"}
 require.memoize("29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk';
 module.exports = require('./lib');
@@ -3729,7 +3744,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/hawk/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/lib/index.js","mtime":1365312498,"wrapper":"commonjs","format":"commonjs","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/lib/index.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/index.js"}
 require.memoize("29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/lib';
 // Export sub-modules
@@ -3750,7 +3765,7 @@ exports.uri = {
 
 }
 , {"filename":"node_modules/request/node_modules/hawk/lib/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/boom/index.js","mtime":1365488312,"wrapper":"commonjs/leaky","format":"leaky","id":"799caeb4798b9c4de483910de2aa52868f1f47d9-boom/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/boom/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"799caeb4798b9c4de483910de2aa52868f1f47d9-boom/index.js"}
 require.memoize("799caeb4798b9c4de483910de2aa52868f1f47d9-boom/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/boom';
 module.exports = require('./lib');
@@ -3760,7 +3775,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/boom/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/boom/lib/index.js","mtime":1369144077,"wrapper":"commonjs","format":"commonjs","id":"799caeb4798b9c4de483910de2aa52868f1f47d9-boom/lib/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/boom/lib/index.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"799caeb4798b9c4de483910de2aa52868f1f47d9-boom/lib/index.js"}
 require.memoize("799caeb4798b9c4de483910de2aa52868f1f47d9-boom/lib/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/boom/lib';
 // Load modules
@@ -3973,7 +3988,7 @@ internals.Boom.passThrough = function (code, payload, contentType, headers) {
 
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/boom/lib/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/index.js","mtime":1368629552,"wrapper":"commonjs/leaky","format":"leaky","id":"6b825b609d9fcb26d947f3cee8a737a80a9b27b3-hoek/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"6b825b609d9fcb26d947f3cee8a737a80a9b27b3-hoek/index.js"}
 require.memoize("6b825b609d9fcb26d947f3cee8a737a80a9b27b3-hoek/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek';
 module.exports = require('./lib');
@@ -3983,7 +3998,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/lib/index.js","mtime":1368653676,"wrapper":"commonjs","format":"commonjs","id":"6b825b609d9fcb26d947f3cee8a737a80a9b27b3-hoek/lib/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/lib/index.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"6b825b609d9fcb26d947f3cee8a737a80a9b27b3-hoek/lib/index.js"}
 require.memoize("6b825b609d9fcb26d947f3cee8a737a80a9b27b3-hoek/lib/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/lib';
 // Load modules
@@ -4574,7 +4589,7 @@ exports.nextTick = function (callback) {
 
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/lib/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/lib/escape.js","mtime":1368629552,"wrapper":"commonjs","format":"commonjs","id":"6b825b609d9fcb26d947f3cee8a737a80a9b27b3-hoek/lib/escape.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/lib/escape.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"6b825b609d9fcb26d947f3cee8a737a80a9b27b3-hoek/lib/escape.js"}
 require.memoize("6b825b609d9fcb26d947f3cee8a737a80a9b27b3-hoek/lib/escape.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/lib';
 // Declare internals
@@ -4711,7 +4726,7 @@ internals.safeCharCodes = (function () {
 }());
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/boom/node_modules/hoek/lib/escape.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/sntp/index.js","mtime":1365306274,"wrapper":"commonjs/leaky","format":"leaky","id":"99cc0c112bc5e48183c985f6e4c69af129c98ba7-sntp/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/sntp/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"99cc0c112bc5e48183c985f6e4c69af129c98ba7-sntp/index.js"}
 require.memoize("99cc0c112bc5e48183c985f6e4c69af129c98ba7-sntp/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/sntp';
 module.exports = require('./lib');
@@ -4721,7 +4736,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/sntp/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/sntp/lib/index.js","mtime":1369144574,"wrapper":"commonjs","format":"commonjs","id":"99cc0c112bc5e48183c985f6e4c69af129c98ba7-sntp/lib/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/sntp/lib/index.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"99cc0c112bc5e48183c985f6e4c69af129c98ba7-sntp/lib/index.js"}
 require.memoize("99cc0c112bc5e48183c985f6e4c69af129c98ba7-sntp/lib/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/sntp/lib';
 // Load modules
@@ -5136,7 +5151,7 @@ exports.now = function () {
 
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/sntp/lib/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/index.js","mtime":1368629552,"wrapper":"commonjs/leaky","format":"leaky","id":"d5ffe40658ed1d8bb0108338b7999512eedb8a6f-hoek/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"d5ffe40658ed1d8bb0108338b7999512eedb8a6f-hoek/index.js"}
 require.memoize("d5ffe40658ed1d8bb0108338b7999512eedb8a6f-hoek/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek';
 module.exports = require('./lib');
@@ -5146,7 +5161,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/lib/index.js","mtime":1368653676,"wrapper":"commonjs","format":"commonjs","id":"d5ffe40658ed1d8bb0108338b7999512eedb8a6f-hoek/lib/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/lib/index.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"d5ffe40658ed1d8bb0108338b7999512eedb8a6f-hoek/lib/index.js"}
 require.memoize("d5ffe40658ed1d8bb0108338b7999512eedb8a6f-hoek/lib/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/lib';
 // Load modules
@@ -5737,7 +5752,7 @@ exports.nextTick = function (callback) {
 
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/lib/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/lib/escape.js","mtime":1368629552,"wrapper":"commonjs","format":"commonjs","id":"d5ffe40658ed1d8bb0108338b7999512eedb8a6f-hoek/lib/escape.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/lib/escape.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"d5ffe40658ed1d8bb0108338b7999512eedb8a6f-hoek/lib/escape.js"}
 require.memoize("d5ffe40658ed1d8bb0108338b7999512eedb8a6f-hoek/lib/escape.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/lib';
 // Declare internals
@@ -5874,7 +5889,7 @@ internals.safeCharCodes = (function () {
 }());
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/sntp/node_modules/hoek/lib/escape.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/lib/server.js","mtime":1365791465,"wrapper":"commonjs","format":"commonjs","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/server.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/lib/server.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/server.js"}
 require.memoize("29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/server.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/lib';
 // Load modules
@@ -6304,7 +6319,7 @@ exports.authenticateBewit = function (req, credentialsFunc, options, callback) {
 
 }
 , {"filename":"node_modules/request/node_modules/hawk/lib/server.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/hoek/index.js","mtime":1365188840,"wrapper":"commonjs/leaky","format":"leaky","id":"f7d6999ac201573ce8335e058ee0439994171772-hoek/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/hoek/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"f7d6999ac201573ce8335e058ee0439994171772-hoek/index.js"}
 require.memoize("f7d6999ac201573ce8335e058ee0439994171772-hoek/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/hoek';
 module.exports = require('./lib');
@@ -6314,7 +6329,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/hoek/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/hoek/lib/index.js","mtime":1367686190,"wrapper":"commonjs","format":"commonjs","id":"f7d6999ac201573ce8335e058ee0439994171772-hoek/lib/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/hoek/lib/index.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"f7d6999ac201573ce8335e058ee0439994171772-hoek/lib/index.js"}
 require.memoize("f7d6999ac201573ce8335e058ee0439994171772-hoek/lib/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/hoek/lib';
 // Load modules
@@ -6900,7 +6915,7 @@ exports.nextTick = function (callback) {
 
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/hoek/lib/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/hoek/lib/escape.js","mtime":1365188900,"wrapper":"commonjs","format":"commonjs","id":"f7d6999ac201573ce8335e058ee0439994171772-hoek/lib/escape.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/hoek/lib/escape.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"f7d6999ac201573ce8335e058ee0439994171772-hoek/lib/escape.js"}
 require.memoize("f7d6999ac201573ce8335e058ee0439994171772-hoek/lib/escape.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/hoek/lib';
 // Declare internals
@@ -7037,7 +7052,7 @@ internals.safeCharCodes = (function () {
 }());
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/hoek/lib/escape.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/cryptiles/index.js","mtime":1372866517,"wrapper":"commonjs/leaky","format":"leaky","id":"0d16239d3ef60fdd17d17b1d50d2c59ee8e63166-cryptiles/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/cryptiles/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"0d16239d3ef60fdd17d17b1d50d2c59ee8e63166-cryptiles/index.js"}
 require.memoize("0d16239d3ef60fdd17d17b1d50d2c59ee8e63166-cryptiles/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/cryptiles';
 module.exports = require('./lib');
@@ -7047,7 +7062,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/cryptiles/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/cryptiles/lib/index.js","mtime":1372866517,"wrapper":"commonjs","format":"commonjs","id":"0d16239d3ef60fdd17d17b1d50d2c59ee8e63166-cryptiles/lib/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/node_modules/cryptiles/lib/index.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"0d16239d3ef60fdd17d17b1d50d2c59ee8e63166-cryptiles/lib/index.js"}
 require.memoize("0d16239d3ef60fdd17d17b1d50d2c59ee8e63166-cryptiles/lib/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/node_modules/cryptiles/lib';
 // Load modules
@@ -7121,7 +7136,7 @@ exports.fixedTimeComparison = function (a, b) {
 
 }
 , {"filename":"node_modules/request/node_modules/hawk/node_modules/cryptiles/lib/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/lib/crypto.js","mtime":1365791934,"wrapper":"commonjs","format":"commonjs","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/crypto.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/lib/crypto.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/crypto.js"}
 require.memoize("29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/crypto.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/lib';
 // Load modules
@@ -7238,7 +7253,7 @@ exports.calculateTsMac = function (ts, credentials) {
 
 }
 , {"filename":"node_modules/request/node_modules/hawk/lib/crypto.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/lib/utils.js","mtime":1365752437,"wrapper":"commonjs","format":"commonjs","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/utils.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/lib/utils.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/utils.js"}
 require.memoize("29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/utils.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/lib';
 // Load modules
@@ -7418,7 +7433,7 @@ exports.unauthorized = function (message) {
 
 }
 , {"filename":"node_modules/request/node_modules/hawk/lib/utils.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/lib/client.js","mtime":1365791465,"wrapper":"commonjs","format":"commonjs","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/client.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/hawk/lib/client.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/client.js"}
 require.memoize("29eb5a18eb620cc598527d89a0c5c611db63e91b-hawk/lib/client.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/hawk/lib';
 // Load modules
@@ -7709,7 +7724,7 @@ exports.getBewit = function (uri, options) {
 
 }
 , {"filename":"node_modules/request/node_modules/hawk/lib/client.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/aws-sign/index.js","mtime":1362168282,"wrapper":"commonjs/leaky","format":"leaky","id":"effa10bda53b956d3e4fe3fada19d444ee3ea1ac-aws-sign/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/aws-sign/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"effa10bda53b956d3e4fe3fada19d444ee3ea1ac-aws-sign/index.js"}
 require.memoize("effa10bda53b956d3e4fe3fada19d444ee3ea1ac-aws-sign/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/aws-sign';
 
@@ -7934,7 +7949,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/aws-sign/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/lib/index.js","mtime":1358971386,"wrapper":"commonjs/leaky","format":"leaky","id":"6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/lib/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/index.js"}
 require.memoize("6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/lib';
 // Copyright 2011 Joyent, Inc.  All rights reserved.
@@ -7973,7 +7988,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/lib/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/lib/parser.js","mtime":1360599652,"wrapper":"commonjs/leaky","format":"leaky","id":"6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/parser.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/lib/parser.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/parser.js"}
 require.memoize("6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/parser.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/lib';
 // Copyright 2012 Joyent, Inc.  All rights reserved.
@@ -8286,7 +8301,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/lib/parser.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/assert-plus/assert.js","mtime":1348004643,"wrapper":"commonjs/leaky","format":"leaky","id":"fbda01465fe6db497c8c3e6b1a4a2bfae5a62cfc-assert-plus/assert.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/assert-plus/assert.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"fbda01465fe6db497c8c3e6b1a4a2bfae5a62cfc-assert-plus/assert.js"}
 require.memoize("fbda01465fe6db497c8c3e6b1a4a2bfae5a62cfc-assert-plus/assert.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/node_modules/assert-plus';
 // Copyright (c) 2012, Mark Cavage. All rights reserved.
@@ -8514,7 +8529,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/node_modules/assert-plus/assert.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/lib/signer.js","mtime":1358971386,"wrapper":"commonjs/leaky","format":"leaky","id":"6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/signer.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/lib/signer.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/signer.js"}
 require.memoize("6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/signer.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/lib';
 // Copyright 2012 Joyent, Inc.  All rights reserved.
@@ -8708,7 +8723,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/lib/signer.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/lib/verify.js","mtime":1358971386,"wrapper":"commonjs/leaky","format":"leaky","id":"6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/verify.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/lib/verify.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/verify.js"}
 require.memoize("6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/verify.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/lib';
 // Copyright 2011 Joyent, Inc.  All rights reserved.
@@ -8762,7 +8777,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/lib/verify.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/lib/util.js","mtime":1358971386,"wrapper":"commonjs/leaky","format":"leaky","id":"6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/util.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/lib/util.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/util.js"}
 require.memoize("6f0d5981580f5664565c0af7ca279d689a790fb5-http-signature/lib/util.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/lib';
 // Copyright 2012 Joyent, Inc.  All rights reserved.
@@ -9031,7 +9046,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/lib/util.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/index.js","mtime":1311378978,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/index.js"}
 require.memoize("e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/node_modules/asn1/lib';
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
@@ -9062,7 +9077,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/index.js","mtime":1311127161,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/index.js"}
 require.memoize("e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber';
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
@@ -9105,7 +9120,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/errors.js","mtime":1311378950,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/errors.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/errors.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/errors.js"}
 require.memoize("e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/errors.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber';
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
@@ -9127,7 +9142,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/errors.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/types.js","mtime":1325868994,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/types.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/types.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/types.js"}
 require.memoize("e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/types.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber';
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
@@ -9172,7 +9187,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/types.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/reader.js","mtime":1325869045,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/reader.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/reader.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/reader.js"}
 require.memoize("e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/reader.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber';
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
@@ -9455,7 +9470,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/reader.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/writer.js","mtime":1325869054,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/writer.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/writer.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/writer.js"}
 require.memoize("e612e189cff4640079c1b54bfddcf962015c2f30-asn1/lib/ber/writer.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber';
 // Copyright 2011 Mark Cavage <mcavage@gmail.com> All rights reserved.
@@ -9793,7 +9808,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/http-signature/node_modules/asn1/lib/ber/writer.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/ctype/ctype.js","mtime":1349567501,"wrapper":"commonjs","format":"commonjs","id":"772d995e44ccaf42f98f64a0097b4a58863c38af-ctype/ctype.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/ctype/ctype.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"772d995e44ccaf42f98f64a0097b4a58863c38af-ctype/ctype.js"}
 require.memoize("772d995e44ccaf42f98f64a0097b4a58863c38af-ctype/ctype.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/node_modules/ctype';
 /*
@@ -10743,7 +10758,7 @@ exports.wdouble = mod_ctio.wdouble;
 
 }
 , {"filename":"node_modules/request/node_modules/http-signature/node_modules/ctype/ctype.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/ctype/ctf.js","mtime":1349069100,"wrapper":"commonjs","format":"commonjs","id":"772d995e44ccaf42f98f64a0097b4a58863c38af-ctype/ctf.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/ctype/ctf.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"772d995e44ccaf42f98f64a0097b4a58863c38af-ctype/ctf.js"}
 require.memoize("772d995e44ccaf42f98f64a0097b4a58863c38af-ctype/ctf.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/node_modules/ctype';
 /*
@@ -10994,7 +11009,7 @@ exports.ctfParseJson = ctfParseJson;
 
 }
 , {"filename":"node_modules/request/node_modules/http-signature/node_modules/ctype/ctf.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/ctype/ctio.js","mtime":1349069100,"wrapper":"commonjs","format":"commonjs","id":"772d995e44ccaf42f98f64a0097b4a58863c38af-ctype/ctio.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/http-signature/node_modules/ctype/ctio.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"772d995e44ccaf42f98f64a0097b4a58863c38af-ctype/ctio.js"}
 require.memoize("772d995e44ccaf42f98f64a0097b4a58863c38af-ctype/ctio.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/http-signature/node_modules/ctype';
 /*
@@ -12485,7 +12500,7 @@ exports.wdouble = wdouble;
 
 }
 , {"filename":"node_modules/request/node_modules/http-signature/node_modules/ctype/ctio.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/node-uuid/uuid.js","mtime":1350567957,"wrapper":"amd-ish","format":"amd-ish","id":"e999f0bd6e194076d315ffd2a431c4c6e32def1e-node-uuid/uuid.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/node-uuid/uuid.js","mtime":1402713826,"wrapper":"amd-ish","format":"amd-ish","id":"e999f0bd6e194076d315ffd2a431c4c6e32def1e-node-uuid/uuid.js"}
 require.memoize("e999f0bd6e194076d315ffd2a431c4c6e32def1e-node-uuid/uuid.js", 
 wrapAMD(function(require, define) {
 //     uuid.js
@@ -12736,7 +12751,7 @@ wrapAMD(function(require, define) {
 
 })
 , {"filename":"node_modules/request/node_modules/node-uuid/uuid.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/mime/mime.js","mtime":1363819327,"wrapper":"commonjs/leaky","format":"leaky","id":"acbfdcf6c33b2a153969671d593b45e4d0cd5768-mime/mime.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/mime/mime.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"acbfdcf6c33b2a153969671d593b45e4d0cd5768-mime/mime.js"}
 require.memoize("acbfdcf6c33b2a153969671d593b45e4d0cd5768-mime/mime.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/mime';
 var path = require('__SYSTEM__/path');
@@ -12868,7 +12883,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/mime/mime.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/tunnel-agent/index.js","mtime":1362170392,"wrapper":"commonjs","format":"commonjs","id":"11cb05bc0940ffae1a1e1f73ca7c89e4731519fe-tunnel-agent/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/tunnel-agent/index.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"11cb05bc0940ffae1a1e1f73ca7c89e4731519fe-tunnel-agent/index.js"}
 require.memoize("11cb05bc0940ffae1a1e1f73ca7c89e4731519fe-tunnel-agent/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/tunnel-agent';
 'use strict'
@@ -13101,7 +13116,7 @@ exports.debug = debug // for test
 
 }
 , {"filename":"node_modules/request/node_modules/tunnel-agent/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/json-stringify-safe/stringify.js","mtime":1363154454,"wrapper":"commonjs/leaky","format":"leaky","id":"cd513417702c216d7e831b5e07732580c4cd46ff-json-stringify-safe/stringify.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/json-stringify-safe/stringify.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"cd513417702c216d7e831b5e07732580c4cd46ff-json-stringify-safe/stringify.js"}
 require.memoize("cd513417702c216d7e831b5e07732580c4cd46ff-json-stringify-safe/stringify.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/json-stringify-safe';
 module.exports = stringify;
@@ -13138,7 +13153,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/json-stringify-safe/stringify.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/forever-agent/index.js","mtime":1366064761,"wrapper":"commonjs/leaky","format":"leaky","id":"0aece9af14f253ebe7db431e7f82a4db65578bac-forever-agent/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/forever-agent/index.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"0aece9af14f253ebe7db431e7f82a4db65578bac-forever-agent/index.js"}
 require.memoize("0aece9af14f253ebe7db431e7f82a4db65578bac-forever-agent/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/forever-agent';
 module.exports = ForeverAgent
@@ -13275,7 +13290,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/forever-agent/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/form-data/lib/form_data.js","mtime":1366517895,"wrapper":"commonjs/leaky","format":"leaky","id":"30e023fb56d12219edd0fa0dc5fec5bc671e23d7-form-data/lib/form_data.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/form-data/lib/form_data.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"30e023fb56d12219edd0fa0dc5fec5bc671e23d7-form-data/lib/form_data.js"}
 require.memoize("30e023fb56d12219edd0fa0dc5fec5bc671e23d7-form-data/lib/form_data.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/form-data/lib';
 var CombinedStream = require('combined-stream');
@@ -13591,7 +13606,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/form-data/lib/form_data.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/form-data/node_modules/combined-stream/lib/combined_stream.js","mtime":1359829774,"wrapper":"commonjs/leaky","format":"leaky","id":"06cbcc54faef9f40e30e431889706609e5cfcee5-combined-stream/lib/combined_stream.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/form-data/node_modules/combined-stream/lib/combined_stream.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"06cbcc54faef9f40e30e431889706609e5cfcee5-combined-stream/lib/combined_stream.js"}
 require.memoize("06cbcc54faef9f40e30e431889706609e5cfcee5-combined-stream/lib/combined_stream.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/form-data/node_modules/combined-stream/lib';
 var util = require('__SYSTEM__/util');
@@ -13791,7 +13806,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/form-data/node_modules/combined-stream/lib/combined_stream.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/form-data/node_modules/combined-stream/node_modules/delayed-stream/lib/delayed_stream.js","mtime":1306224584,"wrapper":"commonjs/leaky","format":"leaky","id":"199a58ca20a8d32f3b68d292b20fd112db88b5ec-delayed-stream/lib/delayed_stream.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/form-data/node_modules/combined-stream/node_modules/delayed-stream/lib/delayed_stream.js","mtime":1402713826,"wrapper":"commonjs/leaky","format":"leaky","id":"199a58ca20a8d32f3b68d292b20fd112db88b5ec-delayed-stream/lib/delayed_stream.js"}
 require.memoize("199a58ca20a8d32f3b68d292b20fd112db88b5ec-delayed-stream/lib/delayed_stream.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/form-data/node_modules/combined-stream/node_modules/delayed-stream/lib';
 var Stream = require('__SYSTEM__/stream').Stream;
@@ -13903,7 +13918,7 @@ return {
 };
 }
 , {"filename":"node_modules/request/node_modules/form-data/node_modules/combined-stream/node_modules/delayed-stream/lib/delayed_stream.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/form-data/node_modules/async/lib/async.js","mtime":1369727354,"wrapper":"amd-ish","format":"amd-ish","id":"257a70b6290719603e5079400727f3d2d2d1b03a-async/lib/async.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/form-data/node_modules/async/lib/async.js","mtime":1402713826,"wrapper":"amd-ish","format":"amd-ish","id":"257a70b6290719603e5079400727f3d2d2d1b03a-async/lib/async.js"}
 require.memoize("257a70b6290719603e5079400727f3d2d2d1b03a-async/lib/async.js", 
 wrapAMD(function(require, define) {
 /*global setImmediate: false, setTimeout: false, console: false */
@@ -14864,7 +14879,7 @@ wrapAMD(function(require, define) {
 
 })
 , {"filename":"node_modules/request/node_modules/form-data/node_modules/async/lib/async.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/cookie-jar/index.js","mtime":1362167190,"wrapper":"commonjs","format":"commonjs","id":"96d6c97b8f07f8f227fbeb5b214187b162ad8c7c-cookie-jar/index.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/cookie-jar/index.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"96d6c97b8f07f8f227fbeb5b214187b162ad8c7c-cookie-jar/index.js"}
 require.memoize("96d6c97b8f07f8f227fbeb5b214187b162ad8c7c-cookie-jar/index.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/cookie-jar';
 /*!
@@ -14936,7 +14951,7 @@ Cookie.prototype.toString = function(){
 module.exports.Jar = require('./jar')
 }
 , {"filename":"node_modules/request/node_modules/cookie-jar/index.js"});
-// @pinf-bundle-module: {"file":"node_modules/request/node_modules/cookie-jar/jar.js","mtime":1362166690,"wrapper":"commonjs","format":"commonjs","id":"96d6c97b8f07f8f227fbeb5b214187b162ad8c7c-cookie-jar/jar.js"}
+// @pinf-bundle-module: {"file":"node_modules/request/node_modules/cookie-jar/jar.js","mtime":1402713826,"wrapper":"commonjs","format":"commonjs","id":"96d6c97b8f07f8f227fbeb5b214187b162ad8c7c-cookie-jar/jar.js"}
 require.memoize("96d6c97b8f07f8f227fbeb5b214187b162ad8c7c-cookie-jar/jar.js", 
 function(require, exports, module) {var __dirname = 'node_modules/request/node_modules/cookie-jar';
 /*!
@@ -15014,7 +15029,7 @@ CookieJar.prototype.cookieString = function(req){
 
 }
 , {"filename":"node_modules/request/node_modules/cookie-jar/jar.js"});
-// @pinf-bundle-module: {"file":"node_modules/pinf-loader-js/loader.js","mtime":1381607720,"wrapper":"commonjs","format":"commonjs","id":"46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js/./loader.js"}
+// @pinf-bundle-module: {"file":"node_modules/pinf-loader-js/loader.js","mtime":1402713887,"wrapper":"commonjs","format":"commonjs","id":"46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js/./loader.js"}
 require.memoize("46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js/./loader.js", 
 function(require, exports, module) {var __dirname = 'node_modules/pinf-loader-js';
 /**

@@ -21,7 +21,9 @@
     "deepcopy": "~0.3.1",
     "require.async": "~0.1.1",
     "send": "~0.1.4",
-    "pinf-it-bundler": "0.1.x"
+    "pinf-it-bundler": "0.1.x",
+    "pinf-vfs": "0.1.x",
+    "pinf-config": "0.1.x"
   },
   "devDependencies": {
     "mocha": "~1.9.0",

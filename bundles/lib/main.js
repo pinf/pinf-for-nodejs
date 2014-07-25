@@ -1,10 +1,12 @@
 // @pinf-bundle-ignore: 
 PINF.bundle("", function(require) {
-// @pinf-bundle-module: {"file":"lib/main.js","mtime":1380950068,"wrapper":"commonjs","format":"commonjs","id":"/lib/main.js"}
+// @pinf-bundle-module: {"file":"lib/main.js","mtime":1406263191,"wrapper":"commonjs","format":"commonjs","id":"/lib/main.js"}
 require.memoize("/lib/main.js", 
 function(require, exports, module) {var __dirname = 'lib';
 
 require("require.async")(require);
+
+const PATH = require("__SYSTEM__/path");
 
 
 exports.main = function(main, module, options, callback) {
@@ -38,7 +40,8 @@ exports.main = function(main, module, options, callback) {
 	}
 	if (!module) {
 	    try {
-			var ret = main(done);			
+			var ret = main(done);
+			// If main function returns `true` we exit and don't wait for `done` callback.
 			if (ret === true) {
 				return done(null);
 			}
@@ -64,7 +67,20 @@ exports.main = function(main, module, options, callback) {
 	//       Only load cache module and determine cache path by looking at PINF_RUNTIME and own package uid (use pinf-primitives-js to do this).
 	//		 Cache module is in primitives package as well.
 	return require.async("./context", function(CONTEXT) {
-		return CONTEXT.contextForModule(module, options, function(err, context) {
+
+		var opts = {};
+		for (var name in options) {
+			opts[name] = options[name];
+		}
+
+		if (typeof opts.PINF_PROGRAM === "undefined") {
+			opts.PINF_PROGRAM = PATH.join(__dirname, "program.json");
+		}
+		if (typeof options.PINF_RUNTIME === "undefined") {
+	        opts.PINF_RUNTIME = "";
+	    }
+
+		return CONTEXT.contextForModule(module, opts, function(err, context) {
 			if (err) return done(err);
 		    try {
 		    	var opts = {};
@@ -86,7 +102,7 @@ exports.main = function(main, module, options, callback) {
 
 }
 , {"filename":"lib/main.js"});
-// @pinf-bundle-module: {"file":"node_modules/require.async/require.async.js","mtime":1376958755,"wrapper":"commonjs/leaky","format":"leaky","id":"437ef8aee826325a41c701ca21e78f84f35ff9f1-require.async/require.async.js"}
+// @pinf-bundle-module: {"file":"node_modules/require.async/require.async.js","mtime":1402713829,"wrapper":"commonjs/leaky","format":"leaky","id":"437ef8aee826325a41c701ca21e78f84f35ff9f1-require.async/require.async.js"}
 require.memoize("437ef8aee826325a41c701ca21e78f84f35ff9f1-require.async/require.async.js", 
 function(require, exports, module) {var __dirname = 'node_modules/require.async';
 /**
@@ -138,7 +154,8 @@ require.memoize("/package.json",
         "pinf-it-program-insight": "4cbfcf3a6f76b102c8abe5ac9f4f68bc773ef413-pinf-it-program-insight",
         "pinf-it-bundler": "d410d765c4a91b52828ad9d1eba8d92a9eb81b63-pinf-it-bundler",
         "request": "ed4bb06796db1905581e7b400da006dd7b8b1b55-request",
-        "pinf-loader-js": "46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js"
+        "pinf-loader-js": "46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js",
+        "pinf-vfs": "59286364ebdd2811b0b95c9a3a98aff6543fdb23-pinf-vfs"
     },
     "dirpath": "."
 }
@@ -412,6 +429,7 @@ require.memoize("d410d765c4a91b52828ad9d1eba8d92a9eb81b63-pinf-it-bundler/packag
         "pinf-it-package-insight": "b357eaf1268ffeb8ba51bc0ea7cf154db5841df7-pinf-it-package-insight",
         "pinf-loader-js": "19418dae005c4d23567770942bd446bf4ab98489-pinf-loader-js",
         "requirejs": "3cbdeaccfdb4ad426e3df4d62ea14ab7520b6fa7-requirejs",
+        "browser-builtins": "5ffbe8b6d730bb97f4962540bf61cb0e2f6ecc6e-browser-builtins",
         "colors": "835808d4d2aa99ffb0289769d0c56dbe3d47a2b0-colors"
     },
     "dirpath": "node_modules/pinf-it-bundler"
@@ -883,6 +901,490 @@ require.memoize("46436413248440678ad5c9378e5dd00081b623bd-pinf-loader-js/package
     "dirpath": "node_modules/pinf-loader-js"
 }
 , {"filename":"node_modules/pinf-loader-js/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"__SYSTEM__/package.json"}
+require.memoize("__SYSTEM__/package.json", 
+{
+    "mappings": {
+        "__SYSTEM__": "__SYSTEM__"
+    }
+}
+, {"filename":"__SYSTEM__/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"5ffbe8b6d730bb97f4962540bf61cb0e2f6ecc6e-browser-builtins/package.json"}
+require.memoize("5ffbe8b6d730bb97f4962540bf61cb0e2f6ecc6e-browser-builtins/package.json", 
+{
+    "main": "5ffbe8b6d730bb97f4962540bf61cb0e2f6ecc6e-browser-builtins/index.js",
+    "mappings": {
+        "http-browserify": "418ec4551cd2bc7e46bfbd6356c17babf6a1be16-http-browserify",
+        "vm-browserify": "f1aac6d232e16345a20d845bdf051a9d73b339c3-vm-browserify",
+        "crypto-browserify": "6edee8a8bdc30840641a8088b91554a13cecc76f-crypto-browserify",
+        "console-browserify": "96d4e09a7298da99ea4f97d441a830624519a0ac-console-browserify",
+        "zlib-browserify": "0bddfdc82945031778c66af5874772da2349b323-zlib-browserify",
+        "buffer-browserify": "c98adf73d135cb3405a72956d8986602c9b75984-buffer-browserify",
+        "constants-browserify": "95b9016890f1582e6f761491de0c23521afc7035-constants-browserify",
+        "os-browserify": "5720622a71b1720e4468008606266a3005769b99-os-browserify"
+    },
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"418ec4551cd2bc7e46bfbd6356c17babf6a1be16-http-browserify/package.json"}
+require.memoize("418ec4551cd2bc7e46bfbd6356c17babf6a1be16-http-browserify/package.json", 
+{
+    "main": "418ec4551cd2bc7e46bfbd6356c17babf6a1be16-http-browserify/index.js",
+    "directories": {
+        "lib": "."
+    },
+    "mappings": {
+        "concat-stream": "b06cbf27e188f2588acf94783b2da349807e5a78-concat-stream",
+        "Base64": "5486a895cc19ff09df890a3e3c42c14d411e5d3e-Base64"
+    },
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/http-browserify"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/http-browserify/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"b06cbf27e188f2588acf94783b2da349807e5a78-concat-stream/package.json"}
+require.memoize("b06cbf27e188f2588acf94783b2da349807e5a78-concat-stream/package.json", 
+{
+    "main": "b06cbf27e188f2588acf94783b2da349807e5a78-concat-stream/index.js",
+    "mappings": {
+        "bops": "86699f825da014d5f495228dbd0fffa9183e9d51-bops"
+    },
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/http-browserify/node_modules/concat-stream"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/http-browserify/node_modules/concat-stream/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"86699f825da014d5f495228dbd0fffa9183e9d51-bops/package.json"}
+require.memoize("86699f825da014d5f495228dbd0fffa9183e9d51-bops/package.json", 
+{
+    "main": "86699f825da014d5f495228dbd0fffa9183e9d51-bops/index.js",
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/http-browserify/node_modules/concat-stream/node_modules/bops"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/http-browserify/node_modules/concat-stream/node_modules/bops/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"5486a895cc19ff09df890a3e3c42c14d411e5d3e-Base64/package.json"}
+require.memoize("5486a895cc19ff09df890a3e3c42c14d411e5d3e-Base64/package.json", 
+{
+    "main": "5486a895cc19ff09df890a3e3c42c14d411e5d3e-Base64/base64.js",
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/http-browserify/node_modules/Base64"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/http-browserify/node_modules/Base64/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"f1aac6d232e16345a20d845bdf051a9d73b339c3-vm-browserify/package.json"}
+require.memoize("f1aac6d232e16345a20d845bdf051a9d73b339c3-vm-browserify/package.json", 
+{
+    "main": "f1aac6d232e16345a20d845bdf051a9d73b339c3-vm-browserify/index.js",
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/vm-browserify"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/vm-browserify/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"6edee8a8bdc30840641a8088b91554a13cecc76f-crypto-browserify/package.json"}
+require.memoize("6edee8a8bdc30840641a8088b91554a13cecc76f-crypto-browserify/package.json", 
+{
+    "main": "6edee8a8bdc30840641a8088b91554a13cecc76f-crypto-browserify/index.js",
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/crypto-browserify"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/crypto-browserify/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"96d4e09a7298da99ea4f97d441a830624519a0ac-console-browserify/package.json"}
+require.memoize("96d4e09a7298da99ea4f97d441a830624519a0ac-console-browserify/package.json", 
+{
+    "main": "96d4e09a7298da99ea4f97d441a830624519a0ac-console-browserify/index.js",
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/console-browserify"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/console-browserify/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"0bddfdc82945031778c66af5874772da2349b323-zlib-browserify/package.json"}
+require.memoize("0bddfdc82945031778c66af5874772da2349b323-zlib-browserify/package.json", 
+{
+    "main": "0bddfdc82945031778c66af5874772da2349b323-zlib-browserify/index.js",
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/zlib-browserify"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/zlib-browserify/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"c98adf73d135cb3405a72956d8986602c9b75984-buffer-browserify/package.json"}
+require.memoize("c98adf73d135cb3405a72956d8986602c9b75984-buffer-browserify/package.json", 
+{
+    "main": "c98adf73d135cb3405a72956d8986602c9b75984-buffer-browserify/index.js",
+    "mappings": {
+        "base64-js": "92c9de5da7cbd0016ed8f5cdd0ce8af7c7bc8716-base64-js"
+    },
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/buffer-browserify"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/buffer-browserify/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"92c9de5da7cbd0016ed8f5cdd0ce8af7c7bc8716-base64-js/package.json"}
+require.memoize("92c9de5da7cbd0016ed8f5cdd0ce8af7c7bc8716-base64-js/package.json", 
+{
+    "main": "92c9de5da7cbd0016ed8f5cdd0ce8af7c7bc8716-base64-js/lib/b64.js",
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/buffer-browserify/node_modules/base64-js"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/buffer-browserify/node_modules/base64-js/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"95b9016890f1582e6f761491de0c23521afc7035-constants-browserify/package.json"}
+require.memoize("95b9016890f1582e6f761491de0c23521afc7035-constants-browserify/package.json", 
+{
+    "main": "95b9016890f1582e6f761491de0c23521afc7035-constants-browserify/constants.json",
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/constants-browserify"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/constants-browserify/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"5720622a71b1720e4468008606266a3005769b99-os-browserify/package.json"}
+require.memoize("5720622a71b1720e4468008606266a3005769b99-os-browserify/package.json", 
+{
+    "main": "5720622a71b1720e4468008606266a3005769b99-os-browserify/main.js",
+    "dirpath": "node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/os-browserify"
+}
+, {"filename":"node_modules/pinf-it-bundler/node_modules/browser-builtins/node_modules/os-browserify/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"59286364ebdd2811b0b95c9a3a98aff6543fdb23-pinf-vfs/package.json"}
+require.memoize("59286364ebdd2811b0b95c9a3a98aff6543fdb23-pinf-vfs/package.json", 
+{
+    "main": "59286364ebdd2811b0b95c9a3a98aff6543fdb23-pinf-vfs/lib/vfs.js",
+    "mappings": {
+        "fs-extra": "b392cc47b0135d716456ecbac2efcdb545109b89-fs-extra",
+        "pinf-proxy": "5c4d27962ebe23d26570d53ee0d0bc1cdcae9d31-pinf-proxy"
+    },
+    "dirpath": "node_modules/pinf-vfs"
+}
+, {"filename":"node_modules/pinf-vfs/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"b392cc47b0135d716456ecbac2efcdb545109b89-fs-extra/package.json"}
+require.memoize("b392cc47b0135d716456ecbac2efcdb545109b89-fs-extra/package.json", 
+{
+    "main": "b392cc47b0135d716456ecbac2efcdb545109b89-fs-extra/lib/index.js",
+    "mappings": {
+        "jsonfile": "33cd8596aa45c211389fbb91bcd5fd83f20f9c09-jsonfile",
+        "mkdirp": "47a8a810ed6f88dcf64e4c73771d6324407be6db-mkdirp",
+        "ncp": "b101bb7429bcbe5507ba29edbda1b4d54b1ca43e-ncp",
+        "rimraf": "bd38d03734ae98ce725226fd810039b1029ff8fc-rimraf"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/fs-extra"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/fs-extra/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"33cd8596aa45c211389fbb91bcd5fd83f20f9c09-jsonfile/package.json"}
+require.memoize("33cd8596aa45c211389fbb91bcd5fd83f20f9c09-jsonfile/package.json", 
+{
+    "main": "33cd8596aa45c211389fbb91bcd5fd83f20f9c09-jsonfile/lib/jsonfile.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/fs-extra/node_modules/jsonfile"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/fs-extra/node_modules/jsonfile/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"47a8a810ed6f88dcf64e4c73771d6324407be6db-mkdirp/package.json"}
+require.memoize("47a8a810ed6f88dcf64e4c73771d6324407be6db-mkdirp/package.json", 
+{
+    "main": "47a8a810ed6f88dcf64e4c73771d6324407be6db-mkdirp/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/fs-extra/node_modules/mkdirp"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/fs-extra/node_modules/mkdirp/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"b101bb7429bcbe5507ba29edbda1b4d54b1ca43e-ncp/package.json"}
+require.memoize("b101bb7429bcbe5507ba29edbda1b4d54b1ca43e-ncp/package.json", 
+{
+    "main": "b101bb7429bcbe5507ba29edbda1b4d54b1ca43e-ncp/lib/ncp.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/fs-extra/node_modules/ncp"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/fs-extra/node_modules/ncp/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"bd38d03734ae98ce725226fd810039b1029ff8fc-rimraf/package.json"}
+require.memoize("bd38d03734ae98ce725226fd810039b1029ff8fc-rimraf/package.json", 
+{
+    "main": "bd38d03734ae98ce725226fd810039b1029ff8fc-rimraf/rimraf.js",
+    "mappings": {
+        "graceful-fs": "82bd18473116977f40712a90a1f535253356f989-graceful-fs"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/fs-extra/node_modules/rimraf"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/fs-extra/node_modules/rimraf/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"82bd18473116977f40712a90a1f535253356f989-graceful-fs/package.json"}
+require.memoize("82bd18473116977f40712a90a1f535253356f989-graceful-fs/package.json", 
+{
+    "main": "82bd18473116977f40712a90a1f535253356f989-graceful-fs/graceful-fs.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/fs-extra/node_modules/rimraf/node_modules/graceful-fs"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/fs-extra/node_modules/rimraf/node_modules/graceful-fs/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"5c4d27962ebe23d26570d53ee0d0bc1cdcae9d31-pinf-proxy/package.json"}
+require.memoize("5c4d27962ebe23d26570d53ee0d0bc1cdcae9d31-pinf-proxy/package.json", 
+{
+    "main": "5c4d27962ebe23d26570d53ee0d0bc1cdcae9d31-pinf-proxy/lib/proxy.js",
+    "mappings": {
+        "http-proxy": "34055e448207acada2bb2775e4bd460aafe2cc66-http-proxy",
+        "empty-port": "55f305dcea137c22d102c9ee607f6cd142bcd3f5-empty-port",
+        "request": "6f63720409c06f45f7e78cfa91332f0ed44a51cb-request"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"34055e448207acada2bb2775e4bd460aafe2cc66-http-proxy/package.json"}
+require.memoize("34055e448207acada2bb2775e4bd460aafe2cc66-http-proxy/package.json", 
+{
+    "main": "34055e448207acada2bb2775e4bd460aafe2cc66-http-proxy/lib/node-http-proxy.js",
+    "mappings": {
+        "pkginfo": "ca2c03206ae800c98eca40fecd29e5446834c2b5-pkginfo",
+        "utile": "6031b7cca24abd8d0e8f287b25a9daacc2c6e759-utile"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"ca2c03206ae800c98eca40fecd29e5446834c2b5-pkginfo/package.json"}
+require.memoize("ca2c03206ae800c98eca40fecd29e5446834c2b5-pkginfo/package.json", 
+{
+    "main": "ca2c03206ae800c98eca40fecd29e5446834c2b5-pkginfo/lib/pkginfo.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/pkginfo"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/pkginfo/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"6031b7cca24abd8d0e8f287b25a9daacc2c6e759-utile/package.json"}
+require.memoize("6031b7cca24abd8d0e8f287b25a9daacc2c6e759-utile/package.json", 
+{
+    "main": "6031b7cca24abd8d0e8f287b25a9daacc2c6e759-utile/lib/index.js",
+    "mappings": {
+        "async": "3642444a33bc99ecf4f0db8991df6fdab0430aa5-async",
+        "i": "f51a1779ab170e78789951fc042da8b855960364-i",
+        "mkdirp": "d957dd8574ec7c106547d19209ac21fab7edfbed-mkdirp",
+        "deep-equal": "7a2b28bdac6b45d64ec87bd9354b78af838139e7-deep-equal",
+        "rimraf": "7b1ced90bbd2868cd55dfe12eaff354291421b2a-rimraf",
+        "ncp": "3d3dbd4012bfc9787f2b733b87132fdc7957dfee-ncp"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"3642444a33bc99ecf4f0db8991df6fdab0430aa5-async/package.json"}
+require.memoize("3642444a33bc99ecf4f0db8991df6fdab0430aa5-async/package.json", 
+{
+    "main": "3642444a33bc99ecf4f0db8991df6fdab0430aa5-async/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/async"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/async/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"f51a1779ab170e78789951fc042da8b855960364-i/package.json"}
+require.memoize("f51a1779ab170e78789951fc042da8b855960364-i/package.json", 
+{
+    "main": "f51a1779ab170e78789951fc042da8b855960364-i/lib/inflect.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/i"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/i/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"d957dd8574ec7c106547d19209ac21fab7edfbed-mkdirp/package.json"}
+require.memoize("d957dd8574ec7c106547d19209ac21fab7edfbed-mkdirp/package.json", 
+{
+    "main": "d957dd8574ec7c106547d19209ac21fab7edfbed-mkdirp/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/mkdirp"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/mkdirp/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"7a2b28bdac6b45d64ec87bd9354b78af838139e7-deep-equal/package.json"}
+require.memoize("7a2b28bdac6b45d64ec87bd9354b78af838139e7-deep-equal/package.json", 
+{
+    "main": "7a2b28bdac6b45d64ec87bd9354b78af838139e7-deep-equal/index.js",
+    "directories": {
+        "lib": "."
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/deep-equal"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/deep-equal/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"7b1ced90bbd2868cd55dfe12eaff354291421b2a-rimraf/package.json"}
+require.memoize("7b1ced90bbd2868cd55dfe12eaff354291421b2a-rimraf/package.json", 
+{
+    "main": "7b1ced90bbd2868cd55dfe12eaff354291421b2a-rimraf/rimraf.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/rimraf"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/rimraf/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"3d3dbd4012bfc9787f2b733b87132fdc7957dfee-ncp/package.json"}
+require.memoize("3d3dbd4012bfc9787f2b733b87132fdc7957dfee-ncp/package.json", 
+{
+    "main": "3d3dbd4012bfc9787f2b733b87132fdc7957dfee-ncp/lib/ncp.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/ncp"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/http-proxy/node_modules/utile/node_modules/ncp/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"55f305dcea137c22d102c9ee607f6cd142bcd3f5-empty-port/package.json"}
+require.memoize("55f305dcea137c22d102c9ee607f6cd142bcd3f5-empty-port/package.json", 
+{
+    "main": "55f305dcea137c22d102c9ee607f6cd142bcd3f5-empty-port/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/empty-port"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/empty-port/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"6f63720409c06f45f7e78cfa91332f0ed44a51cb-request/package.json"}
+require.memoize("6f63720409c06f45f7e78cfa91332f0ed44a51cb-request/package.json", 
+{
+    "main": "6f63720409c06f45f7e78cfa91332f0ed44a51cb-request/index.js",
+    "mappings": {
+        "cookie-jar": "048e1c948e1b1bf41b9d82f2d8ec4bacde5a7d2a-cookie-jar",
+        "qs": "8edd7664213b72331eafafa780f2c2e1cbd7b000-qs",
+        "oauth-sign": "c79a15b17d64a66f527c0913a3f9e5d7a8d07940-oauth-sign",
+        "hawk": "a87ca0438386c16b5ac6514d724eb1d0d35b76f1-hawk",
+        "aws-sign": "0ea6b5ff22c395db134201c64e7ba265521edd03-aws-sign",
+        "http-signature": "3817f8a5bc6f393a043372f2f0cae65fb9528327-http-signature",
+        "node-uuid": "5f8d9053f5854bb5ef71399aeecdcaae0353e029-node-uuid",
+        "mime": "da6cdb7088091b9d2a445b608712eedc04a29923-mime",
+        "tunnel-agent": "6211857db27bf4e867376aa0aa9488144c9f3127-tunnel-agent",
+        "json-stringify-safe": "35b0fc23c495eebad75e0c3644783445414c8cab-json-stringify-safe",
+        "forever-agent": "1e56cf0396f2815e2929dd3e39f4c8c667044dba-forever-agent",
+        "form-data": "ac9e40a4f06e8d8531f989c33e03749368976327-form-data"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"048e1c948e1b1bf41b9d82f2d8ec4bacde5a7d2a-cookie-jar/package.json"}
+require.memoize("048e1c948e1b1bf41b9d82f2d8ec4bacde5a7d2a-cookie-jar/package.json", 
+{
+    "main": "048e1c948e1b1bf41b9d82f2d8ec4bacde5a7d2a-cookie-jar/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/cookie-jar"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/cookie-jar/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"8edd7664213b72331eafafa780f2c2e1cbd7b000-qs/package.json"}
+require.memoize("8edd7664213b72331eafafa780f2c2e1cbd7b000-qs/package.json", 
+{
+    "main": "8edd7664213b72331eafafa780f2c2e1cbd7b000-qs/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/qs"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/qs/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"c79a15b17d64a66f527c0913a3f9e5d7a8d07940-oauth-sign/package.json"}
+require.memoize("c79a15b17d64a66f527c0913a3f9e5d7a8d07940-oauth-sign/package.json", 
+{
+    "main": "c79a15b17d64a66f527c0913a3f9e5d7a8d07940-oauth-sign/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/oauth-sign"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/oauth-sign/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"a87ca0438386c16b5ac6514d724eb1d0d35b76f1-hawk/package.json"}
+require.memoize("a87ca0438386c16b5ac6514d724eb1d0d35b76f1-hawk/package.json", 
+{
+    "main": "a87ca0438386c16b5ac6514d724eb1d0d35b76f1-hawk/index.js",
+    "mappings": {
+        "boom": "9051b3a7264a96fcafd6aae5e48d6d2ed7177c16-boom",
+        "sntp": "b5ce9568f402ff8b438b5334158d250c67ac6323-sntp",
+        "hoek": "9a931f873f7ab95323ec3b68cc5caa3a47b4b0ec-hoek",
+        "cryptiles": "c0863acc28d39fa23d4638a14fdba8d4ff3d4516-cryptiles"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/hawk"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/hawk/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"9051b3a7264a96fcafd6aae5e48d6d2ed7177c16-boom/package.json"}
+require.memoize("9051b3a7264a96fcafd6aae5e48d6d2ed7177c16-boom/package.json", 
+{
+    "main": "9051b3a7264a96fcafd6aae5e48d6d2ed7177c16-boom/index.js",
+    "mappings": {
+        "hoek": "9a931f873f7ab95323ec3b68cc5caa3a47b4b0ec-hoek"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/hawk/node_modules/boom"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/hawk/node_modules/boom/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"9a931f873f7ab95323ec3b68cc5caa3a47b4b0ec-hoek/package.json"}
+require.memoize("9a931f873f7ab95323ec3b68cc5caa3a47b4b0ec-hoek/package.json", 
+{
+    "main": "9a931f873f7ab95323ec3b68cc5caa3a47b4b0ec-hoek/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/hawk/node_modules/hoek"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/hawk/node_modules/hoek/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"b5ce9568f402ff8b438b5334158d250c67ac6323-sntp/package.json"}
+require.memoize("b5ce9568f402ff8b438b5334158d250c67ac6323-sntp/package.json", 
+{
+    "main": "b5ce9568f402ff8b438b5334158d250c67ac6323-sntp/index.js",
+    "mappings": {
+        "hoek": "9a931f873f7ab95323ec3b68cc5caa3a47b4b0ec-hoek"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/hawk/node_modules/sntp"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/hawk/node_modules/sntp/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"c0863acc28d39fa23d4638a14fdba8d4ff3d4516-cryptiles/package.json"}
+require.memoize("c0863acc28d39fa23d4638a14fdba8d4ff3d4516-cryptiles/package.json", 
+{
+    "main": "c0863acc28d39fa23d4638a14fdba8d4ff3d4516-cryptiles/index.js",
+    "mappings": {
+        "boom": "9051b3a7264a96fcafd6aae5e48d6d2ed7177c16-boom"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/hawk/node_modules/cryptiles"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/hawk/node_modules/cryptiles/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"0ea6b5ff22c395db134201c64e7ba265521edd03-aws-sign/package.json"}
+require.memoize("0ea6b5ff22c395db134201c64e7ba265521edd03-aws-sign/package.json", 
+{
+    "main": "0ea6b5ff22c395db134201c64e7ba265521edd03-aws-sign/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/aws-sign"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/aws-sign/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"3817f8a5bc6f393a043372f2f0cae65fb9528327-http-signature/package.json"}
+require.memoize("3817f8a5bc6f393a043372f2f0cae65fb9528327-http-signature/package.json", 
+{
+    "main": "3817f8a5bc6f393a043372f2f0cae65fb9528327-http-signature/lib/index.js",
+    "mappings": {
+        "assert-plus": "a049982648077fabe8948273bc6518b800b5930e-assert-plus",
+        "asn1": "9c29ae96331c2bf1a2869290a35d2e7044e8a2fc-asn1",
+        "ctype": "7066e8d1d89f73b7d239e8a2448a6e84a4c0fe0a-ctype"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/http-signature"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/http-signature/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"a049982648077fabe8948273bc6518b800b5930e-assert-plus/package.json"}
+require.memoize("a049982648077fabe8948273bc6518b800b5930e-assert-plus/package.json", 
+{
+    "main": "a049982648077fabe8948273bc6518b800b5930e-assert-plus/assert.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/http-signature/node_modules/assert-plus"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/http-signature/node_modules/assert-plus/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"9c29ae96331c2bf1a2869290a35d2e7044e8a2fc-asn1/package.json"}
+require.memoize("9c29ae96331c2bf1a2869290a35d2e7044e8a2fc-asn1/package.json", 
+{
+    "main": "9c29ae96331c2bf1a2869290a35d2e7044e8a2fc-asn1/lib/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/http-signature/node_modules/asn1"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/http-signature/node_modules/asn1/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"7066e8d1d89f73b7d239e8a2448a6e84a4c0fe0a-ctype/package.json"}
+require.memoize("7066e8d1d89f73b7d239e8a2448a6e84a4c0fe0a-ctype/package.json", 
+{
+    "main": "7066e8d1d89f73b7d239e8a2448a6e84a4c0fe0a-ctype/ctype.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/http-signature/node_modules/ctype"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/http-signature/node_modules/ctype/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"5f8d9053f5854bb5ef71399aeecdcaae0353e029-node-uuid/package.json"}
+require.memoize("5f8d9053f5854bb5ef71399aeecdcaae0353e029-node-uuid/package.json", 
+{
+    "main": "5f8d9053f5854bb5ef71399aeecdcaae0353e029-node-uuid/uuid.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/node-uuid"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/node-uuid/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"da6cdb7088091b9d2a445b608712eedc04a29923-mime/package.json"}
+require.memoize("da6cdb7088091b9d2a445b608712eedc04a29923-mime/package.json", 
+{
+    "main": "da6cdb7088091b9d2a445b608712eedc04a29923-mime/mime.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/mime"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/mime/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"6211857db27bf4e867376aa0aa9488144c9f3127-tunnel-agent/package.json"}
+require.memoize("6211857db27bf4e867376aa0aa9488144c9f3127-tunnel-agent/package.json", 
+{
+    "main": "6211857db27bf4e867376aa0aa9488144c9f3127-tunnel-agent/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/tunnel-agent"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/tunnel-agent/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"35b0fc23c495eebad75e0c3644783445414c8cab-json-stringify-safe/package.json"}
+require.memoize("35b0fc23c495eebad75e0c3644783445414c8cab-json-stringify-safe/package.json", 
+{
+    "main": "35b0fc23c495eebad75e0c3644783445414c8cab-json-stringify-safe/stringify.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/json-stringify-safe"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/json-stringify-safe/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"1e56cf0396f2815e2929dd3e39f4c8c667044dba-forever-agent/package.json"}
+require.memoize("1e56cf0396f2815e2929dd3e39f4c8c667044dba-forever-agent/package.json", 
+{
+    "main": "1e56cf0396f2815e2929dd3e39f4c8c667044dba-forever-agent/index.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/forever-agent"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/forever-agent/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"ac9e40a4f06e8d8531f989c33e03749368976327-form-data/package.json"}
+require.memoize("ac9e40a4f06e8d8531f989c33e03749368976327-form-data/package.json", 
+{
+    "main": "ac9e40a4f06e8d8531f989c33e03749368976327-form-data/lib/form_data.js",
+    "mappings": {
+        "combined-stream": "1040f388056b3d4d71490cdb6b54419ffe545981-combined-stream",
+        "mime": "da6cdb7088091b9d2a445b608712eedc04a29923-mime",
+        "async": "109199efc96ba8d46699e51052770e8f9564e28b-async"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/form-data"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/form-data/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"1040f388056b3d4d71490cdb6b54419ffe545981-combined-stream/package.json"}
+require.memoize("1040f388056b3d4d71490cdb6b54419ffe545981-combined-stream/package.json", 
+{
+    "main": "1040f388056b3d4d71490cdb6b54419ffe545981-combined-stream/lib/combined_stream.js",
+    "mappings": {
+        "delayed-stream": "f143bee852aba49af1afbcba4bc39ad2c5d4b511-delayed-stream"
+    },
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/form-data/node_modules/combined-stream"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/form-data/node_modules/combined-stream/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"f143bee852aba49af1afbcba4bc39ad2c5d4b511-delayed-stream/package.json"}
+require.memoize("f143bee852aba49af1afbcba4bc39ad2c5d4b511-delayed-stream/package.json", 
+{
+    "main": "f143bee852aba49af1afbcba4bc39ad2c5d4b511-delayed-stream/lib/delayed_stream.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/form-data/node_modules/combined-stream/node_modules/delayed-stream"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/form-data/node_modules/combined-stream/node_modules/delayed-stream/package.json"});
+// @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"109199efc96ba8d46699e51052770e8f9564e28b-async/package.json"}
+require.memoize("109199efc96ba8d46699e51052770e8f9564e28b-async/package.json", 
+{
+    "main": "109199efc96ba8d46699e51052770e8f9564e28b-async/lib/async.js",
+    "dirpath": "node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/form-data/node_modules/async"
+}
+, {"filename":"node_modules/pinf-vfs/node_modules/pinf-proxy/node_modules/request/node_modules/form-data/node_modules/async/package.json"});
 // @pinf-bundle-ignore: 
 });
 // @pinf-bundle-report: {}
