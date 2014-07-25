@@ -15,24 +15,20 @@
     "deepmerge": "~0.2.7",
     "commander": "~2.0.0",
     "colors": "~0.6.1",
-    "pinf-primitives-js": "~0.1.0",
-    "pinf-it-package-insight": "~0.1.3",
-    "pinf-it-program-insight": "~0.1.0",
+    "pinf-primitives-js": "0.2.x",
+    "pinf-it-package-insight": "0.1.x",
+    "pinf-it-program-insight": "0.1.x",
     "deepcopy": "~0.3.1",
     "require.async": "~0.1.1",
-    "send": "~0.1.4"
+    "send": "~0.1.4",
+    "pinf-it-bundler": "0.1.x"
   },
   "devDependencies": {
     "mocha": "~1.9.0",
     "grunt": "~0.4.1",
     "grunt-mocha": "~0.3.1",
-    "q": "~0.9.3"
-  },
-  "mappings": {
-    "pinf-it-bundler": "github.com/pinf-it/pinf-it-bundler/~0.1.1"
-  },
-  "devMappings": {
-    "pinf-loader-js": "github.com/pinf/pinf-loader-js/~0.4.5"
+    "q": "~0.9.3",
+    "pinf-loader-js": "https://github.com/pinf/pinf-loader-js/archive/v0.4.5.tar.gz"
   },
   "require.async": {
     "./lib/main.js": "./context"
