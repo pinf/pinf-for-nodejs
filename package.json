@@ -21,7 +21,7 @@
     "deepcopy": "~0.3.1",
     "require.async": "~0.1.1",
     "send": "~0.1.4",
-    "pinf-it-bundler": "0.1.x",
+    "pinf-it-bundler": "git://github.com/pinf-it/pinf-it-bundler.git#7e6e5c2cc4004dcdea8562b86f8023c87c067584",
     "pinf-vfs": "0.1.x",
     "pinf-config": "0.1.x"
   },
