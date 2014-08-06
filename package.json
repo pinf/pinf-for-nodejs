@@ -23,13 +23,13 @@
     "send": "~0.1.4",
     "pinf-it-bundler": "git://github.com/pinf-it/pinf-it-bundler.git#7e6e5c2cc4004dcdea8562b86f8023c87c067584",
     "pinf-vfs": "0.1.x",
+    "q": "~0.9.3",
     "pinf-config": "0.1.x"
   },
   "devDependencies": {
     "mocha": "~1.9.0",
     "grunt": "~0.4.1",
     "grunt-mocha": "~0.3.1",
-    "q": "~0.9.3",
     "pinf-loader-js": "https://github.com/pinf/pinf-loader-js/archive/v0.4.6.tar.gz"
   },
   "require.async": {
