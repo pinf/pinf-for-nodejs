@@ -7,7 +7,7 @@
         "descriptor": {
           "filename": "o.js",
           "filepath": "o.js",
-          "mtime": 1402713883,
+          "mtime": 1420329393,
           "code": "\nexports.getLetter = function() {\n\treturn \"o\";\n}\n",
           "globals": {
             "exports": {
@@ -43,7 +43,7 @@
         "memoizeId": "/package.json",
         "descriptor": {
           "dirpath": ".",
-          "dirrealpath": "../../../../../../../github.com+pinf-it+pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
+          "dirrealpath": "../../../../../../../pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
           "id": "",
           "lookupPaths": [
             "package.json",
@@ -108,7 +108,7 @@
     },
     "expectExistingModules": {},
     "bundle": {
-      "path": "/legacy/2013-Ginseng-Independence-Desktop/ginseng-source/projects/github.com+pinf+pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app/greeting/hello/o.js"
+      "path": "/playground/2014-12-26-promise-actor/pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app/greeting/hello/o.js"
     },
     "warnings": [],
     "errors": []
@@ -121,7 +121,7 @@
         "descriptor": {
           "filename": "hello.js",
           "filepath": "hello.js",
-          "mtime": 1402713883,
+          "mtime": 1420329393,
           "code": "\nvar APP = require(\"./app\");\n\nexports.getWord = function() {\n\n\tvar moduleId = \"./greeting\";\n\n\tvar GREETING = require(moduleId);\n\n\treturn APP.getLetterH() + \"e\" + GREETING.getLetterL() + \"l\" + require((\"./\" + \"o\")).getLetter();\n}\n",
           "globals": {
             "APP": {
@@ -171,7 +171,7 @@
         "memoizeId": "/package.json",
         "descriptor": {
           "dirpath": ".",
-          "dirrealpath": "../../../../../../../github.com+pinf-it+pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
+          "dirrealpath": "../../../../../../../pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
           "id": "",
           "lookupPaths": [
             "package.json",
@@ -238,7 +238,7 @@
       "/app": {}
     },
     "bundle": {
-      "path": "/legacy/2013-Ginseng-Independence-Desktop/ginseng-source/projects/github.com+pinf+pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app/greeting/hello.js"
+      "path": "/playground/2014-12-26-promise-actor/pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app/greeting/hello.js"
     },
     "warnings": [],
     "errors": []
@@ -251,7 +251,7 @@
         "descriptor": {
           "filename": "greeting.js",
           "filepath": "greeting.js",
-          "mtime": 1402713883,
+          "mtime": 1420329393,
           "code": "\nvar APP = require(\"./app\");\n\nexports.getGreeting = function() {\n\n\tvar moduleId = \"./hello\";\n\n\tvar HELLO = require(moduleId);\n\n\treturn HELLO.getWord() + \" \" + APP.getWorld();\n}\n\nexports.getLetterL = function() {\n\treturn \"l\";\t\n}\n",
           "globals": {
             "APP": {
@@ -301,7 +301,7 @@
         "memoizeId": "/package.json",
         "descriptor": {
           "dirpath": ".",
-          "dirrealpath": "../../../../../../../github.com+pinf-it+pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
+          "dirrealpath": "../../../../../../../pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
           "id": "",
           "lookupPaths": [
             "package.json",
@@ -368,7 +368,7 @@
       "/app": {}
     },
     "bundle": {
-      "path": "/legacy/2013-Ginseng-Independence-Desktop/ginseng-source/projects/github.com+pinf+pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app/greeting.js"
+      "path": "/playground/2014-12-26-promise-actor/pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app/greeting.js"
     },
     "warnings": [],
     "errors": []
@@ -383,7 +383,7 @@
             "descriptor": {
               "filename": "app.js",
               "filepath": "app.js",
-              "mtime": 1402713883,
+              "mtime": 1420329393,
               "code": "\nfunction main() {\n\n\tvar moduleId = \"./greeting\";\n\n\tvar GREETING = require(moduleId);\n\n\tconsole.log(GREETING.getGreeting());\n}\n\nexports.getWorld = function() {\n\treturn \"World\";\t\n}\n\nexports.getLetterH = function() {\n\treturn \"H\";\t\n}\n\nif (require.main === module) {\n\tmain();\n}\n",
               "globals": {
                 "main": {
@@ -430,7 +430,7 @@
             "memoizeId": "/package.json",
             "descriptor": {
               "dirpath": ".",
-              "dirrealpath": "../../../../../../../github.com+pinf-it+pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
+              "dirrealpath": "../../../../../../../pinf-it-bundler/test/assets/packages/nodejs-dynamic-require-nested-declared",
               "id": "",
               "lookupPaths": [
                 "package.json",
@@ -495,7 +495,7 @@
         },
         "expectExistingModules": {},
         "bundle": {
-          "path": "/legacy/2013-Ginseng-Independence-Desktop/ginseng-source/projects/github.com+pinf+pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app.js"
+          "path": "/playground/2014-12-26-promise-actor/pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app.js"
         },
         "warnings": [],
         "errors": [],
@@ -511,7 +511,7 @@
   "#pinf": {
     "status": 200,
     "data": {
-      "rootBundlePath": "/legacy/2013-Ginseng-Independence-Desktop/ginseng-source/projects/github.com+pinf+pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app.js"
+      "rootBundlePath": "/playground/2014-12-26-promise-actor/pinf-for-nodejs/test/assets/bundles/nodejs-dynamic-require-nested-declared/app.js"
     }
   }
 }

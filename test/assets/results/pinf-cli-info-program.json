@@ -10,38 +10,38 @@
             "listen": {
                 "pinf-start": [
                     {
-                        "package": "968ec3dc725b2b042cd01a8b8d9b80865c8e1f19-pinf-cli",
+                        "package": "d100a3d6fe113334f8472ed9e38eb0e864e7d2ca-pinf-cli",
                         "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli",
                         "handler": "on pinf-start: test/assets/packages/pinf-cli"
                     },
                     {
-                        "package": "076ba31c81e5edef5b2129f279be36012927f95d-sub",
+                        "package": "3dce7d29e4ac464c13b41615fd532d83b5c557f4-sub",
                         "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub",
                         "handler": "on pinf-start: test/assets/packages/pinf-cli/node_modules/sub"
                     }
                 ],
                 "pinf-stop": [
                     {
-                        "package": "968ec3dc725b2b042cd01a8b8d9b80865c8e1f19-pinf-cli",
+                        "package": "d100a3d6fe113334f8472ed9e38eb0e864e7d2ca-pinf-cli",
                         "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli",
                         "handler": "on pinf-start: test/assets/packages/pinf-cli"
                     },
                     {
-                        "package": "076ba31c81e5edef5b2129f279be36012927f95d-sub",
+                        "package": "3dce7d29e4ac464c13b41615fd532d83b5c557f4-sub",
                         "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub",
                         "handler": "on pinf-start: test/assets/packages/pinf-cli/node_modules/sub"
                     }
                 ],
                 "pinf/0/runtime/control/0#events/start": [
                     {
-                        "package": "076ba31c81e5edef5b2129f279be36012927f95d-sub",
+                        "package": "3dce7d29e4ac464c13b41615fd532d83b5c557f4-sub",
                         "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub",
                         "handler": "test/assets/packages/pinf-cli/node_modules/sub/on.js"
                     }
                 ],
                 "pinf/0/runtime/control/0#events/stop": [
                     {
-                        "package": "076ba31c81e5edef5b2129f279be36012927f95d-sub",
+                        "package": "3dce7d29e4ac464c13b41615fd532d83b5c557f4-sub",
                         "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub",
                         "handler": "test/assets/packages/pinf-cli/node_modules/sub/on.js"
                     }
@@ -50,7 +50,7 @@
         },
         "descriptor": {
             "boot": {
-                "package": "968ec3dc725b2b042cd01a8b8d9b80865c8e1f19-pinf-cli"
+                "package": "d100a3d6fe113334f8472ed9e38eb0e864e7d2ca-pinf-cli"
             },
             "config": {
                 "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli": {
@@ -64,18 +64,20 @@
     },
     "package": null,
     "packages": {
-        "968ec3dc725b2b042cd01a8b8d9b80865c8e1f19-pinf-cli": {
+        "d100a3d6fe113334f8472ed9e38eb0e864e7d2ca-pinf-cli": {
             "dirpath": "test/assets/packages/pinf-cli",
             "descriptor": {
                 "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli",
                 "dependencies": {
                     "required": {
-                        "required": {
-                            "sub": "0.x"
+                        "sub": {
+                            "selector": "0.x"
                         }
                     },
                     "bundled": {
-                        "sub": "./node_modules/sub"
+                        "sub": {
+                            "location": "./node_modules/sub"
+                        }
                     }
                 },
                 "events": {
@@ -109,11 +111,11 @@
                     }
                 },
                 "mappings": {
-                    "sub": "076ba31c81e5edef5b2129f279be36012927f95d-sub"
+                    "sub": "3dce7d29e4ac464c13b41615fd532d83b5c557f4-sub"
                 }
             }
         },
-        "076ba31c81e5edef5b2129f279be36012927f95d-sub": {
+        "3dce7d29e4ac464c13b41615fd532d83b5c557f4-sub": {
             "dirpath": "test/assets/packages/pinf-cli/node_modules/sub",
             "descriptor": {
                 "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub",

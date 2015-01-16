@@ -5,17 +5,19 @@
     },
     "package": {
         "path": "test/assets/packages/pinf-cli",
-        "id": "968ec3dc725b2b042cd01a8b8d9b80865c8e1f19-pinf-cli",
+        "id": "d100a3d6fe113334f8472ed9e38eb0e864e7d2ca-pinf-cli",
         "descriptor": {
             "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli",
             "dependencies": {
                 "required": {
-                    "required": {
-                        "sub": "0.x"
+                    "sub": {
+                        "selector": "0.x"
                     }
                 },
                 "bundled": {
-                    "sub": "./node_modules/sub"
+                    "sub": {
+                        "location": "./node_modules/sub"
+                    }
                 }
             },
             "events": {
@@ -49,7 +51,7 @@
                 }
             },
             "mappings": {
-                "sub": "076ba31c81e5edef5b2129f279be36012927f95d-sub"
+                "sub": "3dce7d29e4ac464c13b41615fd532d83b5c557f4-sub"
             }
         },
         "config": {
