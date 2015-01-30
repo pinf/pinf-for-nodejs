@@ -48,7 +48,7 @@ describe("bundle", function() {
                 if (err) return done(err);
                 ASSERT.deepEqual(summary, {
                     bundles: {
-                        "./app.js": {}
+                        "app.js": "./app.js"
                     }
                 });
                 return done();
