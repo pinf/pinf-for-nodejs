@@ -77,7 +77,7 @@ describe("vm", function() {
 
     describe("load multiple complex packages", function() {
 
-        this.timeout(40 * 1000);
+        this.timeout(60 * 5 * 1000);
 
         var context = null;
         var vm = null;
