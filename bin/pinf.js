@@ -54,7 +54,7 @@ PINF.main(function(context, callback) {
     program
         .version(JSON.parse(FS.readFileSync(PATH.join(__dirname, "../package.json"))).version)
         .option("-v, --verbose", "Show verbose progress.")
-        .option("--debug", "Show debug output.")
+        .option("-d, --debug", "Show debug output.")
         .option("--nocache", "Don't use cache for anything.")
         .option("--output <TYPE>", "Output format.");
 
