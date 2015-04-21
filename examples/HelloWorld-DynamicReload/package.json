@@ -1,0 +1,13 @@
+{
+  "name": "pinf-for-nodejs-examples-HelloWorld-DynamicReload",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "send": "^0.7.3",
+    "express": "^4.7.2"
+  },
+  "scripts": {
+    "build": "cd client; ../../../bin/pinf bundle",
+    "start": "node server.js"
+  }
+}

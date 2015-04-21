@@ -1,0 +1,8 @@
+{
+  "main": "./client.js",
+  "exports": {
+    "bundles": {
+      "client.js": "./client.js"
+    }
+  }
+}

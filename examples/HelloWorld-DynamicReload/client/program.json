@@ -1,0 +1,11 @@
+{
+	"name": "pinf-for-nodejs-examples-HelloWorld-DynamicReload-client",
+	"boot": {
+		"package": "./package.json"
+	},
+	"config": {
+		"github.com/pinf-it/pinf-it-bundler/0": {
+			"target": "browser"
+		}
+	}
+}

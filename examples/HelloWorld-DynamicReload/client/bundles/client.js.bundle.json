@@ -1,0 +1,168 @@
+{
+  ".": {
+    "bundles": {
+      "/client.js": {
+        "modules": {
+          "/client.js": {
+            "requireId": "/client",
+            "memoizeId": "/client.js",
+            "descriptor": {
+              "filename": "client.js",
+              "filepath": "client.js",
+              "mtime": 1425845037,
+              "code": "\n\nexports.main = function () {\n\n\tconsole.log(\"Greeting from util: \" + require(\"./util\").getGreeting());\n\n}\n\n",
+              "globals": {
+                "exports": {
+                  "type": "reference"
+                },
+                "require": {
+                  "type": "call"
+                },
+                "console": {
+                  "type": "reference"
+                }
+              },
+              "syntax": "javascript",
+              "format": "commonjs",
+              "undefine": [],
+              "uses": {},
+              "dependencies": {
+                "static": {
+                  "./util": {
+                    "where": "inline"
+                  }
+                },
+                "dynamic": {},
+                "computed": false
+              }
+            },
+            "wrapper": {
+              "type": "commonjs",
+              "top": "function(require, exports, module) {var __dirname = '';",
+              "code": "function(require, exports, module) {var __dirname = '';\n\n\nexports.main = function () {\n\n\tconsole.log(\"Greeting from util: \" + require(\"./util\").getGreeting());\n\n}\n\n\n}",
+              "bottom": "}"
+            },
+            "dependencies": {
+              "static": {
+                "./util": {
+                  "where": "inline"
+                }
+              },
+              "dynamic": {},
+              "computed": false
+            },
+            "warnings": [],
+            "errors": []
+          },
+          "/util.js": {
+            "requireId": "/util",
+            "memoizeId": "/util.js",
+            "descriptor": {
+              "filename": "util.js",
+              "filepath": "util.js",
+              "mtime": 1425845177,
+              "code": "\n\nexports.getGreeting = function () {\n\n\treturn \"Hey from Util!\";\n\n}\n\n",
+              "globals": {
+                "exports": {
+                  "type": "reference"
+                }
+              },
+              "syntax": "javascript",
+              "format": "commonjs",
+              "undefine": [],
+              "uses": {},
+              "dependencies": {
+                "static": {},
+                "dynamic": {},
+                "computed": false
+              }
+            },
+            "wrapper": {
+              "type": "commonjs",
+              "top": "function(require, exports, module) {var __dirname = '';",
+              "code": "function(require, exports, module) {var __dirname = '';\n\n\nexports.getGreeting = function () {\n\n\treturn \"Hey from Util!\";\n\n}\n\n\n}",
+              "bottom": "}"
+            },
+            "dependencies": {
+              "static": {},
+              "dynamic": {},
+              "computed": false
+            },
+            "warnings": [],
+            "errors": []
+          },
+          "/package.json": {
+            "requireId": "/package.json",
+            "memoizeId": "/package.json",
+            "descriptor": {
+              "dirpath": ".",
+              "dirrealpath": "",
+              "id": "",
+              "lookupPaths": [
+                "package.json",
+                ".package.json"
+              ],
+              "descriptorPaths": [
+                "package.json"
+              ],
+              "raw": {
+                "package.json": {
+                  "main": "./client.js",
+                  "exports": {
+                    "bundles": {
+                      "client.js": "./client.js"
+                    }
+                  }
+                }
+              },
+              "normalized": {
+                ".package.json": {},
+                "package.json": {
+                  "exports": {
+                    "bundles": {
+                      "client.js": "./client.js"
+                    },
+                    "main": "./client.js"
+                  }
+                }
+              },
+              "combined": {
+                "exports": {
+                  "bundles": {
+                    "client.js": "./client.js"
+                  },
+                  "main": "./client.js"
+                }
+              },
+              "warnings": [],
+              "errors": [],
+              "memoized": {
+                "main": "/client.js",
+                "dirpath": "."
+              }
+            },
+            "wrapper": "json"
+          }
+        },
+        "expectExistingModules": {},
+        "bundle": {
+          "path": "/genesis/os.inception/services/2-org.pinf/pinf-for-nodejs/examples/HelloWorld-DynamicReload/client/bundles/client.js"
+        },
+        "warnings": [],
+        "errors": [],
+        "id": "/client.js"
+      }
+    },
+    "warnings": [],
+    "errors": [],
+    "exports": {
+      "main": "/client.js"
+    }
+  },
+  "#pinf": {
+    "status": 200,
+    "data": {
+      "rootBundlePath": "/genesis/os.inception/services/2-org.pinf/pinf-for-nodejs/examples/HelloWorld-DynamicReload/client/bundles/client.js"
+    }
+  }
+}
