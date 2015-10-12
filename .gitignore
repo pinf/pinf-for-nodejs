@@ -1,5 +1,6 @@
 .rt/
 /.sm/
+/.sm.*
 /node_modules/
 /test/.program.json
 /test/package.json
