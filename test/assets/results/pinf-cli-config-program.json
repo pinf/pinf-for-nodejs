@@ -7,12 +7,12 @@
             "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub": {
                 "key2": "value2: test"
             },
-            "1979269e42d045b9723760f48a0b9de94dce6741-pinf-cli": {
+            "0e357147bc07e53d9d84ae6d48a6cf6d2c3a5410-pinf-cli": {
                 "key1": "value1: test/assets/packages/pinf-cli",
                 "key2": "value2: test/assets/packages/pinf-cli",
                 "key3": "value2: $__DIRNAME"
             },
-            "d54d8c92ba777c75f2d8c8e1c309a4ed6b3bee7c-sub": {
+            "510abf70423c71d6898ab5cde64c8d42d3f22633-sub": {
                 "key1": "value1: test/assets/packages/pinf-cli/node_modules/sub",
                 "key2": "value2: test/assets/packages/pinf-cli/node_modules/sub"
             }

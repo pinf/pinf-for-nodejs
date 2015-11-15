@@ -5,7 +5,7 @@
     },
     "package": {
         "path": "/test/assets/packages/pinf-cli/node_modules/sub",
-        "id": "d54d8c92ba777c75f2d8c8e1c309a4ed6b3bee7c-sub",
+        "id": "510abf70423c71d6898ab5cde64c8d42d3f22633-sub",
         "descriptor": {
             "uid": "github.com/pinf/pinf-for-nodejs/test/assets/packages/pinf-cli/node_modules/sub",
             "events": {

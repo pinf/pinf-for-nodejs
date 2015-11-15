@@ -1,6 +1,6 @@
 // @pinf-bundle-ignore: 
-PINF.bundle("", function(require) {
-// @pinf-bundle-module: {"file":"hello.js","mtime":1421533770,"wrapper":"commonjs","format":"commonjs","id":"/hello.js"}
+PINF.bundle("", function(require, _____bundle_global) {
+// @pinf-bundle-module: {"file":"hello.js","mtime":1445137845,"wrapper":"commonjs","format":"commonjs","variation":"","id":"/hello.js"}
 require.memoize("/hello.js", 
 function(require, exports, module) {var __dirname = '';
 
@@ -16,7 +16,7 @@ exports.getWord = function() {
 }
 
 }
-, {"filename":"hello.js"});
+, {"filename":"hello.js","variation":""});
 // @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"/package.json"}
 require.memoize("/package.json", 
 {

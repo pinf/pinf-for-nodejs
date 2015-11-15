@@ -1,0 +1,550 @@
+{
+  "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/component": {
+    "bundles": {
+      "sub/comp.js": {
+        "modules": {
+          "/sub/comp.js": {
+            "requireId": "/sub/comp",
+            "memoizeId": "/sub/comp.js",
+            "descriptor": {
+              "filename": "comp.js",
+              "filepath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/component/sub/comp.js",
+              "mtime": 0,
+              "code": "\nexports.main = function (callback) {\n\n    const COMMON = require(\"common/helpers\");\n\n    return COMMON.loadTemplate(\"hello\", function (err, tpl) {\n        if (err) return callback(err);\n        \nconsole.log(\"FINAL tpl\", tpl);\n\n        var rendered = tpl.render({\n            \"foo\": \"bar\"\n        });\n\nconsole.log(\"FINAL rendered\", rendered);\n\n        return callback(null, rendered);\n    });\n}\n",
+              "globals": {
+                "exports": {
+                  "type": "reference"
+                },
+                "require": {
+                  "type": "call"
+                },
+                "console": {
+                  "type": "reference"
+                }
+              },
+              "syntax": "javascript",
+              "format": "commonjs",
+              "undefine": [],
+              "uses": {},
+              "dependencies": {
+                "static": {
+                  "common/helpers": {
+                    "where": "inline"
+                  }
+                },
+                "dynamic": {},
+                "computed": false
+              }
+            },
+            "wrapper": {
+              "type": "commonjs",
+              "top": "function(require, exports, module) {var __dirname = '/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/component/sub';",
+              "code": "function(require, exports, module) {var __dirname = '/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/component/sub';\n\nexports.main = function (callback) {\n\n    const COMMON = require(\"common/helpers\");\n\n    return COMMON.loadTemplate(\"hello\", function (err, tpl) {\n        if (err) return callback(err);\n        \nconsole.log(\"FINAL tpl\", tpl);\n\n        var rendered = tpl.render({\n            \"foo\": \"bar\"\n        });\n\nconsole.log(\"FINAL rendered\", rendered);\n\n        return callback(null, rendered);\n    });\n}\n\n}",
+              "bottom": "}"
+            },
+            "dependencies": {
+              "static": {
+                "common/helpers": {
+                  "where": "inline"
+                }
+              },
+              "dynamic": {},
+              "computed": false
+            },
+            "warnings": [],
+            "errors": []
+          },
+          "5bb91176038bc5572ba1264df31a985415b171f1-common/helpers.js": {
+            "requireId": "5bb91176038bc5572ba1264df31a985415b171f1-common/helpers",
+            "memoizeId": "5bb91176038bc5572ba1264df31a985415b171f1-common/helpers.js",
+            "descriptor": {
+              "filename": "helpers.js",
+              "filepath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/common/helpers.js",
+              "mtime": 0,
+              "code": "\n\n// This is needed to support mapped requires for plain nodejs modules\n// as they are supported by the pinf bundler.\n// TODO: Move this into a generic helper.\nvar originalRequire = require;\nrequire = function (id) {\n    if (module.parent) {\n        // We are running directly via NodeJS.\n        var idParts = id.split(\"/\");\n        var packageAlias = idParts.shift();\n        if (/^\\./.test(packageAlias)) {\n            return originalRequire(id);\n        }\n        var descriptor = require(\"./package.json\");\n        idParts.unshift(descriptor.mappings[packageAlias]);\n        return originalRequire(idParts.join(\"/\"));\n    } else {\n        // We are running within a PINF bundle.\n        return originalRequire(id);\n    }\n};\n\n\nconst TEMPLATES = require(\"templates/loader\");\n\nexports.loadTemplate = function (name, callback) {\n\n    return TEMPLATES.load(name, callback);\n}\n\n",
+              "globals": {
+                "originalRequire": {
+                  "type": "assign"
+                },
+                "require": {
+                  "type": "assign"
+                },
+                "module": {
+                  "type": "reference"
+                },
+                "TEMPLATES": {
+                  "type": "assign"
+                },
+                "exports": {
+                  "type": "reference"
+                }
+              },
+              "syntax": "javascript",
+              "format": "commonjs",
+              "undefine": [],
+              "uses": {},
+              "dependencies": {
+                "static": {
+                  "./package.json": {
+                    "where": "inline"
+                  },
+                  "templates/loader": {
+                    "where": "inline"
+                  }
+                },
+                "dynamic": {},
+                "computed": false
+              }
+            },
+            "wrapper": {
+              "type": "commonjs",
+              "top": "function(require, exports, module) {var __dirname = '/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/common';",
+              "code": "function(require, exports, module) {var __dirname = '/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/common';\n\n\n// This is needed to support mapped requires for plain nodejs modules\n// as they are supported by the pinf bundler.\n// TODO: Move this into a generic helper.\nvar originalRequire = require;\nrequire = function (id) {\n    if (module.parent) {\n        // We are running directly via NodeJS.\n        var idParts = id.split(\"/\");\n        var packageAlias = idParts.shift();\n        if (/^\\./.test(packageAlias)) {\n            return originalRequire(id);\n        }\n        var descriptor = require(\"./package.json\");\n        idParts.unshift(descriptor.mappings[packageAlias]);\n        return originalRequire(idParts.join(\"/\"));\n    } else {\n        // We are running within a PINF bundle.\n        return originalRequire(id);\n    }\n};\n\n\nconst TEMPLATES = require(\"templates/loader\");\n\nexports.loadTemplate = function (name, callback) {\n\n    return TEMPLATES.load(name, callback);\n}\n\n\n}",
+              "bottom": "}"
+            },
+            "dependencies": {
+              "static": {
+                "./package.json": {
+                  "where": "inline"
+                },
+                "templates/loader": {
+                  "where": "inline"
+                }
+              },
+              "dynamic": {},
+              "computed": false
+            },
+            "warnings": [],
+            "errors": []
+          },
+          "5bb91176038bc5572ba1264df31a985415b171f1-common/package.json": {
+            "requireId": "5bb91176038bc5572ba1264df31a985415b171f1-common/package.json",
+            "memoizeId": "5bb91176038bc5572ba1264df31a985415b171f1-common/package.json",
+            "descriptor": {
+              "dirpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/common",
+              "dirrealpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/common",
+              "id": "5bb91176038bc5572ba1264df31a985415b171f1-common",
+              "lookupPaths": [
+                "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/common/package.json",
+                "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/common/.package.json"
+              ],
+              "descriptorPaths": [
+                "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/common/package.json"
+              ],
+              "raw": {
+                "package.json": {
+                  "mappings": {
+                    "templates": "../templates"
+                  }
+                }
+              },
+              "normalized": {
+                ".package.json": {},
+                "package.json": {
+                  "dependencies": {
+                    "required": {
+                      "templates": {
+                        "location": "../templates"
+                      }
+                    }
+                  }
+                }
+              },
+              "combined": {
+                "dependencies": {
+                  "required": {
+                    "templates": {
+                      "location": "../templates"
+                    }
+                  }
+                }
+              },
+              "warnings": [],
+              "errors": [],
+              "memoized": {
+                "mappings": {
+                  "templates": "c9021c7f9d3ec48564a6399bbabbf0d09f152b1e-templates"
+                },
+                "dirpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/common"
+              },
+              "mtime": "0"
+            },
+            "wrapper": "json"
+          },
+          "c9021c7f9d3ec48564a6399bbabbf0d09f152b1e-templates/loader.js": {
+            "requireId": "c9021c7f9d3ec48564a6399bbabbf0d09f152b1e-templates/loader",
+            "memoizeId": "c9021c7f9d3ec48564a6399bbabbf0d09f152b1e-templates/loader.js",
+            "descriptor": {
+              "filename": "loader.js",
+              "filepath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/templates/loader.js",
+              "mtime": 0,
+              "code": "\nrequire(\"require.async\")(require);\n\nexports.load = function (name, callback) {\n\nconsole.log(\"load template\", name);\n\n    return require.async(\"./tpl/\" + name, function (api) {\n\nconsole.log(\"TEMPLATE API\", api);\n\n    \treturn callback(null, api);\n    }, callback);\n}\n",
+              "globals": {
+                "require": {
+                  "type": "reference"
+                },
+                "exports": {
+                  "type": "reference"
+                },
+                "console": {
+                  "type": "reference"
+                }
+              },
+              "syntax": "javascript",
+              "format": "commonjs",
+              "undefine": [],
+              "uses": {},
+              "dependencies": {
+                "static": {
+                  "require.async": {
+                    "where": "inline"
+                  }
+                },
+                "dynamic": {},
+                "computed": false
+              }
+            },
+            "wrapper": {
+              "type": "commonjs",
+              "top": "function(require, exports, module) {var __dirname = '/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/templates';",
+              "code": "function(require, exports, module) {var __dirname = '/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/templates';\n\nrequire(\"require.async\")(require);\n\nexports.load = function (name, callback) {\n\nconsole.log(\"load template\", name);\n\n    return require.async(\"./tpl/\" + name, function (api) {\n\nconsole.log(\"TEMPLATE API\", api);\n\n    \treturn callback(null, api);\n    }, callback);\n}\n\n}",
+              "bottom": "}"
+            },
+            "dependencies": {
+              "static": {
+                "require.async": {
+                  "where": "inline"
+                }
+              },
+              "dynamic": {},
+              "computed": false
+            },
+            "warnings": [],
+            "errors": []
+          },
+          "a81d66805e2377970585ecd1237e83ab78636759-require.async/require.async.js": {
+            "requireId": "a81d66805e2377970585ecd1237e83ab78636759-require.async/require.async.js",
+            "memoizeId": "a81d66805e2377970585ecd1237e83ab78636759-require.async/require.async.js",
+            "descriptor": {
+              "filename": "require.async.js",
+              "filepath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/node_modules/require.async/require.async.js",
+              "mtime": 0,
+              "code": "/**\n * Author: Christoph Dorn <christoph@christophdorn.com>\n * [UNLICENSE](http://unlicense.org/)\n */\n\nmodule.exports = function(require) {\n\n\t// We only add the method if it is not already there.\n\tif (typeof require.async !== \"undefined\") {\n\t\treturn;\n\t}\n\n\t// We add the portable `require.async` method.\n\trequire.async = function(id, successCallback, errorCallback) {\n\t\tvar exports = null;\n\t\ttry {\n\t\t\texports = require(id);\n\t\t} catch(err) {\n\t\t\tif (typeof errorCallback === \"function\") {\n\t\t\t\terrorCallback(err);\n\t\t\t}\n\t\t\treturn;\n\t\t}\n\t\tsuccessCallback(exports);\n\t\treturn;\n\t}\n\n}\n",
+              "globals": {
+                "module": {
+                  "type": "reference"
+                }
+              },
+              "syntax": "javascript",
+              "format": "leaky",
+              "undefine": [],
+              "uses": {},
+              "dependencies": {
+                "static": {},
+                "dynamic": {},
+                "computed": false
+              }
+            },
+            "wrapper": {
+              "type": "commonjs/leaky",
+              "top": "function(require, exports, module) {var __dirname = '/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/node_modules/require.async';",
+              "code": "function(require, exports, module) {var __dirname = '/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/node_modules/require.async';\n/**\n * Author: Christoph Dorn <christoph@christophdorn.com>\n * [UNLICENSE](http://unlicense.org/)\n */\n\nmodule.exports = function(require) {\n\n\t// We only add the method if it is not already there.\n\tif (typeof require.async !== \"undefined\") {\n\t\treturn;\n\t}\n\n\t// We add the portable `require.async` method.\n\trequire.async = function(id, successCallback, errorCallback) {\n\t\tvar exports = null;\n\t\ttry {\n\t\t\texports = require(id);\n\t\t} catch(err) {\n\t\t\tif (typeof errorCallback === \"function\") {\n\t\t\t\terrorCallback(err);\n\t\t\t}\n\t\t\treturn;\n\t\t}\n\t\tsuccessCallback(exports);\n\t\treturn;\n\t}\n\n}\n\nreturn {\n    module: (typeof module !== \"undefined\") ? module : null\n};\n}",
+              "bottom": "return {\n    module: (typeof module !== \"undefined\") ? module : null\n};\n}"
+            },
+            "dependencies": {
+              "static": {},
+              "dynamic": {},
+              "computed": false
+            },
+            "warnings": [],
+            "errors": []
+          },
+          "/package.json": {
+            "requireId": "/package.json",
+            "memoizeId": "/package.json",
+            "descriptor": {
+              "dirpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/component",
+              "dirrealpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/component",
+              "id": "",
+              "lookupPaths": [
+                "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/component/package.json",
+                "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/component/.package.json"
+              ],
+              "descriptorPaths": [
+                "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/component/package.json"
+              ],
+              "raw": {
+                "package.json": {
+                  "mappings": {
+                    "common": "../common"
+                  }
+                }
+              },
+              "normalized": {
+                ".package.json": {},
+                "package.json": {
+                  "dependencies": {
+                    "required": {
+                      "common": {
+                        "location": "../common"
+                      }
+                    }
+                  }
+                }
+              },
+              "combined": {
+                "dependencies": {
+                  "required": {
+                    "common": {
+                      "location": "../common"
+                    }
+                  }
+                }
+              },
+              "warnings": [],
+              "errors": [],
+              "memoized": {
+                "main": "sub/comp.js",
+                "mappings": {
+                  "common": "5bb91176038bc5572ba1264df31a985415b171f1-common"
+                },
+                "dirpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/component"
+              },
+              "mtime": "0"
+            },
+            "wrapper": "json"
+          },
+          "c9021c7f9d3ec48564a6399bbabbf0d09f152b1e-templates/package.json": {
+            "requireId": "c9021c7f9d3ec48564a6399bbabbf0d09f152b1e-templates/package.json",
+            "memoizeId": "c9021c7f9d3ec48564a6399bbabbf0d09f152b1e-templates/package.json",
+            "descriptor": {
+              "dirpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/templates",
+              "dirrealpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/templates",
+              "id": "c9021c7f9d3ec48564a6399bbabbf0d09f152b1e-templates",
+              "lookupPaths": [
+                "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/templates/package.json",
+                "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/templates/.package.json"
+              ],
+              "descriptorPaths": [],
+              "raw": {},
+              "normalized": {
+                ".package.json": {},
+                "package.json": {}
+              },
+              "combined": {},
+              "warnings": [],
+              "errors": [],
+              "memoized": {
+                "mappings": {
+                  "require.async": "a81d66805e2377970585ecd1237e83ab78636759-require.async"
+                },
+                "dirpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/templates"
+              },
+              "mtime": "0"
+            },
+            "wrapper": "json"
+          },
+          "a81d66805e2377970585ecd1237e83ab78636759-require.async/package.json": {
+            "requireId": "a81d66805e2377970585ecd1237e83ab78636759-require.async/package.json",
+            "memoizeId": "a81d66805e2377970585ecd1237e83ab78636759-require.async/package.json",
+            "descriptor": {
+              "dirpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/node_modules/require.async",
+              "dirrealpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/node_modules/require.async",
+              "id": "a81d66805e2377970585ecd1237e83ab78636759-require.async",
+              "lookupPaths": [
+                "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/node_modules/require.async/package.json",
+                "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/node_modules/require.async/.package.json"
+              ],
+              "descriptorPaths": [
+                "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/node_modules/require.async/package.json"
+              ],
+              "raw": {
+                "package.json": {
+                  "name": "require.async",
+                  "version": "0.1.1",
+                  "publish": true,
+                  "pm": "npm",
+                  "main": "require.async.js",
+                  "engines": {
+                    "node": ">=0.6"
+                  },
+                  "scripts": {
+                    "test": "node test.js"
+                  },
+                  "readme": "require.async\n=============\n\n[![Build Status](https://secure.travis-ci.org/pinf/require.js.png)](http://travis-ci.org/pinf/require.js)\n\n\nBackground\n----------\n\n[NodeJS](http://nodejs.org/) has a synchronous [`require()`](http://nodejs.org/api/globals.html#globals_require) because its module loading\nsystem is synchronous.\n\nThis works because NodeJS runs on the server which means IO calls to fetch module code will be fast (< 10 ms).\n\n**But not all module loading systems are synchronous.**\n\nAlmost all module loading systems designed for the browser are **asynchronous** for the express purpose of working around higher IO latencies\nand keeping runtime sizes smaller. They do this by allowing for **incremental loading** of resources and in our case **code bundles**.\n\nCode bundles are sets of statically linked modules that (`exports = require(\"<id>\")`) each other.\n\nOne bundle can require another bundle using `require.async(id, function success(exports), function error(err))`. Notice how\nwe are making an asynchronous call to fetch the next segment of the program we need to execute.\n\nThis approach of composing a program into bundles where one root bundle loads other bundles (which may load further bundles)\nis considered best practice and achieved in different ways by various toolchains.\n\n**All toolchains and runtimes can benefit from `require.async()` used by a developer (instead of `require()`) to indicate\nentry into an OPTIONAL / CONDITIONAL / RARE segment of the program. Programs written in this fashion are more portable.**\n\nThe `require.async` method is inspired by [CommonJS](http://wiki.commonjs.org/wiki/Modules/Async/A) and supported by\nthe [PINF JavaScript Loader](https://github.com/pinf/pinf-loader-js) which can load code bundles conflict free into\nany modern JavaScript runtime.\n\n\nWhat\n----\n\n`require.async` is a module that patches the `require` given to your module by the NodeJS module system.\n\nIt adds the method `require.async(id, function success(exports), function error(err))` which you can use\ninstead of `require(\"<id>\")` to indicate entry into an OPTIONAL / CONDITIONAL / RARE segment of the program.\n\nAll plugin loaders for example should be using `require.async` to asynchronously load plugins.\n\n\nInstall\n-------\n\n    npm install require.async\n\n\nUsage\n-----\n\n`package.json`\n\n    {\n        \"name\": \"test\"\n    }\n\n`main.js`\n\n    require(\"require.async\")(require);\n\n    require.async(\"./package.json\", function(info) {\n        console.log(JSON.stringify(json));\n    })l\n\nRun:\n\n    $ node main.js\n    {\"name\": \"test\"}\n\n\nLicense\n=======\n\nAuthor: [Christoph Dorn](http://christophdorn.com/)\nLicense: [UNLICENSE](http://unlicense.org/)\n",
+                  "readmeFilename": "README.md",
+                  "description": "require.async =============",
+                  "_id": "require.async@0.1.1",
+                  "dist": {
+                    "shasum": "68db50c5b9cc731e1a01e5a248bbcb2fda0b7d4f",
+                    "tarball": "http://registry.npmjs.org/require.async/-/require.async-0.1.1.tgz"
+                  },
+                  "_from": "require.async@>=0.1.1 <0.2.0",
+                  "_npmVersion": "1.3.5",
+                  "_npmUser": {
+                    "name": "cadorn",
+                    "email": "christoph@christophdorn.com"
+                  },
+                  "maintainers": [
+                    {
+                      "name": "cadorn",
+                      "email": "christoph@christophdorn.com"
+                    }
+                  ],
+                  "directories": {},
+                  "_shasum": "68db50c5b9cc731e1a01e5a248bbcb2fda0b7d4f",
+                  "_resolved": "https://registry.npmjs.org/require.async/-/require.async-0.1.1.tgz"
+                }
+              },
+              "normalized": {
+                ".package.json": {
+                  "pm": {
+                    "install": "npm"
+                  },
+                  "layout": {
+                    "directories": {
+                      "dependency": "./node_modules"
+                    }
+                  }
+                },
+                "package.json": {
+                  "name": "require.async",
+                  "description": "require.async =============",
+                  "version": "0.1.1",
+                  "locator": {
+                    "pointer": ">=0.1.1 <0.2.0",
+                    "shasum": "68db50c5b9cc731e1a01e5a248bbcb2fda0b7d4f",
+                    "tarball": "http://registry.npmjs.org/require.async/-/require.async-0.1.1.tgz"
+                  },
+                  "pm": {
+                    "install": "npm"
+                  },
+                  "requirements": {
+                    "engines": {
+                      "node": ">=0.6"
+                    }
+                  },
+                  "exports": {
+                    "scripts": {
+                      "test": "node test.js"
+                    },
+                    "main": "./require.async.js"
+                  },
+                  "events": {
+                    "publish": true
+                  },
+                  "layout": {
+                    "directories": {
+                      "dependency": "./node_modules"
+                    }
+                  },
+                  "files": {
+                    "readme": "./README.md"
+                  },
+                  "maintainers": [
+                    {
+                      "name": "cadorn",
+                      "email": "christoph@christophdorn.com"
+                    }
+                  ]
+                }
+              },
+              "combined": {
+                "name": "require.async",
+                "description": "require.async =============",
+                "version": "0.1.1",
+                "locator": {
+                  "pointer": ">=0.1.1 <0.2.0",
+                  "shasum": "68db50c5b9cc731e1a01e5a248bbcb2fda0b7d4f",
+                  "tarball": "http://registry.npmjs.org/require.async/-/require.async-0.1.1.tgz"
+                },
+                "pm": {
+                  "install": "npm"
+                },
+                "requirements": {
+                  "engines": {
+                    "node": ">=0.6"
+                  }
+                },
+                "exports": {
+                  "scripts": {
+                    "test": "node test.js"
+                  },
+                  "main": "./require.async.js"
+                },
+                "events": {
+                  "publish": true
+                },
+                "layout": {
+                  "directories": {
+                    "dependency": "./node_modules"
+                  }
+                },
+                "files": {
+                  "readme": "./README.md"
+                },
+                "maintainers": [
+                  {
+                    "name": "cadorn",
+                    "email": "christoph@christophdorn.com"
+                  }
+                ]
+              },
+              "warnings": [
+                [
+                  "normalize",
+                  "Property '_npmVersion' was ignored",
+                  "descriptor",
+                  "package.json"
+                ],
+                [
+                  "normalize",
+                  "Property '_npmUser' was ignored",
+                  "descriptor",
+                  "package.json"
+                ],
+                [
+                  "normalize",
+                  "Property '_shasum' was ignored",
+                  "descriptor",
+                  "package.json"
+                ],
+                [
+                  "normalize",
+                  "Property '_resolved' was ignored",
+                  "descriptor",
+                  "package.json"
+                ]
+              ],
+              "errors": [],
+              "memoized": {
+                "main": "a81d66805e2377970585ecd1237e83ab78636759-require.async/require.async.js",
+                "dirpath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/node_modules/require.async"
+              },
+              "mtime": "0"
+            },
+            "wrapper": "json"
+          }
+        },
+        "expectExistingModules": {},
+        "bundle": {
+          "path": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/_dist/sub/comp.js"
+        },
+        "warnings": [],
+        "errors": [],
+        "id": "sub/comp.js"
+      }
+    },
+    "warnings": [],
+    "errors": [],
+    "exports": {
+      "main": "sub/comp.js"
+    }
+  },
+  "#pinf": {
+    "status": 200,
+    "data": {
+      "rootBundlePath": "/freedom/0.workspace/0/0.FireWidgets/.deps/github.com~pinf~pinf-for-nodejs~0/source/installed/master/test/use-cases/01-MultipleMappedPackagesServerBundleLoadDynamic/_dist/sub/comp.js"
+    }
+  }
+}

@@ -1,6 +1,6 @@
 // @pinf-bundle-ignore: 
-PINF.bundle("", function(require) {
-// @pinf-bundle-module: {"file":"greeting.js","mtime":1421533770,"wrapper":"commonjs","format":"commonjs","id":"/greeting.js"}
+PINF.bundle("", function(require, _____bundle_global) {
+// @pinf-bundle-module: {"file":"greeting.js","mtime":1445137845,"wrapper":"commonjs","format":"commonjs","variation":"","id":"/greeting.js"}
 require.memoize("/greeting.js", 
 function(require, exports, module) {var __dirname = '';
 
@@ -20,7 +20,7 @@ exports.getLetterL = function() {
 }
 
 }
-, {"filename":"greeting.js"});
+, {"filename":"greeting.js","variation":""});
 // @pinf-bundle-module: {"file":null,"mtime":0,"wrapper":"json","format":"json","id":"/package.json"}
 require.memoize("/package.json", 
 {

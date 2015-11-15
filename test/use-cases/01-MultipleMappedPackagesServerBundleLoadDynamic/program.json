@@ -1,0 +1,10 @@
+{
+	"boot": {
+		"package": "./component/package.json"
+	},
+	"config": {
+		"github.com/pinf-it/pinf-it-bundler/0": {
+			"target": "nodejs"
+		}
+	}
+}
