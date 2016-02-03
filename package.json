@@ -1,6 +1,6 @@
 {
     "name": "pinf-for-nodejs",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "pm": "npm",
     "publish": true,
     "main": "lib/pinf.js",
