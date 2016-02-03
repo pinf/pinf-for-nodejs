@@ -9,7 +9,7 @@ const LOADER = require("../lib/loader");
 
 describe("loader-bundles", function() {
 
-    var featuresPath = PATH.join(__dirname, "../node_modules/pinf-loader-js/features");
+    var featuresPath = PATH.join(require.resolve("pinf-loader-js/package.json"), "..", "features");
 
     var logBuffer = {};
 

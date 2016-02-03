@@ -6,7 +6,7 @@ const FS = require("fs-extra");
 const PINF_CONTEXT = require("../lib/context");
 const PINF_LOADER = require("../lib/loader");
 const VM = require("../lib/vm").VM;
-const RT_BUNDLER = require("../node_modules/pinf-it-bundler/lib/rt-bundler");
+const RT_BUNDLER = require("pinf-it-bundler/lib/rt-bundler");
 
 
 const VERBOSE = true;
