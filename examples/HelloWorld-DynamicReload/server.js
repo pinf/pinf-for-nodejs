@@ -12,7 +12,7 @@ return PINF.main(function(options, callback) {
 
 	app.get(/^\/lib\/pinf-loader-js\/(.+)$/, function (req, res, next) {
 		return SEND(req, req.params[0], {
-			root: PATH.join(__dirname, "../../node_modules/pinf-loader-js")
+			root: PATH.dirname(require.resolve("pinf-loader-js/package.json"))
 		}).on("error", next).pipe(res);
 	});
 
